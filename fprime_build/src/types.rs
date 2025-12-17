@@ -1,5 +1,6 @@
 use crate::util::NameKind::StructMember;
-use crate::util::{annotate, format_name, qualified_identifier, qualify, NameKind};
+use crate::util::{annotate, format_name, qualified_identifier, NameKind};
+use crate::Qualifier;
 use fprime_dictionary::{
     AliasType, ArrayType, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition, TypeName,
 };
@@ -34,7 +35,7 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
     }
 }
 
-fn array_type_definition(ty: &ArrayType) -> TokenStream {
+fn array_type_definition(ty: &ArrayType) -> (Qualifier, TokenStream) {
     let (q, name) = qualified_identifier(&ty.qualified_name);
     let tn = type_name(&ty.element_type);
     let size = ty.size;
@@ -43,10 +44,10 @@ fn array_type_definition(ty: &ArrayType) -> TokenStream {
         pub struct #name([#tn;#size]);
     };
 
-    qualify(q, annotate(arr_def, &ty.annotation))
+    (q, annotate(arr_def, &ty.annotation))
 }
 
-fn enum_type_definition(ty: &EnumType) -> TokenStream {
+fn enum_type_definition(ty: &EnumType) -> (Qualifier, TokenStream) {
     let (q, name) = qualified_identifier(&ty.qualified_name);
     let repr_ty = type_name(&ty.representation_type);
     let constants = ty.enumerated_constants.iter().map(|c| {
@@ -63,10 +64,10 @@ fn enum_type_definition(ty: &EnumType) -> TokenStream {
         }
     };
 
-    qualify(q, annotate(enum_def, &ty.annotation))
+    (q, annotate(enum_def, &ty.annotation))
 }
 
-fn struct_type_definition(ty: &StructType) -> TokenStream {
+fn struct_type_definition(ty: &StructType) -> (Qualifier, TokenStream) {
     let (q, name) = qualified_identifier(&ty.qualified_name);
     let members = ty.members.iter().map(|member| {
         let name = format_name(StructMember, &member.name);
@@ -86,20 +87,20 @@ fn struct_type_definition(ty: &StructType) -> TokenStream {
         }
     };
 
-    qualify(q, annotate(struct_def, &ty.annotation))
+    (q, annotate(struct_def, &ty.annotation))
 }
 
-fn alias_type_definition(ty: &AliasType) -> TokenStream {
+fn alias_type_definition(ty: &AliasType) -> (Qualifier, TokenStream) {
     let (q, name) = qualified_identifier(&ty.qualified_name);
     let tn = type_name(&ty.type_name);
     let alias_def = quote! {
         pub type #name = #tn;
     };
 
-    qualify(q, annotate(alias_def, &ty.annotation))
+    (q, annotate(alias_def, &ty.annotation))
 }
 
-pub(crate) fn type_definition(ty: &TypeDefinition) -> TokenStream {
+pub(crate) fn type_definition(ty: &TypeDefinition) -> (Qualifier, TokenStream) {
     match ty {
         TypeDefinition::Array(a) => array_type_definition(a),
         TypeDefinition::Enum(e) => enum_type_definition(e),

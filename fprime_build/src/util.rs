@@ -1,8 +1,9 @@
+use crate::Qualifier;
 use convert_case::{Case, Casing};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 
-pub(crate) fn qualified_identifier(qi: &str) -> (Vec<Ident>, Ident) {
+pub(crate) fn qualified_identifier(qi: &str) -> (Qualifier, Ident) {
     let mut qn: Vec<&str> = qi.split('.').collect();
 
     let name = qn
@@ -15,17 +16,6 @@ pub(crate) fn qualified_identifier(qi: &str) -> (Vec<Ident>, Ident) {
             .collect(),
         format_name(NameKind::Definition, name),
     )
-}
-
-/// Qualify definition in a Rust module
-pub(crate) fn qualify(qualifier: Vec<Ident>, inner: TokenStream) -> TokenStream {
-    qualifier.iter().rfold(inner, |inner, ident| {
-        quote! {
-            mod #ident {
-                #inner
-            }
-        }
-    })
 }
 
 pub(crate) fn annotate(inner: TokenStream, annotation: &Option<String>) -> TokenStream {
