@@ -3,7 +3,7 @@ pub type FwTlmPacketizeIdType = u16;
 /// The width of packet descriptors when they are serialized by the framework
 pub type FwPacketDescriptorType = u16;
 /// The type of a parameter identifier
-pub type FwPrmIdType = FwIdType;
+pub type FwPrmIdType = crate::FwIdType;
 /// The type of a data product priority
 pub type FwDpPriorityType = u32;
 /// The unsigned type of larger sizes internal to the software,
@@ -11,323 +11,111 @@ pub type FwDpPriorityType = u32;
 /// Supplied by platform, overridable by project.
 pub type PlatformSizeType = u64;
 /// The type of a telemetry channel identifier
-pub type FwChanIdType = FwIdType;
+pub type FwChanIdType = crate::FwIdType;
 /// The type used to serialize a time context value
 pub type FwTimeContextStoreType = u8;
 /// The type of a data product identifier
-pub type FwDpIdType = FwIdType;
+pub type FwDpIdType = crate::FwIdType;
 /// The id type.
 pub type FwIdType = u32;
 /// The type of a command opcode
-pub type FwOpcodeType = FwIdType;
+pub type FwOpcodeType = crate::FwIdType;
 /// The unsigned type of larger sizes internal to the software,
 /// e.g., memory buffer sizes, file sizes. Must be unsigned.
-pub type FwSizeType = PlatformSizeType;
+pub type FwSizeType = crate::PlatformSizeType;
 /// The type used to serialize a size value
 pub type FwSizeStoreType = u16;
 /// The type used to serialize a time base value
 pub type FwTimeBaseStoreType = u16;
 /// The type of an event identifier
-pub type FwEventIdType = FwIdType;
-mod fw {
+pub type FwEventIdType = crate::FwIdType;
+pub mod fw {
     /// Enum representing a command response
     #[derive(Clone, Debug)]
     #[repr(i32)]
     pub enum CmdResponse {
         /// Command successfully executed
-        Ok = 0i64,
+        Ok = 0,
         /// Invalid opcode dispatched
-        InvalidOpcode = 1i64,
+        InvalidOpcode = 1,
         /// Command failed validation
-        ValidationError = 2i64,
+        ValidationError = 2,
         /// Command failed to deserialize
-        FormatError = 3i64,
+        FormatError = 3,
         /// Command had execution error
-        ExecutionError = 4i64,
+        ExecutionError = 4,
         /// Component busy
-        Busy = 5i64,
+        Busy = 5,
     }
     #[derive(Clone, Debug)]
     #[repr(u8)]
     pub enum DpState {
         /// The untransmitted state
-        Untransmitted = 0i64,
+        Untransmitted = 0,
         /// The partially transmitted state
         /// A data product is in this state from the start of transmission
         /// until transmission is complete.
-        Partial = 1i64,
+        Partial = 1,
         /// The transmitted state
-        Transmitted = 2i64,
+        Transmitted = 2,
     }
     /// Enum representing parameter validity
     #[derive(Clone, Debug)]
     #[repr(i32)]
     pub enum ParamValid {
-        Uninit = 0i64,
-        Valid = 1i64,
-        Invalid = 2i64,
-        Default = 3i64,
+        Uninit = 0,
+        Valid = 1,
+        Invalid = 2,
+        Default = 3,
     }
     /// Deserialization status
     #[derive(Clone, Debug)]
     #[repr(u8)]
     pub enum DeserialStatus {
-        Ok = 0i64,
+        Ok = 0,
         /// Deserialization buffer was empty when trying to read data
-        BufferEmpty = 3i64,
+        BufferEmpty = 3,
         /// Deserialization data had incorrect values (unexpected data types)
-        FormatError = 4i64,
+        FormatError = 4,
         /// Data was left in in the buffer, but not enough to deserialize
-        SizeMismatch = 5i64,
+        SizeMismatch = 5,
         /// Deserialized type ID didn't match
-        TypeMismatch = 6i64,
+        TypeMismatch = 6,
     }
     /// Wait or don't wait for something
     #[derive(Clone, Debug)]
     #[repr(u8)]
     pub enum Wait {
         /// Wait for something
-        Wait = 0i64,
+        Wait = 0,
         /// Don't wait for something
-        NoWait = 1i64,
+        NoWait = 1,
     }
     /// Enabled and disabled states
     #[derive(Clone, Debug)]
     #[repr(u8)]
     pub enum Enabled {
         /// Disabled state
-        Disabled = 0i64,
+        Disabled = 0,
         /// Enabled state
-        Enabled = 1i64,
+        Enabled = 1,
     }
-    mod dp_cfg {
+    pub mod dp_cfg {
         /// A bit mask for selecting the type of processing to perform on
         /// a container before writing it to disk.
         #[derive(Clone, Debug)]
         #[repr(u8)]
         pub enum ProcType {
             /// Processing type 0
-            ProcTypeZero = 1i64,
+            ProcTypeZero = 1,
             /// Processing type 1
-            ProcTypeOne = 2i64,
+            ProcTypeOne = 2,
             /// Processing type 2
-            ProcTypeTwo = 4i64,
+            ProcTypeTwo = 4,
         }
     }
 }
-mod svc {
-    /// An enumeration for Version Type
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum VersionType {
-        /// project version
-        Project = 0i64,
-        /// framework version
-        Framework = 1i64,
-        /// library version
-        Library = 2i64,
-        /// custom version
-        Custom = 3i64,
-        /// all above versions
-        All = 4i64,
-    }
-    /// Array of queue depths for Fw::Com types
-    #[derive(Clone, Debug)]
-    pub struct ComQueueDepth([u32; 2u32]);
-    /// Array of queue depths for Fw::Buffer types
-    #[derive(Clone, Debug)]
-    pub struct BuffQueueDepth([u32; 1u32]);
-    /// An enumeration for version status
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum VersionStatus {
-        /// Version was good
-        Ok = 0i64,
-        /// Failure to get version
-        Failure = 1i64,
-    }
-    /// Tracks versions for project, framework and user defined versions etc
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum VersionEnabled {
-        /// verbosity disabled
-        Disabled = 0i64,
-        /// verbosity enabled
-        Enabled = 1i64,
-    }
-    /// Data structure representing a data product.
-    #[derive(Clone, Debug)]
-    pub struct DpRecord {
-        pub id: FwDpIdType,
-        pub t_sec: u32,
-        pub t_sub: u32,
-        pub priority: u32,
-        pub size: u64,
-        pub blocks: u32,
-        pub state: fw::DpState,
-    }
-    /// Send file status enum
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum SendFileStatus {
-        StatusOk = 0i64,
-        StatusError = 1i64,
-        StatusInvalid = 2i64,
-        StatusBusy = 3i64,
-    }
-    /// An enumeration of queue data types
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum QueueType {
-        ComQueue = 0i64,
-        BufferQueue = 1i64,
-    }
-    /// Header validation error
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum DpHdrField {
-        Descriptor = 0i64,
-        Id = 1i64,
-        Priority = 2i64,
-        Crc = 3i64,
-    }
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum SystemResourceEnabled {
-        Disabled = 0i64,
-        Enabled = 1i64,
-    }
-    /// Data Structure for custom version Tlm
-    #[derive(Clone, Debug)]
-    pub struct CustomVersionDb {
-        /// enumeration/name of the custom version
-        pub version_enum: svc::version_cfg::VersionEnum,
-        /// string containing custom version
-        pub version_value: heapless::String<80u32>,
-        /// status of the custom version
-        pub version_status: svc::VersionStatus,
-    }
-    mod prm_db {
-        /// Parameter read error
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum PrmReadError {
-            Open = 0i64,
-            Delimiter = 1i64,
-            DelimiterSize = 2i64,
-            DelimiterValue = 3i64,
-            RecordSize = 4i64,
-            RecordSizeSize = 5i64,
-            RecordSizeValue = 6i64,
-            ParameterId = 7i64,
-            ParameterIdSize = 8i64,
-            ParameterValue = 9i64,
-            ParameterValueSize = 10i64,
-        }
-        /// Parameter write error
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum PrmWriteError {
-            Open = 0i64,
-            Delimiter = 1i64,
-            DelimiterSize = 2i64,
-            RecordSize = 3i64,
-            RecordSizeSize = 4i64,
-            ParameterId = 5i64,
-            ParameterIdSize = 6i64,
-            ParameterValue = 7i64,
-            ParameterValueSize = 8i64,
-        }
-    }
-    mod version_cfg {
-        /// Define a set of Version entries on a project-specific
-        /// basis.
-        #[derive(Clone, Debug)]
-        #[repr(u32)]
-        pub enum VersionEnum {
-            /// Entry 0
-            ProjectVersion00 = 0i64,
-            /// Entry 1
-            ProjectVersion01 = 1i64,
-            /// Entry 2
-            ProjectVersion02 = 2i64,
-            /// Entry 3
-            ProjectVersion03 = 3i64,
-            /// Entry 4
-            ProjectVersion04 = 4i64,
-            /// Entry 5
-            ProjectVersion05 = 5i64,
-            /// Entry 6
-            ProjectVersion06 = 6i64,
-            /// Entry 7
-            ProjectVersion07 = 7i64,
-            /// Entry 8
-            ProjectVersion08 = 8i64,
-            /// Entry 9
-            ProjectVersion09 = 9i64,
-        }
-    }
-    mod event_manager {
-        /// Severity level for event filtering
-        /// Similar to Fw::LogSeverity, but no FATAL event
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum FilterSeverity {
-            /// Filter WARNING_HI events
-            WarningHi = 0i64,
-            /// Filter WARNING_LO events
-            WarningLo = 1i64,
-            /// Filter COMMAND events
-            Command = 2i64,
-            /// Filter ACTIVITY_HI events
-            ActivityHi = 3i64,
-            /// Filter ACTIVITY_LO events
-            ActivityLo = 4i64,
-            /// Filter DIAGNOSTIC events
-            Diagnostic = 5i64,
-        }
-        /// Enabled and disabled state
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum Enabled {
-            /// Enabled state
-            Enabled = 0i64,
-            /// Disabled state
-            Disabled = 1i64,
-        }
-    }
-    mod cmd_sequencer {
-        /// The stage of the file read operation
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum FileReadStage {
-            ReadHeader = 0i64,
-            ReadHeaderSize = 1i64,
-            DeserSize = 2i64,
-            DeserNumRecords = 3i64,
-            DeserTimeBase = 4i64,
-            DeserTimeContext = 5i64,
-            ReadSeqCrc = 6i64,
-            ReadSeqData = 7i64,
-            ReadSeqDataSize = 8i64,
-        }
-        /// Sequencer blocking state
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum BlockState {
-            Block = 0i64,
-            NoBlock = 1i64,
-        }
-        /// The sequencer mode
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum SeqMode {
-            Step = 0i64,
-            Auto = 1i64,
-        }
-    }
-}
-mod r#ref {
+pub mod r#ref {
     #[derive(Clone, Debug)]
     pub struct SignalPair {
         pub time: f32,
@@ -335,7 +123,7 @@ mod r#ref {
     }
     /// Array of array
     #[derive(Clone, Debug)]
-    pub struct TooManyChoices([r#ref::ManyChoices; 2u32]);
+    pub struct TooManyChoices([crate::r#ref::ManyChoices; 2]);
     /// Some Packet Statistics
     #[derive(Clone, Debug)]
     pub struct PacketStat {
@@ -344,61 +132,61 @@ mod r#ref {
         /// Number of buffers received with errors
         pub buff_err: u32,
         /// Packet Status
-        pub packet_status: r#ref::PacketRecvStatus,
+        pub packet_status: crate::r#ref::PacketRecvStatus,
     }
     #[derive(Clone, Debug)]
     #[repr(i32)]
     pub enum SignalType {
-        Triangle = 0i64,
-        Square = 1i64,
-        Sine = 2i64,
-        Noise = 3i64,
+        Triangle = 0,
+        Square = 1,
+        Sine = 2,
+        Noise = 3,
     }
     #[derive(Clone, Debug)]
-    pub struct SignalPairSet([r#ref::SignalPair; 4u32]);
+    pub struct SignalPairSet([crate::r#ref::SignalPair; 4]);
     /// Enumeration type for use later
     #[derive(Clone, Debug)]
     #[repr(i32)]
     pub enum Choice {
-        One = 0i64,
-        Two = 1i64,
-        Red = 2i64,
-        Blue = 3i64,
+        One = 0,
+        Two = 1,
+        Red = 2,
+        Blue = 3,
     }
     /// Enumeration array
     #[derive(Clone, Debug)]
-    pub struct ManyChoices([r#ref::Choice; 2u32]);
+    pub struct ManyChoices([crate::r#ref::Choice; 2]);
     /// Packet receive status
     #[derive(Clone, Debug)]
     #[repr(i32)]
     pub enum PacketRecvStatus {
-        PacketStateNoPackets = 0i64,
-        PacketStateOk = 1i64,
+        PacketStateNoPackets = 0,
+        PacketStateOk = 1,
         /// Receiver has seen errors
-        PacketStateErrors = 3i64,
+        PacketStateErrors = 3,
     }
     /// Structure of enums (with an multi-dimensional array and structure)
     #[derive(Clone, Debug)]
     pub struct ChoiceSlurry {
         /// A large set of disorganized choices
-        pub too_many_choices: r#ref::TooManyChoices,
+        pub too_many_choices: crate::r#ref::TooManyChoices,
         /// A singular choice
-        pub separate_choice: r#ref::Choice,
+        pub separate_choice: crate::r#ref::Choice,
         /// A pair of choices
-        pub choice_pair: r#ref::ChoicePair,
+        pub choice_pair: crate::r#ref::ChoicePair,
         /// An array of choices defined as member array
-        pub choice_as_member_array: [u8; 2u32],
+        pub choice_as_member_array: [u8; 2],
     }
     /// Set of floating points to emit
     #[derive(Clone, Debug)]
-    pub struct FloatSet([f32; 3u32]);
+    pub struct FloatSet([f32; 3]);
     /// Structure of enums
     #[derive(Clone, Debug)]
     pub struct ChoicePair {
         /// The first choice to make
-        pub first_choice: r#ref::Choice,
+        pub first_choice: crate::r#ref::Choice,
         /// The second choice to make
-        pub second_choice: r#ref::Choice,
+        pub second_choice: crate::r#ref::Choice,
     }
     /// All scalar inputs
     #[derive(Clone, Debug)]
@@ -415,92 +203,304 @@ mod r#ref {
         pub f_64: f64,
     }
     #[derive(Clone, Debug)]
-    pub struct SignalSet([f32; 4u32]);
+    pub struct SignalSet([f32; 4]);
     #[derive(Clone, Debug)]
     pub struct SignalInfo {
-        pub r#type: r#ref::SignalType,
-        pub history: r#ref::SignalSet,
-        pub pair_history: r#ref::SignalPairSet,
+        pub r#type: crate::r#ref::SignalType,
+        pub history: crate::r#ref::SignalSet,
+        pub pair_history: crate::r#ref::SignalPairSet,
     }
-    mod signal_gen {
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum DpReqType {
-            Immediate = 0i64,
-            Async = 1i64,
-        }
-    }
-    mod send_buff {
+    pub mod send_buff {
         /// Active state
         #[derive(Clone, Debug)]
         #[repr(i32)]
         pub enum ActiveState {
-            SendIdle = 0i64,
-            SendActive = 1i64,
+            SendIdle = 0,
+            SendActive = 1,
         }
     }
-    mod dp_demo {
+    pub mod dp_demo {
         pub type BoolAlias = bool;
         #[derive(Clone, Debug)]
         #[repr(i32)]
         pub enum ColorEnum {
-            Red = 0i64,
-            Green = 1i64,
-            Blue = 2i64,
+            Red = 0,
+            Green = 1,
+            Blue = 2,
         }
         #[derive(Clone, Debug)]
         #[repr(i32)]
         pub enum DpReqType {
-            Immediate = 0i64,
-            Async = 1i64,
+            Immediate = 0,
+            Async = 1,
         }
         #[derive(Clone, Debug)]
         pub struct StructWithEverything {
-            pub integer_member: r#ref::dp_demo::I32Alias,
+            pub integer_member: crate::r#ref::dp_demo::I32Alias,
             pub float_member: f32,
-            pub string_member: heapless::String<80u32>,
+            pub string_member: heapless::String<80>,
             pub boolean_member: bool,
-            pub enum_member: r#ref::dp_demo::ColorEnum,
-            pub array_member_u_32: [r#ref::dp_demo::U32Array; 2u32],
-            pub f_32_array: r#ref::dp_demo::F32Array,
-            pub u_32_array: r#ref::dp_demo::U32Array,
-            pub enum_array: r#ref::dp_demo::EnumArray,
-            pub string_array: r#ref::dp_demo::StringArray,
-            pub boolean_array: r#ref::dp_demo::BooleanArray,
-            pub struct_with_strings: r#ref::dp_demo::StructWithStringMembers,
-            pub nested_arrays: r#ref::dp_demo::ArrayOfStringArray,
+            pub enum_member: crate::r#ref::dp_demo::ColorEnum,
+            pub array_member_u_32: [crate::r#ref::dp_demo::U32Array; 2],
+            pub f_32_array: crate::r#ref::dp_demo::F32Array,
+            pub u_32_array: crate::r#ref::dp_demo::U32Array,
+            pub enum_array: crate::r#ref::dp_demo::EnumArray,
+            pub string_array: crate::r#ref::dp_demo::StringArray,
+            pub boolean_array: crate::r#ref::dp_demo::BooleanArray,
+            pub struct_with_strings: crate::r#ref::dp_demo::StructWithStringMembers,
+            pub nested_arrays: crate::r#ref::dp_demo::ArrayOfStringArray,
         }
         /// Array of integers
         #[derive(Clone, Debug)]
-        pub struct U32Array([u32; 5u32]);
+        pub struct U32Array([u32; 5]);
         pub type F64Alias = f64;
         #[derive(Clone, Debug)]
-        pub struct ArrayOfStructs([r#ref::dp_demo::StructWithStringMembers; 3u32]);
+        pub struct ArrayOfStructs([crate::r#ref::dp_demo::StructWithStringMembers; 3]);
         #[derive(Clone, Debug)]
         pub struct ColorInfoStruct {
-            pub color: r#ref::dp_demo::ColorEnum,
+            pub color: crate::r#ref::dp_demo::ColorEnum,
         }
         /// Array of strings
         #[derive(Clone, Debug)]
-        pub struct StringArray([heapless::String<80u32>; 2u32]);
-        pub type StringAlias = heapless::String<80u32>;
+        pub struct StringArray([heapless::String<80>; 2]);
+        pub type StringAlias = heapless::String<80>;
         pub type I32Alias = i32;
         #[derive(Clone, Debug)]
         pub struct StructWithStringMembers {
-            pub string_member: heapless::String<80u32>,
-            pub string_array_member: r#ref::dp_demo::StringArray,
+            pub string_member: heapless::String<80>,
+            pub string_array_member: crate::r#ref::dp_demo::StringArray,
         }
         /// Array of floats
         #[derive(Clone, Debug)]
-        pub struct F32Array([f32; 3u32]);
+        pub struct F32Array([f32; 3]);
         /// Array of enumerations
         #[derive(Clone, Debug)]
-        pub struct EnumArray([r#ref::dp_demo::ColorEnum; 3u32]);
+        pub struct EnumArray([crate::r#ref::dp_demo::ColorEnum; 3]);
         /// Array of booleans
         #[derive(Clone, Debug)]
-        pub struct BooleanArray([bool; 2u32]);
+        pub struct BooleanArray([bool; 2]);
         /// Array of array of strings
         #[derive(Clone, Debug)]
-        pub struct ArrayOfStringArray([r#ref::dp_demo::StringArray; 3u32]);
+        pub struct ArrayOfStringArray([crate::r#ref::dp_demo::StringArray; 3]);
+    }
+    pub mod signal_gen {
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum DpReqType {
+            Immediate = 0,
+            Async = 1,
+        }
+    }
+}
+pub mod svc {
+    /// An enumeration for Version Type
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum VersionType {
+        /// project version
+        Project = 0,
+        /// framework version
+        Framework = 1,
+        /// library version
+        Library = 2,
+        /// custom version
+        Custom = 3,
+        /// all above versions
+        All = 4,
+    }
+    /// Array of queue depths for Fw::Com types
+    #[derive(Clone, Debug)]
+    pub struct ComQueueDepth([u32; 2]);
+    /// Array of queue depths for Fw::Buffer types
+    #[derive(Clone, Debug)]
+    pub struct BuffQueueDepth([u32; 1]);
+    /// An enumeration for version status
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum VersionStatus {
+        /// Version was good
+        Ok = 0,
+        /// Failure to get version
+        Failure = 1,
+    }
+    /// Tracks versions for project, framework and user defined versions etc
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum VersionEnabled {
+        /// verbosity disabled
+        Disabled = 0,
+        /// verbosity enabled
+        Enabled = 1,
+    }
+    /// Data structure representing a data product.
+    #[derive(Clone, Debug)]
+    pub struct DpRecord {
+        pub id: crate::FwDpIdType,
+        pub t_sec: u32,
+        pub t_sub: u32,
+        pub priority: u32,
+        pub size: u64,
+        pub blocks: u32,
+        pub state: crate::fw::DpState,
+    }
+    /// Send file status enum
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum SendFileStatus {
+        StatusOk = 0,
+        StatusError = 1,
+        StatusInvalid = 2,
+        StatusBusy = 3,
+    }
+    /// An enumeration of queue data types
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum QueueType {
+        ComQueue = 0,
+        BufferQueue = 1,
+    }
+    /// Header validation error
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum DpHdrField {
+        Descriptor = 0,
+        Id = 1,
+        Priority = 2,
+        Crc = 3,
+    }
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum SystemResourceEnabled {
+        Disabled = 0,
+        Enabled = 1,
+    }
+    /// Data Structure for custom version Tlm
+    #[derive(Clone, Debug)]
+    pub struct CustomVersionDb {
+        /// enumeration/name of the custom version
+        pub version_enum: crate::svc::version_cfg::VersionEnum,
+        /// string containing custom version
+        pub version_value: heapless::String<80>,
+        /// status of the custom version
+        pub version_status: crate::svc::VersionStatus,
+    }
+    pub mod event_manager {
+        /// Severity level for event filtering
+        /// Similar to Fw::LogSeverity, but no FATAL event
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum FilterSeverity {
+            /// Filter WARNING_HI events
+            WarningHi = 0,
+            /// Filter WARNING_LO events
+            WarningLo = 1,
+            /// Filter COMMAND events
+            Command = 2,
+            /// Filter ACTIVITY_HI events
+            ActivityHi = 3,
+            /// Filter ACTIVITY_LO events
+            ActivityLo = 4,
+            /// Filter DIAGNOSTIC events
+            Diagnostic = 5,
+        }
+        /// Enabled and disabled state
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum Enabled {
+            /// Enabled state
+            Enabled = 0,
+            /// Disabled state
+            Disabled = 1,
+        }
+    }
+    pub mod cmd_sequencer {
+        /// The stage of the file read operation
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum FileReadStage {
+            ReadHeader = 0,
+            ReadHeaderSize = 1,
+            DeserSize = 2,
+            DeserNumRecords = 3,
+            DeserTimeBase = 4,
+            DeserTimeContext = 5,
+            ReadSeqCrc = 6,
+            ReadSeqData = 7,
+            ReadSeqDataSize = 8,
+        }
+        /// Sequencer blocking state
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum BlockState {
+            Block = 0,
+            NoBlock = 1,
+        }
+        /// The sequencer mode
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum SeqMode {
+            Step = 0,
+            Auto = 1,
+        }
+    }
+    pub mod version_cfg {
+        /// Define a set of Version entries on a project-specific
+        /// basis.
+        #[derive(Clone, Debug)]
+        #[repr(u32)]
+        pub enum VersionEnum {
+            /// Entry 0
+            ProjectVersion00 = 0,
+            /// Entry 1
+            ProjectVersion01 = 1,
+            /// Entry 2
+            ProjectVersion02 = 2,
+            /// Entry 3
+            ProjectVersion03 = 3,
+            /// Entry 4
+            ProjectVersion04 = 4,
+            /// Entry 5
+            ProjectVersion05 = 5,
+            /// Entry 6
+            ProjectVersion06 = 6,
+            /// Entry 7
+            ProjectVersion07 = 7,
+            /// Entry 8
+            ProjectVersion08 = 8,
+            /// Entry 9
+            ProjectVersion09 = 9,
+        }
+    }
+    pub mod prm_db {
+        /// Parameter read error
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum PrmReadError {
+            Open = 0,
+            Delimiter = 1,
+            DelimiterSize = 2,
+            DelimiterValue = 3,
+            RecordSize = 4,
+            RecordSizeSize = 5,
+            RecordSizeValue = 6,
+            ParameterId = 7,
+            ParameterIdSize = 8,
+            ParameterValue = 9,
+            ParameterValueSize = 10,
+        }
+        /// Parameter write error
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum PrmWriteError {
+            Open = 0,
+            Delimiter = 1,
+            DelimiterSize = 2,
+            RecordSize = 3,
+            RecordSizeSize = 4,
+            ParameterId = 5,
+            ParameterIdSize = 6,
+            ParameterValue = 7,
+            ParameterValueSize = 8,
+        }
     }
 }

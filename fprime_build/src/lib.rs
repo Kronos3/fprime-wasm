@@ -67,7 +67,7 @@ impl From<CodeTree> for TokenStream {
             .map(|(q, g)| {
                 let inner: TokenStream = g.into();
                 quote! {
-                    mod #q {
+                    pub mod #q {
                         #inner
                     }
                 }

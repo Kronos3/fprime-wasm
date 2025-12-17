@@ -4,7 +4,7 @@ use crate::Qualifier;
 use fprime_dictionary::{
     AliasType, ArrayType, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition, TypeName,
 };
-use proc_macro2::TokenStream;
+use proc_macro2::{Literal, TokenStream};
 use quote::quote;
 
 pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
@@ -26,11 +26,14 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
         TypeName::Bool => quote! { bool },
         TypeName::String { size } => match size {
             None => quote! { heapless::String<crate::DEFAULT_STRING_SIZE> },
-            Some(size) => quote! { heapless::String<#size> },
+            Some(size) => {
+                let size_u = Literal::u32_unsuffixed(*size);
+                quote! { heapless::String<#size_u> }
+            }
         },
         TypeName::QualifiedIdentifier { name } => {
             let (qualifier, name) = qualified_identifier(name);
-            quote! { #(#qualifier::)*#name }
+            quote! { crate::#(#qualifier::)*#name }
         }
     }
 }
@@ -38,7 +41,7 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
 fn array_type_definition(ty: &ArrayType) -> (Qualifier, TokenStream) {
     let (q, name) = qualified_identifier(&ty.qualified_name);
     let tn = type_name(&ty.element_type);
-    let size = ty.size;
+    let size = Literal::u32_unsuffixed(ty.size);
     let arr_def = quote! {
         #[derive(Clone, Debug)]
         pub struct #name([#tn;#size]);
@@ -52,7 +55,7 @@ fn enum_type_definition(ty: &EnumType) -> (Qualifier, TokenStream) {
     let repr_ty = type_name(&ty.representation_type);
     let constants = ty.enumerated_constants.iter().map(|c| {
         let name = format_name(NameKind::EnumConstant, &c.name);
-        let val = c.value;
+        let val = Literal::i64_unsuffixed(c.value);
         annotate(quote! { #name = #val, }, &c.annotation)
     });
 
@@ -75,7 +78,10 @@ fn struct_type_definition(ty: &StructType) -> (Qualifier, TokenStream) {
 
         let inner = match member.size {
             None => quote! { pub #name: #ty, },
-            Some(size) => quote! { pub #name: [#ty;#size], },
+            Some(size) => {
+                let size_u = Literal::u32_unsuffixed(size);
+                quote! { pub #name: [#ty;#size_u], }
+            }
         };
         annotate(inner, &member.annotation)
     });
