@@ -16,6 +16,7 @@ mod svc {
         }
     }
 }
+
 mod r#ref {
     #[derive(Clone, Debug)]
     pub struct SignalPair {
@@ -23,20 +24,25 @@ mod r#ref {
         pub value: f32,
     }
 }
+
 /// The type of a telemetry packet identifier
 pub type FwTlmPacketizeIdType = u16;
+
 /// The width of packet descriptors when they are serialized by the framework
 pub type FwPacketDescriptorType = u16;
+
 mod r#ref {
     /// Array of array
     #[derive(Clone, Debug)]
     pub struct TooManyChoices([r#ref::ManyChoices; 2u32]);
 }
+
 mod r#ref {
     mod dp_demo {
         pub type BoolAlias = bool;
     }
 }
+
 mod svc {
     /// An enumeration for Version Type
     #[derive(Clone, Debug)]
@@ -54,8 +60,10 @@ mod svc {
         All = 4i64,
     }
 }
+
 /// The type of a parameter identifier
 pub type FwPrmIdType = FwIdType;
+
 mod r#ref {
     mod dp_demo {
         #[derive(Clone, Debug)]
@@ -67,6 +75,7 @@ mod r#ref {
         }
     }
 }
+
 mod r#ref {
     mod signal_gen {
         #[derive(Clone, Debug)]
@@ -77,6 +86,7 @@ mod r#ref {
         }
     }
 }
+
 mod r#ref {
     mod dp_demo {
         #[derive(Clone, Debug)]
@@ -87,11 +97,13 @@ mod r#ref {
         }
     }
 }
+
 mod svc {
     /// Array of queue depths for Fw::Com types
     #[derive(Clone, Debug)]
     pub struct ComQueueDepth([u32; 2u32]);
 }
+
 mod r#ref {
     /// Some Packet Statistics
     #[derive(Clone, Debug)]
@@ -104,11 +116,13 @@ mod r#ref {
         pub packet_status: r#ref::PacketRecvStatus,
     }
 }
+
 mod svc {
     /// Array of queue depths for Fw::Buffer types
     #[derive(Clone, Debug)]
     pub struct BuffQueueDepth([u32; 1u32]);
 }
+
 mod r#ref {
     mod dp_demo {
         #[derive(Clone, Debug)]
@@ -129,6 +143,7 @@ mod r#ref {
         }
     }
 }
+
 mod fw {
     /// Enum representing a command response
     #[derive(Clone, Debug)]
@@ -148,6 +163,7 @@ mod fw {
         Busy = 5i64,
     }
 }
+
 mod r#ref {
     mod dp_demo {
         /// Array of integers
@@ -155,6 +171,7 @@ mod r#ref {
         pub struct U32Array([u32; 5u32]);
     }
 }
+
 mod svc {
     mod cmd_sequencer {
         /// Sequencer blocking state
@@ -166,6 +183,7 @@ mod svc {
         }
     }
 }
+
 mod fw {
     #[derive(Clone, Debug)]
     #[repr(u8)]
@@ -180,6 +198,7 @@ mod fw {
         Transmitted = 2i64,
     }
 }
+
 mod r#ref {
     #[derive(Clone, Debug)]
     #[repr(i32)]
@@ -190,12 +209,15 @@ mod r#ref {
         Noise = 3i64,
     }
 }
+
 /// The type of a data product priority
 pub type FwDpPriorityType = u32;
+
 mod r#ref {
     #[derive(Clone, Debug)]
     pub struct SignalPairSet([r#ref::SignalPair; 4u32]);
 }
+
 mod svc {
     /// An enumeration for version status
     #[derive(Clone, Debug)]
@@ -207,21 +229,25 @@ mod svc {
         Failure = 1i64,
     }
 }
+
 /// The unsigned type of larger sizes internal to the software,
 /// e.g., memory buffer sizes, file sizes. Must be unsigned.
 /// Supplied by platform, overridable by project.
 pub type PlatformSizeType = u64;
+
 mod r#ref {
     mod dp_demo {
         pub type F64Alias = f64;
     }
 }
+
 mod r#ref {
     mod dp_demo {
         #[derive(Clone, Debug)]
         pub struct ArrayOfStructs([r#ref::dp_demo::StructWithStringMembers; 3u32]);
     }
 }
+
 mod r#ref {
     mod dp_demo {
         #[derive(Clone, Debug)]
@@ -230,6 +256,7 @@ mod r#ref {
         }
     }
 }
+
 mod fw {
     /// Enum representing parameter validity
     #[derive(Clone, Debug)]
@@ -241,8 +268,10 @@ mod fw {
         Default = 3i64,
     }
 }
+
 /// The type of a telemetry channel identifier
 pub type FwChanIdType = FwIdType;
+
 mod svc {
     /// Tracks versions for project, framework and user defined versions etc
     #[derive(Clone, Debug)]
@@ -254,8 +283,10 @@ mod svc {
         Enabled = 1i64,
     }
 }
+
 /// The type used to serialize a time context value
 pub type FwTimeContextStoreType = u8;
+
 mod r#ref {
     mod dp_demo {
         /// Array of strings
@@ -263,11 +294,13 @@ mod r#ref {
         pub struct StringArray([heapless::String<80u32>; 2u32]);
     }
 }
+
 mod r#ref {
     mod dp_demo {
         pub type StringAlias = heapless::String<80u32>;
     }
 }
+
 mod svc {
     /// Data structure representing a data product.
     #[derive(Clone, Debug)]
@@ -281,6 +314,7 @@ mod svc {
         pub state: fw::DpState,
     }
 }
+
 mod svc {
     mod event_manager {
         /// Severity level for event filtering
@@ -303,6 +337,7 @@ mod svc {
         }
     }
 }
+
 mod r#ref {
     /// Enumeration type for use later
     #[derive(Clone, Debug)]
@@ -314,6 +349,7 @@ mod r#ref {
         Blue = 3i64,
     }
 }
+
 mod svc {
     mod version_cfg {
         /// Define a set of Version entries on a project-specific
@@ -344,8 +380,10 @@ mod svc {
         }
     }
 }
+
 /// The type of a data product identifier
 pub type FwDpIdType = FwIdType;
+
 mod svc {
     /// Send file status enum
     #[derive(Clone, Debug)]
@@ -357,8 +395,10 @@ mod svc {
         StatusBusy = 3i64,
     }
 }
+
 /// The id type.
 pub type FwIdType = u32;
+
 mod svc {
     mod prm_db {
         /// Parameter read error
@@ -379,16 +419,19 @@ mod svc {
         }
     }
 }
+
 mod r#ref {
     /// Enumeration array
     #[derive(Clone, Debug)]
     pub struct ManyChoices([r#ref::Choice; 2u32]);
 }
+
 mod r#ref {
     mod dp_demo {
         pub type I32Alias = i32;
     }
 }
+
 mod fw {
     mod dp_cfg {
         /// A bit mask for selecting the type of processing to perform on
@@ -405,6 +448,7 @@ mod fw {
         }
     }
 }
+
 mod svc {
     mod cmd_sequencer {
         /// The sequencer mode
@@ -416,8 +460,10 @@ mod svc {
         }
     }
 }
+
 /// The type of a command opcode
 pub type FwOpcodeType = FwIdType;
+
 mod r#ref {
     /// Packet receive status
     #[derive(Clone, Debug)]
@@ -429,6 +475,7 @@ mod r#ref {
         PacketStateErrors = 3i64,
     }
 }
+
 mod svc {
     /// An enumeration of queue data types
     #[derive(Clone, Debug)]
@@ -438,6 +485,7 @@ mod svc {
         BufferQueue = 1i64,
     }
 }
+
 mod r#ref {
     mod dp_demo {
         #[derive(Clone, Debug)]
@@ -447,6 +495,7 @@ mod r#ref {
         }
     }
 }
+
 mod r#ref {
     mod dp_demo {
         /// Array of floats
@@ -454,6 +503,7 @@ mod r#ref {
         pub struct F32Array([f32; 3u32]);
     }
 }
+
 mod r#ref {
     mod dp_demo {
         /// Array of enumerations
@@ -461,6 +511,7 @@ mod r#ref {
         pub struct EnumArray([r#ref::dp_demo::ColorEnum; 3u32]);
     }
 }
+
 mod r#ref {
     /// Structure of enums (with an multi-dimensional array and structure)
     #[derive(Clone, Debug)]
@@ -475,6 +526,7 @@ mod r#ref {
         pub choice_as_member_array: [u8; 2u32],
     }
 }
+
 mod svc {
     /// Header validation error
     #[derive(Clone, Debug)]
@@ -486,14 +538,17 @@ mod svc {
         Crc = 3i64,
     }
 }
+
 mod r#ref {
     /// Set of floating points to emit
     #[derive(Clone, Debug)]
     pub struct FloatSet([f32; 3u32]);
 }
+
 /// The unsigned type of larger sizes internal to the software,
 /// e.g., memory buffer sizes, file sizes. Must be unsigned.
 pub type FwSizeType = PlatformSizeType;
+
 mod svc {
     mod event_manager {
         /// Enabled and disabled state
@@ -507,6 +562,7 @@ mod svc {
         }
     }
 }
+
 mod r#ref {
     /// Structure of enums
     #[derive(Clone, Debug)]
@@ -517,6 +573,7 @@ mod r#ref {
         pub second_choice: r#ref::Choice,
     }
 }
+
 mod r#ref {
     /// All scalar inputs
     #[derive(Clone, Debug)]
@@ -533,8 +590,10 @@ mod r#ref {
         pub f_64: f64,
     }
 }
+
 /// The type used to serialize a size value
 pub type FwSizeStoreType = u16;
+
 mod svc {
     mod prm_db {
         /// Parameter write error
@@ -553,6 +612,7 @@ mod svc {
         }
     }
 }
+
 mod r#ref {
     mod dp_demo {
         /// Array of booleans
@@ -560,6 +620,7 @@ mod r#ref {
         pub struct BooleanArray([bool; 2u32]);
     }
 }
+
 mod fw {
     /// Deserialization status
     #[derive(Clone, Debug)]
@@ -576,6 +637,7 @@ mod fw {
         TypeMismatch = 6i64,
     }
 }
+
 mod r#ref {
     mod send_buff {
         /// Active state
@@ -587,6 +649,7 @@ mod r#ref {
         }
     }
 }
+
 mod svc {
     #[derive(Clone, Debug)]
     #[repr(i32)]
@@ -595,6 +658,7 @@ mod svc {
         Enabled = 1i64,
     }
 }
+
 mod fw {
     /// Wait or don't wait for something
     #[derive(Clone, Debug)]
@@ -606,6 +670,7 @@ mod fw {
         NoWait = 1i64,
     }
 }
+
 mod svc {
     /// Data Structure for custom version Tlm
     #[derive(Clone, Debug)]
@@ -618,10 +683,12 @@ mod svc {
         pub version_status: svc::VersionStatus,
     }
 }
+
 mod r#ref {
     #[derive(Clone, Debug)]
     pub struct SignalSet([f32; 4u32]);
 }
+
 mod fw {
     /// Enabled and disabled states
     #[derive(Clone, Debug)]
@@ -633,6 +700,7 @@ mod fw {
         Enabled = 1i64,
     }
 }
+
 mod r#ref {
     mod dp_demo {
         /// Array of array of strings
@@ -640,6 +708,7 @@ mod r#ref {
         pub struct ArrayOfStringArray([r#ref::dp_demo::StringArray; 3u32]);
     }
 }
+
 mod r#ref {
     #[derive(Clone, Debug)]
     pub struct SignalInfo {
@@ -648,7 +717,10 @@ mod r#ref {
         pub pair_history: r#ref::SignalPairSet,
     }
 }
+
 /// The type used to serialize a time base value
 pub type FwTimeBaseStoreType = u16;
+
 /// The type of an event identifier
 pub type FwEventIdType = FwIdType;
+

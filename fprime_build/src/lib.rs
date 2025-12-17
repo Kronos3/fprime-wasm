@@ -30,6 +30,10 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
                     .expect("failed to write to file");
             }
         };
+
+        writer
+            .write("\n".as_bytes())
+            .expect("failed to write to file");
     }
 
     writer.flush().expect("failed to flush file")
