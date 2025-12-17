@@ -1,1 +1,4 @@
-pub mod dictionary;
+mod types;
+mod commands;
+mod telemetry;
+mod context;

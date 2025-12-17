@@ -2,3 +2,8 @@
 name = "fprime_build"
 version = "0.1.0"
 edition = "2024"
+
+[dependencies]
+fprime_dictionary = { path = "../fprime_dictionary" }
+proc-macro2 = "1.0.103"
+quote = "1.0.42"
