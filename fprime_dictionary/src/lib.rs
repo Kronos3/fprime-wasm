@@ -1,3 +1,4 @@
+use serde::de::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -49,7 +50,20 @@ pub struct EnumConstant {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+struct StructMemberRaw {
+    #[serde(rename = "type")]
+    pub type_name: TypeName,
+    pub index: u32,
+    pub size: Option<u32>,
+    pub format: Option<String>,
+
+    pub annotation: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StructMember {
+    pub name: String,
     #[serde(rename = "type")]
     pub type_name: TypeName,
     pub index: u32,
@@ -82,11 +96,43 @@ pub struct EnumType {
     pub annotation: Option<String>,
 }
 
+fn deserialize_struct_members<'de, D>(deserializer: D) -> Result<Vec<StructMember>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let initial_map: HashMap<String, StructMemberRaw> = HashMap::deserialize(deserializer)?;
+    let mut initial: Vec<(String, StructMemberRaw)> = initial_map.into_iter().collect();
+    initial.sort_by(|a, b| a.1.index.cmp(&b.1.index));
+
+    initial
+        .into_iter()
+        .enumerate()
+        .map(|(index, (name, member))| {
+            if index != member.index as usize {
+                Err(D::Error::custom(format!(
+                    "Missing struct member with index {}",
+                    index
+                )))
+            } else {
+                Ok(StructMember {
+                    name,
+                    type_name: member.type_name,
+                    index: member.index,
+                    size: member.size,
+                    format: member.format,
+                    annotation: member.annotation,
+                })
+            }
+        })
+        .collect()
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StructType {
     pub qualified_name: String,
-    pub members: HashMap<String, StructMember>,
+    #[serde(deserialize_with = "deserialize_struct_members")]
+    pub members: Vec<StructMember>,
     pub default: Option<serde_json::Value>,
 
     pub annotation: Option<String>,

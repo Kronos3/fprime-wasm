@@ -68,19 +68,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.SignalPair",
-                members: {
-                    "value": StructMember {
-                        type_name: Float {
-                            name: F32,
-                        },
-                        index: 1,
-                        size: None,
-                        format: Some(
-                            "{f}",
-                        ),
-                        annotation: None,
-                    },
-                    "time": StructMember {
+                members: [
+                    StructMember {
+                        name: "time",
                         type_name: Float {
                             name: F32,
                         },
@@ -91,7 +81,19 @@ Dictionary {
                         ),
                         annotation: None,
                     },
-                },
+                    StructMember {
+                        name: "value",
+                        type_name: Float {
+                            name: F32,
+                        },
+                        index: 1,
+                        size: None,
+                        format: Some(
+                            "{f}",
+                        ),
+                        annotation: None,
+                    },
+                ],
                 default: Some(
                     Object {
                         "time": Number(0.0),
@@ -314,8 +316,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.PacketStat",
-                members: {
-                    "BuffRecv": StructMember {
+                members: [
+                    StructMember {
+                        name: "BuffRecv",
                         type_name: Integer {
                             name: U32,
                         },
@@ -326,7 +329,8 @@ Dictionary {
                             "Number of buffers received",
                         ),
                     },
-                    "BuffErr": StructMember {
+                    StructMember {
+                        name: "BuffErr",
                         type_name: Integer {
                             name: U32,
                         },
@@ -337,7 +341,8 @@ Dictionary {
                             "Number of buffers received with errors",
                         ),
                     },
-                    "PacketStatus": StructMember {
+                    StructMember {
+                        name: "PacketStatus",
                         type_name: QualifiedIdentifier {
                             name: "Ref.PacketRecvStatus",
                         },
@@ -348,7 +353,7 @@ Dictionary {
                             "Packet Status",
                         ),
                     },
-                },
+                ],
                 default: Some(
                     Object {
                         "BuffErr": Number(0),
@@ -380,8 +385,29 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.DpDemo.StructWithEverything",
-                members: {
-                    "stringMember": StructMember {
+                members: [
+                    StructMember {
+                        name: "integerMember",
+                        type_name: QualifiedIdentifier {
+                            name: "Ref.DpDemo.I32Alias",
+                        },
+                        index: 0,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "floatMember",
+                        type_name: Float {
+                            name: F32,
+                        },
+                        index: 1,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "stringMember",
                         type_name: String {
                             size: Some(
                                 80,
@@ -392,16 +418,26 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "structWithStrings": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Ref.DpDemo.StructWithStringMembers",
-                        },
-                        index: 11,
+                    StructMember {
+                        name: "booleanMember",
+                        type_name: Bool,
+                        index: 3,
                         size: None,
                         format: None,
                         annotation: None,
                     },
-                    "arrayMemberU32": StructMember {
+                    StructMember {
+                        name: "enumMember",
+                        type_name: QualifiedIdentifier {
+                            name: "Ref.DpDemo.ColorEnum",
+                        },
+                        index: 4,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "arrayMemberU32",
                         type_name: QualifiedIdentifier {
                             name: "Ref.DpDemo.U32Array",
                         },
@@ -412,7 +448,8 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "F32Array": StructMember {
+                    StructMember {
+                        name: "F32Array",
                         type_name: QualifiedIdentifier {
                             name: "Ref.DpDemo.F32Array",
                         },
@@ -421,68 +458,8 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "booleanMember": StructMember {
-                        type_name: Bool,
-                        index: 3,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "stringArray": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Ref.DpDemo.StringArray",
-                        },
-                        index: 9,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "floatMember": StructMember {
-                        type_name: Float {
-                            name: F32,
-                        },
-                        index: 1,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "booleanArray": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Ref.DpDemo.BooleanArray",
-                        },
-                        index: 10,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "nestedArrays": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Ref.DpDemo.ArrayOfStringArray",
-                        },
-                        index: 12,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "integerMember": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Ref.DpDemo.I32Alias",
-                        },
-                        index: 0,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "enumMember": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Ref.DpDemo.ColorEnum",
-                        },
-                        index: 4,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "U32Array": StructMember {
+                    StructMember {
+                        name: "U32Array",
                         type_name: QualifiedIdentifier {
                             name: "Ref.DpDemo.U32Array",
                         },
@@ -491,7 +468,8 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "enumArray": StructMember {
+                    StructMember {
+                        name: "enumArray",
                         type_name: QualifiedIdentifier {
                             name: "Ref.DpDemo.EnumArray",
                         },
@@ -500,7 +478,47 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                },
+                    StructMember {
+                        name: "stringArray",
+                        type_name: QualifiedIdentifier {
+                            name: "Ref.DpDemo.StringArray",
+                        },
+                        index: 9,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "booleanArray",
+                        type_name: QualifiedIdentifier {
+                            name: "Ref.DpDemo.BooleanArray",
+                        },
+                        index: 10,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "structWithStrings",
+                        type_name: QualifiedIdentifier {
+                            name: "Ref.DpDemo.StructWithStringMembers",
+                        },
+                        index: 11,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "nestedArrays",
+                        type_name: QualifiedIdentifier {
+                            name: "Ref.DpDemo.ArrayOfStringArray",
+                        },
+                        index: 12,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                ],
                 default: Some(
                     Object {
                         "F32Array": Array [
@@ -865,8 +883,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.DpDemo.ColorInfoStruct",
-                members: {
-                    "Color": StructMember {
+                members: [
+                    StructMember {
+                        name: "Color",
                         type_name: QualifiedIdentifier {
                             name: "Ref.DpDemo.ColorEnum",
                         },
@@ -875,7 +894,7 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                },
+                ],
                 default: Some(
                     Object {
                         "Color": String("Ref.DpDemo.ColorEnum.RED"),
@@ -1012,53 +1031,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Svc.DpRecord",
-                members: {
-                    "size": StructMember {
-                        type_name: Integer {
-                            name: U64,
-                        },
-                        index: 4,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "tSec": StructMember {
-                        type_name: Integer {
-                            name: U32,
-                        },
-                        index: 1,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "tSub": StructMember {
-                        type_name: Integer {
-                            name: U32,
-                        },
-                        index: 2,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "state": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Fw.DpState",
-                        },
-                        index: 6,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "blocks": StructMember {
-                        type_name: Integer {
-                            name: U32,
-                        },
-                        index: 5,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "id": StructMember {
+                members: [
+                    StructMember {
+                        name: "id",
                         type_name: QualifiedIdentifier {
                             name: "FwDpIdType",
                         },
@@ -1067,7 +1042,28 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "priority": StructMember {
+                    StructMember {
+                        name: "tSec",
+                        type_name: Integer {
+                            name: U32,
+                        },
+                        index: 1,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "tSub",
+                        type_name: Integer {
+                            name: U32,
+                        },
+                        index: 2,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "priority",
                         type_name: Integer {
                             name: U32,
                         },
@@ -1076,7 +1072,37 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                },
+                    StructMember {
+                        name: "size",
+                        type_name: Integer {
+                            name: U64,
+                        },
+                        index: 4,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "blocks",
+                        type_name: Integer {
+                            name: U32,
+                        },
+                        index: 5,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "state",
+                        type_name: QualifiedIdentifier {
+                            name: "Fw.DpState",
+                        },
+                        index: 6,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                ],
                 default: Some(
                     Object {
                         "blocks": Number(0),
@@ -1558,8 +1584,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.DpDemo.StructWithStringMembers",
-                members: {
-                    "stringMember": StructMember {
+                members: [
+                    StructMember {
+                        name: "stringMember",
                         type_name: String {
                             size: Some(
                                 80,
@@ -1570,7 +1597,8 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "stringArrayMember": StructMember {
+                    StructMember {
+                        name: "stringArrayMember",
                         type_name: QualifiedIdentifier {
                             name: "Ref.DpDemo.StringArray",
                         },
@@ -1579,7 +1607,7 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                },
+                ],
                 default: Some(
                     Object {
                         "stringArrayMember": Array [
@@ -1631,8 +1659,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.ChoiceSlurry",
-                members: {
-                    "tooManyChoices": StructMember {
+                members: [
+                    StructMember {
+                        name: "tooManyChoices",
                         type_name: QualifiedIdentifier {
                             name: "Ref.TooManyChoices",
                         },
@@ -1643,18 +1672,8 @@ Dictionary {
                             "A large set of disorganized choices",
                         ),
                     },
-                    "choicePair": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Ref.ChoicePair",
-                        },
-                        index: 2,
-                        size: None,
-                        format: None,
-                        annotation: Some(
-                            "A pair of choices",
-                        ),
-                    },
-                    "separateChoice": StructMember {
+                    StructMember {
+                        name: "separateChoice",
                         type_name: QualifiedIdentifier {
                             name: "Ref.Choice",
                         },
@@ -1665,7 +1684,20 @@ Dictionary {
                             "A singular choice",
                         ),
                     },
-                    "choiceAsMemberArray": StructMember {
+                    StructMember {
+                        name: "choicePair",
+                        type_name: QualifiedIdentifier {
+                            name: "Ref.ChoicePair",
+                        },
+                        index: 2,
+                        size: None,
+                        format: None,
+                        annotation: Some(
+                            "A pair of choices",
+                        ),
+                    },
+                    StructMember {
+                        name: "choiceAsMemberArray",
                         type_name: Integer {
                             name: U8,
                         },
@@ -1678,7 +1710,7 @@ Dictionary {
                             "An array of choices defined as member array",
                         ),
                     },
-                },
+                ],
                 default: Some(
                     Object {
                         "choiceAsMemberArray": Number(0),
@@ -1801,19 +1833,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.ChoicePair",
-                members: {
-                    "secondChoice": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Ref.Choice",
-                        },
-                        index: 1,
-                        size: None,
-                        format: None,
-                        annotation: Some(
-                            "The second choice to make",
-                        ),
-                    },
-                    "firstChoice": StructMember {
+                members: [
+                    StructMember {
+                        name: "firstChoice",
                         type_name: QualifiedIdentifier {
                             name: "Ref.Choice",
                         },
@@ -1824,7 +1846,19 @@ Dictionary {
                             "The first choice to make",
                         ),
                     },
-                },
+                    StructMember {
+                        name: "secondChoice",
+                        type_name: QualifiedIdentifier {
+                            name: "Ref.Choice",
+                        },
+                        index: 1,
+                        size: None,
+                        format: None,
+                        annotation: Some(
+                            "The second choice to make",
+                        ),
+                    },
+                ],
                 default: Some(
                     Object {
                         "firstChoice": String("Ref.Choice.ONE"),
@@ -1839,71 +1873,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.ScalarStruct",
-                members: {
-                    "u64": StructMember {
-                        type_name: Integer {
-                            name: U64,
-                        },
-                        index: 7,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "u8": StructMember {
-                        type_name: Integer {
-                            name: U8,
-                        },
-                        index: 4,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "i64": StructMember {
-                        type_name: Integer {
-                            name: I64,
-                        },
-                        index: 3,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "i32": StructMember {
-                        type_name: Integer {
-                            name: I32,
-                        },
-                        index: 2,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "u16": StructMember {
-                        type_name: Integer {
-                            name: U16,
-                        },
-                        index: 5,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "f32": StructMember {
-                        type_name: Float {
-                            name: F32,
-                        },
-                        index: 8,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "f64": StructMember {
-                        type_name: Float {
-                            name: F64,
-                        },
-                        index: 9,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "i8": StructMember {
+                members: [
+                    StructMember {
+                        name: "i8",
                         type_name: Integer {
                             name: I8,
                         },
@@ -1912,16 +1884,8 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "u32": StructMember {
-                        type_name: Integer {
-                            name: U32,
-                        },
-                        index: 6,
-                        size: None,
-                        format: None,
-                        annotation: None,
-                    },
-                    "i16": StructMember {
+                    StructMember {
+                        name: "i16",
                         type_name: Integer {
                             name: I16,
                         },
@@ -1930,7 +1894,87 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                },
+                    StructMember {
+                        name: "i32",
+                        type_name: Integer {
+                            name: I32,
+                        },
+                        index: 2,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "i64",
+                        type_name: Integer {
+                            name: I64,
+                        },
+                        index: 3,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "u8",
+                        type_name: Integer {
+                            name: U8,
+                        },
+                        index: 4,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "u16",
+                        type_name: Integer {
+                            name: U16,
+                        },
+                        index: 5,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "u32",
+                        type_name: Integer {
+                            name: U32,
+                        },
+                        index: 6,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "u64",
+                        type_name: Integer {
+                            name: U64,
+                        },
+                        index: 7,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "f32",
+                        type_name: Float {
+                            name: F32,
+                        },
+                        index: 8,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "f64",
+                        type_name: Float {
+                            name: F64,
+                        },
+                        index: 9,
+                        size: None,
+                        format: None,
+                        annotation: None,
+                    },
+                ],
                 default: Some(
                     Object {
                         "f32": Number(0.0),
@@ -2162,19 +2206,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Svc.CustomVersionDb",
-                members: {
-                    "version_status": StructMember {
-                        type_name: QualifiedIdentifier {
-                            name: "Svc.VersionStatus",
-                        },
-                        index: 2,
-                        size: None,
-                        format: None,
-                        annotation: Some(
-                            "status of the custom version",
-                        ),
-                    },
-                    "version_enum": StructMember {
+                members: [
+                    StructMember {
+                        name: "version_enum",
                         type_name: QualifiedIdentifier {
                             name: "Svc.VersionCfg.VersionEnum",
                         },
@@ -2185,7 +2219,8 @@ Dictionary {
                             "enumeration/name of the custom version",
                         ),
                     },
-                    "version_value": StructMember {
+                    StructMember {
+                        name: "version_value",
                         type_name: String {
                             size: Some(
                                 80,
@@ -2198,7 +2233,19 @@ Dictionary {
                             "string containing custom version",
                         ),
                     },
-                },
+                    StructMember {
+                        name: "version_status",
+                        type_name: QualifiedIdentifier {
+                            name: "Svc.VersionStatus",
+                        },
+                        index: 2,
+                        size: None,
+                        format: None,
+                        annotation: Some(
+                            "status of the custom version",
+                        ),
+                    },
+                ],
                 default: Some(
                     Object {
                         "version_enum": String("Svc.VersionCfg.VersionEnum.PROJECT_VERSION_00"),
@@ -2288,8 +2335,9 @@ Dictionary {
         Struct(
             StructType {
                 qualified_name: "Ref.SignalInfo",
-                members: {
-                    "type": StructMember {
+                members: [
+                    StructMember {
+                        name: "type",
                         type_name: QualifiedIdentifier {
                             name: "Ref.SignalType",
                         },
@@ -2298,7 +2346,8 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "history": StructMember {
+                    StructMember {
+                        name: "history",
                         type_name: QualifiedIdentifier {
                             name: "Ref.SignalSet",
                         },
@@ -2307,7 +2356,8 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                    "pairHistory": StructMember {
+                    StructMember {
+                        name: "pairHistory",
                         type_name: QualifiedIdentifier {
                             name: "Ref.SignalPairSet",
                         },
@@ -2316,7 +2366,7 @@ Dictionary {
                         format: None,
                         annotation: None,
                     },
-                },
+                ],
                 default: Some(
                     Object {
                         "history": Array [
