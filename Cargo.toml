@@ -1,3 +1,3 @@
 [workspace]
 resolver = "3"
-members = ["example", "fprime", "fprime_build", "fprime_dictionary"]
+members = ["example", "fprime_internal", "fprime_build", "fprime_dictionary"]

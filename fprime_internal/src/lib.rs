@@ -1,5 +1,6 @@
 #![no_std]
 
+use crate::dict::{FwIdType, FwOpcodeType};
 use core::fmt::{Display, Formatter};
 
 mod dict;
@@ -51,13 +52,8 @@ impl Display for Time {
     }
 }
 
-pub mod __internal {
-    use crate::dict::{FwIdType, FwOpcodeType};
-    use crate::{CommandResponse, Time};
-
-    #[link(wasm_import_module = "fprime_internal")]
-    unsafe extern "C" {
-        pub fn command(opcode: FwOpcodeType, args: *const u8, size: u32) -> CommandResponse;
-        pub fn telemetry(id: FwIdType, data: *mut u8, size: u32) -> Time;
-    }
+#[link(wasm_import_module = "fprime_internal")]
+unsafe extern "C" {
+    pub fn command(opcode: FwOpcodeType, args: *const u8, size: u32) -> CommandResponse;
+    pub fn telemetry(id: FwIdType, data: *mut u8, size: u32) -> Time;
 }
