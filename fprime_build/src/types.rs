@@ -43,8 +43,7 @@ fn array_type_definition(ty: &ArrayType) -> (Qualifier, TokenStream) {
     let tn = type_name(&ty.element_type);
     let size = Literal::u32_unsuffixed(ty.size);
     let arr_def = quote! {
-        #[derive(Clone, Debug)]
-        pub struct #name([#tn;#size]);
+        pub type #name = [#tn;#size];
     };
 
     (q, annotate(arr_def, &ty.annotation))

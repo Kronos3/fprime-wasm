@@ -115,183 +115,6 @@ pub mod fw {
         }
     }
 }
-pub mod r#ref {
-    #[derive(Clone, Debug)]
-    pub struct SignalPair {
-        pub time: f32,
-        pub value: f32,
-    }
-    /// Array of array
-    #[derive(Clone, Debug)]
-    pub struct TooManyChoices([crate::r#ref::ManyChoices; 2]);
-    /// Some Packet Statistics
-    #[derive(Clone, Debug)]
-    pub struct PacketStat {
-        /// Number of buffers received
-        pub buff_recv: u32,
-        /// Number of buffers received with errors
-        pub buff_err: u32,
-        /// Packet Status
-        pub packet_status: crate::r#ref::PacketRecvStatus,
-    }
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum SignalType {
-        Triangle = 0,
-        Square = 1,
-        Sine = 2,
-        Noise = 3,
-    }
-    #[derive(Clone, Debug)]
-    pub struct SignalPairSet([crate::r#ref::SignalPair; 4]);
-    /// Enumeration type for use later
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum Choice {
-        One = 0,
-        Two = 1,
-        Red = 2,
-        Blue = 3,
-    }
-    /// Enumeration array
-    #[derive(Clone, Debug)]
-    pub struct ManyChoices([crate::r#ref::Choice; 2]);
-    /// Packet receive status
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum PacketRecvStatus {
-        PacketStateNoPackets = 0,
-        PacketStateOk = 1,
-        /// Receiver has seen errors
-        PacketStateErrors = 3,
-    }
-    /// Structure of enums (with an multi-dimensional array and structure)
-    #[derive(Clone, Debug)]
-    pub struct ChoiceSlurry {
-        /// A large set of disorganized choices
-        pub too_many_choices: crate::r#ref::TooManyChoices,
-        /// A singular choice
-        pub separate_choice: crate::r#ref::Choice,
-        /// A pair of choices
-        pub choice_pair: crate::r#ref::ChoicePair,
-        /// An array of choices defined as member array
-        pub choice_as_member_array: [u8; 2],
-    }
-    /// Set of floating points to emit
-    #[derive(Clone, Debug)]
-    pub struct FloatSet([f32; 3]);
-    /// Structure of enums
-    #[derive(Clone, Debug)]
-    pub struct ChoicePair {
-        /// The first choice to make
-        pub first_choice: crate::r#ref::Choice,
-        /// The second choice to make
-        pub second_choice: crate::r#ref::Choice,
-    }
-    /// All scalar inputs
-    #[derive(Clone, Debug)]
-    pub struct ScalarStruct {
-        pub i_8: i8,
-        pub i_16: i16,
-        pub i_32: i32,
-        pub i_64: i64,
-        pub u_8: u8,
-        pub u_16: u16,
-        pub u_32: u32,
-        pub u_64: u64,
-        pub f_32: f32,
-        pub f_64: f64,
-    }
-    #[derive(Clone, Debug)]
-    pub struct SignalSet([f32; 4]);
-    #[derive(Clone, Debug)]
-    pub struct SignalInfo {
-        pub r#type: crate::r#ref::SignalType,
-        pub history: crate::r#ref::SignalSet,
-        pub pair_history: crate::r#ref::SignalPairSet,
-    }
-    pub mod send_buff {
-        /// Active state
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum ActiveState {
-            SendIdle = 0,
-            SendActive = 1,
-        }
-    }
-    pub mod dp_demo {
-        pub type BoolAlias = bool;
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum ColorEnum {
-            Red = 0,
-            Green = 1,
-            Blue = 2,
-        }
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum DpReqType {
-            Immediate = 0,
-            Async = 1,
-        }
-        #[derive(Clone, Debug)]
-        pub struct StructWithEverything {
-            pub integer_member: crate::r#ref::dp_demo::I32Alias,
-            pub float_member: f32,
-            pub string_member: heapless::String<80>,
-            pub boolean_member: bool,
-            pub enum_member: crate::r#ref::dp_demo::ColorEnum,
-            pub array_member_u_32: [crate::r#ref::dp_demo::U32Array; 2],
-            pub f_32_array: crate::r#ref::dp_demo::F32Array,
-            pub u_32_array: crate::r#ref::dp_demo::U32Array,
-            pub enum_array: crate::r#ref::dp_demo::EnumArray,
-            pub string_array: crate::r#ref::dp_demo::StringArray,
-            pub boolean_array: crate::r#ref::dp_demo::BooleanArray,
-            pub struct_with_strings: crate::r#ref::dp_demo::StructWithStringMembers,
-            pub nested_arrays: crate::r#ref::dp_demo::ArrayOfStringArray,
-        }
-        /// Array of integers
-        #[derive(Clone, Debug)]
-        pub struct U32Array([u32; 5]);
-        pub type F64Alias = f64;
-        #[derive(Clone, Debug)]
-        pub struct ArrayOfStructs([crate::r#ref::dp_demo::StructWithStringMembers; 3]);
-        #[derive(Clone, Debug)]
-        pub struct ColorInfoStruct {
-            pub color: crate::r#ref::dp_demo::ColorEnum,
-        }
-        /// Array of strings
-        #[derive(Clone, Debug)]
-        pub struct StringArray([heapless::String<80>; 2]);
-        pub type StringAlias = heapless::String<80>;
-        pub type I32Alias = i32;
-        #[derive(Clone, Debug)]
-        pub struct StructWithStringMembers {
-            pub string_member: heapless::String<80>,
-            pub string_array_member: crate::r#ref::dp_demo::StringArray,
-        }
-        /// Array of floats
-        #[derive(Clone, Debug)]
-        pub struct F32Array([f32; 3]);
-        /// Array of enumerations
-        #[derive(Clone, Debug)]
-        pub struct EnumArray([crate::r#ref::dp_demo::ColorEnum; 3]);
-        /// Array of booleans
-        #[derive(Clone, Debug)]
-        pub struct BooleanArray([bool; 2]);
-        /// Array of array of strings
-        #[derive(Clone, Debug)]
-        pub struct ArrayOfStringArray([crate::r#ref::dp_demo::StringArray; 3]);
-    }
-    pub mod signal_gen {
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum DpReqType {
-            Immediate = 0,
-            Async = 1,
-        }
-    }
-}
 pub mod svc {
     /// An enumeration for Version Type
     #[derive(Clone, Debug)]
@@ -309,11 +132,9 @@ pub mod svc {
         All = 4,
     }
     /// Array of queue depths for Fw::Com types
-    #[derive(Clone, Debug)]
-    pub struct ComQueueDepth([u32; 2]);
+    pub type ComQueueDepth = [u32; 2];
     /// Array of queue depths for Fw::Buffer types
-    #[derive(Clone, Debug)]
-    pub struct BuffQueueDepth([u32; 1]);
+    pub type BuffQueueDepth = [u32; 1];
     /// An enumeration for version status
     #[derive(Clone, Debug)]
     #[repr(i32)]
@@ -384,35 +205,6 @@ pub mod svc {
         /// status of the custom version
         pub version_status: crate::svc::VersionStatus,
     }
-    pub mod event_manager {
-        /// Severity level for event filtering
-        /// Similar to Fw::LogSeverity, but no FATAL event
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum FilterSeverity {
-            /// Filter WARNING_HI events
-            WarningHi = 0,
-            /// Filter WARNING_LO events
-            WarningLo = 1,
-            /// Filter COMMAND events
-            Command = 2,
-            /// Filter ACTIVITY_HI events
-            ActivityHi = 3,
-            /// Filter ACTIVITY_LO events
-            ActivityLo = 4,
-            /// Filter DIAGNOSTIC events
-            Diagnostic = 5,
-        }
-        /// Enabled and disabled state
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum Enabled {
-            /// Enabled state
-            Enabled = 0,
-            /// Disabled state
-            Disabled = 1,
-        }
-    }
     pub mod cmd_sequencer {
         /// The stage of the file read operation
         #[derive(Clone, Debug)]
@@ -443,32 +235,33 @@ pub mod svc {
             Auto = 1,
         }
     }
-    pub mod version_cfg {
-        /// Define a set of Version entries on a project-specific
-        /// basis.
+    pub mod event_manager {
+        /// Severity level for event filtering
+        /// Similar to Fw::LogSeverity, but no FATAL event
         #[derive(Clone, Debug)]
-        #[repr(u32)]
-        pub enum VersionEnum {
-            /// Entry 0
-            ProjectVersion00 = 0,
-            /// Entry 1
-            ProjectVersion01 = 1,
-            /// Entry 2
-            ProjectVersion02 = 2,
-            /// Entry 3
-            ProjectVersion03 = 3,
-            /// Entry 4
-            ProjectVersion04 = 4,
-            /// Entry 5
-            ProjectVersion05 = 5,
-            /// Entry 6
-            ProjectVersion06 = 6,
-            /// Entry 7
-            ProjectVersion07 = 7,
-            /// Entry 8
-            ProjectVersion08 = 8,
-            /// Entry 9
-            ProjectVersion09 = 9,
+        #[repr(i32)]
+        pub enum FilterSeverity {
+            /// Filter WARNING_HI events
+            WarningHi = 0,
+            /// Filter WARNING_LO events
+            WarningLo = 1,
+            /// Filter COMMAND events
+            Command = 2,
+            /// Filter ACTIVITY_HI events
+            ActivityHi = 3,
+            /// Filter ACTIVITY_LO events
+            ActivityLo = 4,
+            /// Filter DIAGNOSTIC events
+            Diagnostic = 5,
+        }
+        /// Enabled and disabled state
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum Enabled {
+            /// Enabled state
+            Enabled = 0,
+            /// Disabled state
+            Disabled = 1,
         }
     }
     pub mod prm_db {
@@ -501,6 +294,199 @@ pub mod svc {
             ParameterIdSize = 6,
             ParameterValue = 7,
             ParameterValueSize = 8,
+        }
+    }
+    pub mod version_cfg {
+        /// Define a set of Version entries on a project-specific
+        /// basis.
+        #[derive(Clone, Debug)]
+        #[repr(u32)]
+        pub enum VersionEnum {
+            /// Entry 0
+            ProjectVersion00 = 0,
+            /// Entry 1
+            ProjectVersion01 = 1,
+            /// Entry 2
+            ProjectVersion02 = 2,
+            /// Entry 3
+            ProjectVersion03 = 3,
+            /// Entry 4
+            ProjectVersion04 = 4,
+            /// Entry 5
+            ProjectVersion05 = 5,
+            /// Entry 6
+            ProjectVersion06 = 6,
+            /// Entry 7
+            ProjectVersion07 = 7,
+            /// Entry 8
+            ProjectVersion08 = 8,
+            /// Entry 9
+            ProjectVersion09 = 9,
+        }
+    }
+}
+pub mod r#ref {
+    #[derive(Clone, Debug)]
+    pub struct SignalPair {
+        pub time: f32,
+        pub value: f32,
+    }
+    /// Array of array
+    pub type TooManyChoices = [crate::r#ref::ManyChoices; 2];
+    /// Some Packet Statistics
+    #[derive(Clone, Debug)]
+    pub struct PacketStat {
+        /// Number of buffers received
+        pub buff_recv: u32,
+        /// Number of buffers received with errors
+        pub buff_err: u32,
+        /// Packet Status
+        pub packet_status: crate::r#ref::PacketRecvStatus,
+    }
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum SignalType {
+        Triangle = 0,
+        Square = 1,
+        Sine = 2,
+        Noise = 3,
+    }
+    pub type SignalPairSet = [crate::r#ref::SignalPair; 4];
+    /// Enumeration type for use later
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum Choice {
+        One = 0,
+        Two = 1,
+        Red = 2,
+        Blue = 3,
+    }
+    /// Enumeration array
+    pub type ManyChoices = [crate::r#ref::Choice; 2];
+    /// Packet receive status
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum PacketRecvStatus {
+        PacketStateNoPackets = 0,
+        PacketStateOk = 1,
+        /// Receiver has seen errors
+        PacketStateErrors = 3,
+    }
+    /// Structure of enums (with an multi-dimensional array and structure)
+    #[derive(Clone, Debug)]
+    pub struct ChoiceSlurry {
+        /// A large set of disorganized choices
+        pub too_many_choices: crate::r#ref::TooManyChoices,
+        /// A singular choice
+        pub separate_choice: crate::r#ref::Choice,
+        /// A pair of choices
+        pub choice_pair: crate::r#ref::ChoicePair,
+        /// An array of choices defined as member array
+        pub choice_as_member_array: [u8; 2],
+    }
+    /// Set of floating points to emit
+    pub type FloatSet = [f32; 3];
+    /// Structure of enums
+    #[derive(Clone, Debug)]
+    pub struct ChoicePair {
+        /// The first choice to make
+        pub first_choice: crate::r#ref::Choice,
+        /// The second choice to make
+        pub second_choice: crate::r#ref::Choice,
+    }
+    /// All scalar inputs
+    #[derive(Clone, Debug)]
+    pub struct ScalarStruct {
+        pub i_8: i8,
+        pub i_16: i16,
+        pub i_32: i32,
+        pub i_64: i64,
+        pub u_8: u8,
+        pub u_16: u16,
+        pub u_32: u32,
+        pub u_64: u64,
+        pub f_32: f32,
+        pub f_64: f64,
+    }
+    pub type SignalSet = [f32; 4];
+    #[derive(Clone, Debug)]
+    pub struct SignalInfo {
+        pub r#type: crate::r#ref::SignalType,
+        pub history: crate::r#ref::SignalSet,
+        pub pair_history: crate::r#ref::SignalPairSet,
+    }
+    pub mod dp_demo {
+        pub type BoolAlias = bool;
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum ColorEnum {
+            Red = 0,
+            Green = 1,
+            Blue = 2,
+        }
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum DpReqType {
+            Immediate = 0,
+            Async = 1,
+        }
+        #[derive(Clone, Debug)]
+        pub struct StructWithEverything {
+            pub integer_member: crate::r#ref::dp_demo::I32Alias,
+            pub float_member: f32,
+            pub string_member: heapless::String<80>,
+            pub boolean_member: bool,
+            pub enum_member: crate::r#ref::dp_demo::ColorEnum,
+            pub array_member_u_32: [crate::r#ref::dp_demo::U32Array; 2],
+            pub f_32_array: crate::r#ref::dp_demo::F32Array,
+            pub u_32_array: crate::r#ref::dp_demo::U32Array,
+            pub enum_array: crate::r#ref::dp_demo::EnumArray,
+            pub string_array: crate::r#ref::dp_demo::StringArray,
+            pub boolean_array: crate::r#ref::dp_demo::BooleanArray,
+            pub struct_with_strings: crate::r#ref::dp_demo::StructWithStringMembers,
+            pub nested_arrays: crate::r#ref::dp_demo::ArrayOfStringArray,
+        }
+        /// Array of integers
+        pub type U32Array = [u32; 5];
+        pub type F64Alias = f64;
+        pub type ArrayOfStructs = [crate::r#ref::dp_demo::StructWithStringMembers; 3];
+        #[derive(Clone, Debug)]
+        pub struct ColorInfoStruct {
+            pub color: crate::r#ref::dp_demo::ColorEnum,
+        }
+        /// Array of strings
+        pub type StringArray = [heapless::String<80>; 2];
+        pub type StringAlias = heapless::String<80>;
+        pub type I32Alias = i32;
+        #[derive(Clone, Debug)]
+        pub struct StructWithStringMembers {
+            pub string_member: heapless::String<80>,
+            pub string_array_member: crate::r#ref::dp_demo::StringArray,
+        }
+        /// Array of floats
+        pub type F32Array = [f32; 3];
+        /// Array of enumerations
+        pub type EnumArray = [crate::r#ref::dp_demo::ColorEnum; 3];
+        /// Array of booleans
+        pub type BooleanArray = [bool; 2];
+        /// Array of array of strings
+        pub type ArrayOfStringArray = [crate::r#ref::dp_demo::StringArray; 3];
+    }
+    pub mod signal_gen {
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum DpReqType {
+            Immediate = 0,
+            Async = 1,
+        }
+    }
+    pub mod send_buff {
+        /// Active state
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum ActiveState {
+            SendIdle = 0,
+            SendActive = 1,
         }
     }
 }
