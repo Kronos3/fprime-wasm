@@ -1,10 +1,12 @@
+use crate::util::NameKind::StructMember;
+use crate::util::{annotate, format_name, qualified_identifier, qualify, NameKind};
 use fprime_dictionary::{
     AliasType, ArrayType, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition, TypeName,
 };
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::quote;
 
-pub(crate) fn type_name(tn: TypeName) -> TokenStream {
+pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
     match tn {
         TypeName::Integer { name } => match name {
             IntegerKind::U8 => quote! { u8 },
@@ -26,26 +28,78 @@ pub(crate) fn type_name(tn: TypeName) -> TokenStream {
             Some(size) => quote! { heapless::String<#size> },
         },
         TypeName::QualifiedIdentifier { name } => {
-            let qn: Vec<Ident> = name
-                .split(".")
-                .map(|q| Ident::new(q, Span::call_site()))
-                .collect();
-            quote! { crate [#(::#qn)*] }
+            let (qualifier, name) = qualified_identifier(name);
+            quote! { #(#qualifier::)*#name }
         }
     }
 }
 
-fn array_type_definition(ty: ArrayType) -> TokenStream {
+fn array_type_definition(ty: &ArrayType) -> TokenStream {
+    let (q, name) = qualified_identifier(&ty.qualified_name);
+    let tn = type_name(&ty.element_type);
+    let size = ty.size;
+    let arr_def = quote! {
+        #[derive(Clone, Debug)]
+        pub struct #name([#tn;#size]);
+    };
 
+    qualify(q, annotate(arr_def, &ty.annotation))
 }
 
-fn enum_type_definition(ty: EnumType) -> TokenStream {}
+fn enum_type_definition(ty: &EnumType) -> TokenStream {
+    let (q, name) = qualified_identifier(&ty.qualified_name);
+    let repr_ty = type_name(&ty.representation_type);
+    let constants = ty.enumerated_constants.iter().map(|c| {
+        let name = format_name(NameKind::EnumConstant, &c.name);
+        let val = c.value;
+        annotate(quote! { #name = #val, }, &c.annotation)
+    });
 
-fn struct_type_definition(ty: StructType) -> TokenStream {}
+    let enum_def = quote! {
+        #[derive(Clone, Debug)]
+        #[repr(#repr_ty)]
+        pub enum #name {
+            #(#constants)*
+        }
+    };
 
-fn alias_type_definition(ty: AliasType) -> TokenStream {}
+    qualify(q, annotate(enum_def, &ty.annotation))
+}
 
-pub(crate) fn type_definition(ty: TypeDefinition) -> TokenStream {
+fn struct_type_definition(ty: &StructType) -> TokenStream {
+    let (q, name) = qualified_identifier(&ty.qualified_name);
+    let members = ty.members.iter().map(|member| {
+        let name = format_name(StructMember, &member.name);
+        let ty = type_name(&member.type_name);
+
+        let inner = match member.size {
+            None => quote! { pub #name: #ty, },
+            Some(size) => quote! { pub #name: [#ty;#size], },
+        };
+        annotate(inner, &member.annotation)
+    });
+
+    let struct_def = quote! {
+        #[derive(Clone, Debug)]
+        pub struct #name {
+            #(#members)*
+        }
+    };
+
+    qualify(q, annotate(struct_def, &ty.annotation))
+}
+
+fn alias_type_definition(ty: &AliasType) -> TokenStream {
+    let (q, name) = qualified_identifier(&ty.qualified_name);
+    let tn = type_name(&ty.type_name);
+    let alias_def = quote! {
+        pub type #name = #tn;
+    };
+
+    qualify(q, annotate(alias_def, &ty.annotation))
+}
+
+pub(crate) fn type_definition(ty: &TypeDefinition) -> TokenStream {
     match ty {
         TypeDefinition::Array(a) => array_type_definition(a),
         TypeDefinition::Enum(e) => enum_type_definition(e),

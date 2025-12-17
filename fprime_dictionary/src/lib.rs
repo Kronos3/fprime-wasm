@@ -1,6 +1,8 @@
 use serde::de::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -258,6 +260,19 @@ pub struct Dictionary {
     pub commands: Vec<Command>,
     pub telemetry_channels: Vec<TelemetryChannel>,
     // TODO(tumbar) Fully spec the dictionary loader
+}
+
+pub fn parse(json_file: &Path) -> Dictionary {
+    match serde_json::from_str(&fs::read_to_string(json_file).expect("failed to read json file")) {
+        Ok(d) => d,
+        Err(err) => panic!(
+            "{}:{}:{} {}",
+            json_file.to_str().unwrap(),
+            err.line(),
+            err.column(),
+            err.to_string()
+        ),
+    }
 }
 
 #[cfg(test)]
