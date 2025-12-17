@@ -3,6 +3,4 @@
 mod RefTopologyDictionary;
 pub use RefTopologyDictionary::*;
 
-fn main() {
-    
-}
+fn main() {}

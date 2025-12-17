@@ -37,7 +37,7 @@ pub enum TypeName {
     Integer { name: IntegerKind },
     Float { name: FloatKind },
     Bool,
-    String { size: Option<u32> },
+    String { size: u32 },
     QualifiedIdentifier { name: String },
 }
 

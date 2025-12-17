@@ -1,3 +1,5 @@
+/// Fprime strings are stored on the stack with 16-bit lengths
+pub type String<const N: usize> = heapless::String<N, u16>;
 /// The type of a telemetry packet identifier
 pub type FwTlmPacketizeIdType = u16;
 /// The width of packet descriptors when they are serialized by the framework
@@ -115,6 +117,171 @@ pub mod fw {
         }
     }
 }
+pub mod r#ref {
+    #[derive(Clone, Debug)]
+    pub struct SignalPair {
+        pub time: f32,
+        pub value: f32,
+    }
+    /// Array of array
+    pub type TooManyChoices = [crate::r#ref::ManyChoices; 2];
+    /// Some Packet Statistics
+    #[derive(Clone, Debug)]
+    pub struct PacketStat {
+        /// Number of buffers received
+        pub buff_recv: u32,
+        /// Number of buffers received with errors
+        pub buff_err: u32,
+        /// Packet Status
+        pub packet_status: crate::r#ref::PacketRecvStatus,
+    }
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum SignalType {
+        Triangle = 0,
+        Square = 1,
+        Sine = 2,
+        Noise = 3,
+    }
+    pub type SignalPairSet = [crate::r#ref::SignalPair; 4];
+    /// Enumeration type for use later
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum Choice {
+        One = 0,
+        Two = 1,
+        Red = 2,
+        Blue = 3,
+    }
+    /// Enumeration array
+    pub type ManyChoices = [crate::r#ref::Choice; 2];
+    /// Packet receive status
+    #[derive(Clone, Debug)]
+    #[repr(i32)]
+    pub enum PacketRecvStatus {
+        PacketStateNoPackets = 0,
+        PacketStateOk = 1,
+        /// Receiver has seen errors
+        PacketStateErrors = 3,
+    }
+    /// Structure of enums (with an multi-dimensional array and structure)
+    #[derive(Clone, Debug)]
+    pub struct ChoiceSlurry {
+        /// A large set of disorganized choices
+        pub too_many_choices: crate::r#ref::TooManyChoices,
+        /// A singular choice
+        pub separate_choice: crate::r#ref::Choice,
+        /// A pair of choices
+        pub choice_pair: crate::r#ref::ChoicePair,
+        /// An array of choices defined as member array
+        pub choice_as_member_array: [u8; 2],
+    }
+    /// Set of floating points to emit
+    pub type FloatSet = [f32; 3];
+    /// Structure of enums
+    #[derive(Clone, Debug)]
+    pub struct ChoicePair {
+        /// The first choice to make
+        pub first_choice: crate::r#ref::Choice,
+        /// The second choice to make
+        pub second_choice: crate::r#ref::Choice,
+    }
+    /// All scalar inputs
+    #[derive(Clone, Debug)]
+    pub struct ScalarStruct {
+        pub i_8: i8,
+        pub i_16: i16,
+        pub i_32: i32,
+        pub i_64: i64,
+        pub u_8: u8,
+        pub u_16: u16,
+        pub u_32: u32,
+        pub u_64: u64,
+        pub f_32: f32,
+        pub f_64: f64,
+    }
+    pub type SignalSet = [f32; 4];
+    #[derive(Clone, Debug)]
+    pub struct SignalInfo {
+        pub r#type: crate::r#ref::SignalType,
+        pub history: crate::r#ref::SignalSet,
+        pub pair_history: crate::r#ref::SignalPairSet,
+    }
+    pub mod dp_demo {
+        pub type BoolAlias = bool;
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum ColorEnum {
+            Red = 0,
+            Green = 1,
+            Blue = 2,
+        }
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum DpReqType {
+            Immediate = 0,
+            Async = 1,
+        }
+        #[derive(Clone, Debug)]
+        pub struct StructWithEverything {
+            pub integer_member: crate::r#ref::dp_demo::I32Alias,
+            pub float_member: f32,
+            pub string_member: crate::String<80>,
+            pub boolean_member: bool,
+            pub enum_member: crate::r#ref::dp_demo::ColorEnum,
+            pub array_member_u_32: [crate::r#ref::dp_demo::U32Array; 2],
+            pub f_32_array: crate::r#ref::dp_demo::F32Array,
+            pub u_32_array: crate::r#ref::dp_demo::U32Array,
+            pub enum_array: crate::r#ref::dp_demo::EnumArray,
+            pub string_array: crate::r#ref::dp_demo::StringArray,
+            pub boolean_array: crate::r#ref::dp_demo::BooleanArray,
+            pub struct_with_strings: crate::r#ref::dp_demo::StructWithStringMembers,
+            pub nested_arrays: crate::r#ref::dp_demo::ArrayOfStringArray,
+        }
+        /// Array of integers
+        pub type U32Array = [u32; 5];
+        pub type F64Alias = f64;
+        pub type ArrayOfStructs = [crate::r#ref::dp_demo::StructWithStringMembers; 3];
+        #[derive(Clone, Debug)]
+        pub struct ColorInfoStruct {
+            pub color: crate::r#ref::dp_demo::ColorEnum,
+        }
+        /// Array of strings
+        pub type StringArray = [crate::String<80>; 2];
+        pub type StringAlias = crate::String<80>;
+        pub type I32Alias = i32;
+        #[derive(Clone, Debug)]
+        pub struct StructWithStringMembers {
+            pub string_member: crate::String<80>,
+            pub string_array_member: crate::r#ref::dp_demo::StringArray,
+        }
+        /// Array of floats
+        pub type F32Array = [f32; 3];
+        /// Array of enumerations
+        pub type EnumArray = [crate::r#ref::dp_demo::ColorEnum; 3];
+        /// Array of booleans
+        pub type BooleanArray = [bool; 2];
+        /// Array of array of strings
+        pub type ArrayOfStringArray = [crate::r#ref::dp_demo::StringArray; 3];
+    }
+    pub mod send_buff {
+        /// Active state
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum ActiveState {
+            SendIdle = 0,
+            SendActive = 1,
+        }
+    }
+    pub mod signal_gen {
+        #[derive(Clone, Debug)]
+        #[repr(i32)]
+        pub enum DpReqType {
+            Immediate = 0,
+            Async = 1,
+        }
+    }
+}
 pub mod svc {
     /// An enumeration for Version Type
     #[derive(Clone, Debug)]
@@ -201,7 +368,7 @@ pub mod svc {
         /// enumeration/name of the custom version
         pub version_enum: crate::svc::version_cfg::VersionEnum,
         /// string containing custom version
-        pub version_value: heapless::String<80>,
+        pub version_value: crate::String<80>,
         /// status of the custom version
         pub version_status: crate::svc::VersionStatus,
     }
@@ -322,171 +489,6 @@ pub mod svc {
             ProjectVersion08 = 8,
             /// Entry 9
             ProjectVersion09 = 9,
-        }
-    }
-}
-pub mod r#ref {
-    #[derive(Clone, Debug)]
-    pub struct SignalPair {
-        pub time: f32,
-        pub value: f32,
-    }
-    /// Array of array
-    pub type TooManyChoices = [crate::r#ref::ManyChoices; 2];
-    /// Some Packet Statistics
-    #[derive(Clone, Debug)]
-    pub struct PacketStat {
-        /// Number of buffers received
-        pub buff_recv: u32,
-        /// Number of buffers received with errors
-        pub buff_err: u32,
-        /// Packet Status
-        pub packet_status: crate::r#ref::PacketRecvStatus,
-    }
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum SignalType {
-        Triangle = 0,
-        Square = 1,
-        Sine = 2,
-        Noise = 3,
-    }
-    pub type SignalPairSet = [crate::r#ref::SignalPair; 4];
-    /// Enumeration type for use later
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum Choice {
-        One = 0,
-        Two = 1,
-        Red = 2,
-        Blue = 3,
-    }
-    /// Enumeration array
-    pub type ManyChoices = [crate::r#ref::Choice; 2];
-    /// Packet receive status
-    #[derive(Clone, Debug)]
-    #[repr(i32)]
-    pub enum PacketRecvStatus {
-        PacketStateNoPackets = 0,
-        PacketStateOk = 1,
-        /// Receiver has seen errors
-        PacketStateErrors = 3,
-    }
-    /// Structure of enums (with an multi-dimensional array and structure)
-    #[derive(Clone, Debug)]
-    pub struct ChoiceSlurry {
-        /// A large set of disorganized choices
-        pub too_many_choices: crate::r#ref::TooManyChoices,
-        /// A singular choice
-        pub separate_choice: crate::r#ref::Choice,
-        /// A pair of choices
-        pub choice_pair: crate::r#ref::ChoicePair,
-        /// An array of choices defined as member array
-        pub choice_as_member_array: [u8; 2],
-    }
-    /// Set of floating points to emit
-    pub type FloatSet = [f32; 3];
-    /// Structure of enums
-    #[derive(Clone, Debug)]
-    pub struct ChoicePair {
-        /// The first choice to make
-        pub first_choice: crate::r#ref::Choice,
-        /// The second choice to make
-        pub second_choice: crate::r#ref::Choice,
-    }
-    /// All scalar inputs
-    #[derive(Clone, Debug)]
-    pub struct ScalarStruct {
-        pub i_8: i8,
-        pub i_16: i16,
-        pub i_32: i32,
-        pub i_64: i64,
-        pub u_8: u8,
-        pub u_16: u16,
-        pub u_32: u32,
-        pub u_64: u64,
-        pub f_32: f32,
-        pub f_64: f64,
-    }
-    pub type SignalSet = [f32; 4];
-    #[derive(Clone, Debug)]
-    pub struct SignalInfo {
-        pub r#type: crate::r#ref::SignalType,
-        pub history: crate::r#ref::SignalSet,
-        pub pair_history: crate::r#ref::SignalPairSet,
-    }
-    pub mod dp_demo {
-        pub type BoolAlias = bool;
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum ColorEnum {
-            Red = 0,
-            Green = 1,
-            Blue = 2,
-        }
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum DpReqType {
-            Immediate = 0,
-            Async = 1,
-        }
-        #[derive(Clone, Debug)]
-        pub struct StructWithEverything {
-            pub integer_member: crate::r#ref::dp_demo::I32Alias,
-            pub float_member: f32,
-            pub string_member: heapless::String<80>,
-            pub boolean_member: bool,
-            pub enum_member: crate::r#ref::dp_demo::ColorEnum,
-            pub array_member_u_32: [crate::r#ref::dp_demo::U32Array; 2],
-            pub f_32_array: crate::r#ref::dp_demo::F32Array,
-            pub u_32_array: crate::r#ref::dp_demo::U32Array,
-            pub enum_array: crate::r#ref::dp_demo::EnumArray,
-            pub string_array: crate::r#ref::dp_demo::StringArray,
-            pub boolean_array: crate::r#ref::dp_demo::BooleanArray,
-            pub struct_with_strings: crate::r#ref::dp_demo::StructWithStringMembers,
-            pub nested_arrays: crate::r#ref::dp_demo::ArrayOfStringArray,
-        }
-        /// Array of integers
-        pub type U32Array = [u32; 5];
-        pub type F64Alias = f64;
-        pub type ArrayOfStructs = [crate::r#ref::dp_demo::StructWithStringMembers; 3];
-        #[derive(Clone, Debug)]
-        pub struct ColorInfoStruct {
-            pub color: crate::r#ref::dp_demo::ColorEnum,
-        }
-        /// Array of strings
-        pub type StringArray = [heapless::String<80>; 2];
-        pub type StringAlias = heapless::String<80>;
-        pub type I32Alias = i32;
-        #[derive(Clone, Debug)]
-        pub struct StructWithStringMembers {
-            pub string_member: heapless::String<80>,
-            pub string_array_member: crate::r#ref::dp_demo::StringArray,
-        }
-        /// Array of floats
-        pub type F32Array = [f32; 3];
-        /// Array of enumerations
-        pub type EnumArray = [crate::r#ref::dp_demo::ColorEnum; 3];
-        /// Array of booleans
-        pub type BooleanArray = [bool; 2];
-        /// Array of array of strings
-        pub type ArrayOfStringArray = [crate::r#ref::dp_demo::StringArray; 3];
-    }
-    pub mod signal_gen {
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum DpReqType {
-            Immediate = 0,
-            Async = 1,
-        }
-    }
-    pub mod send_buff {
-        /// Active state
-        #[derive(Clone, Debug)]
-        #[repr(i32)]
-        pub enum ActiveState {
-            SendIdle = 0,
-            SendActive = 1,
         }
     }
 }

@@ -24,13 +24,10 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
             FloatKind::F64 => quote! { f64 },
         },
         TypeName::Bool => quote! { bool },
-        TypeName::String { size } => match size {
-            None => quote! { heapless::String<crate::DEFAULT_STRING_SIZE> },
-            Some(size) => {
-                let size_u = Literal::u32_unsuffixed(*size);
-                quote! { heapless::String<#size_u> }
-            }
-        },
+        TypeName::String { size } => {
+            let size_u = Literal::u32_unsuffixed(*size);
+            quote! { crate::String<#size_u> }
+        }
         TypeName::QualifiedIdentifier { name } => {
             let (qualifier, name) = qualified_identifier(name);
             quote! { crate::#(#qualifier::)*#name }

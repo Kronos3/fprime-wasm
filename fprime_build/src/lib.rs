@@ -1,6 +1,6 @@
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::{env, fs};
@@ -17,14 +17,17 @@ struct CodeVec(Vec<(Qualifier, TokenStream)>);
 
 struct CodeTree {
     leafs: Vec<TokenStream>,
-    modules: HashMap<Ident, CodeTree>,
+    modules: BTreeMap<Ident, CodeTree>,
 }
 
 /// Consolidate definitions under the same module qualifier into a tree structure
 impl From<CodeVec> for CodeTree {
     fn from(value: CodeVec) -> Self {
         let mut root = CodeTree {
-            leafs: vec![],
+            leafs: vec![quote! {
+                /// Fprime strings are stored on the stack with 16-bit lengths
+                pub type String<const N: usize> = heapless::String<N, u16>;
+            }],
             modules: Default::default(),
         };
 
