@@ -12,8 +12,14 @@ pub struct Metadata {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum IntegerKind {
-    F32,
-    F64,
+    U8,
+    I8,
+    U16,
+    I16,
+    U32,
+    I32,
+    U64,
+    I64,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -36,7 +42,7 @@ pub enum TypeName {
 #[serde(rename_all = "camelCase")]
 pub struct EnumConstant {
     pub name: String,
-    pub value: i128,
+    pub value: i64,
 
     pub annotation: Option<String>,
 }
@@ -152,9 +158,9 @@ pub struct FormalParam {
 pub struct Command {
     #[serde(rename = "commandKind")]
     pub kind: CommandKind,
-    pub opcode: i128,
+    pub opcode: u64,
     pub formal_params: Vec<FormalParam>,
-    pub priority: Option<i128>,
+    pub priority: Option<i64>,
     pub queue_full_behavior: Option<QueueFull>,
 
     pub annotation: Option<String>,
@@ -179,15 +185,15 @@ pub struct TelemetryChannelLimit {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TelemetryChannelLimits {
-    pub low: Vec<TelemetryChannelLimit>,
-    pub high: Vec<TelemetryChannelLimit>,
+    pub low: Option<TelemetryChannelLimit>,
+    pub high: Option<TelemetryChannelLimit>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TelemetryChannel {
     pub name: String,
-    pub id: i128,
+    pub id: u64,
     #[serde(rename = "type")]
     pub type_name: TypeName,
     pub telemetry_update: TelemetryUpdate,
@@ -206,4 +212,9 @@ pub struct Dictionary {
     pub commands: Vec<Command>,
     pub telemetry_channels: Vec<TelemetryChannel>,
     // TODO(tumbar) Fully spec the dictionary loader
+}
+
+#[cfg(test)]
+mod test {
+    mod test;
 }
