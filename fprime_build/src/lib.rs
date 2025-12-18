@@ -24,10 +24,7 @@ struct CodeTree {
 impl From<CodeVec> for CodeTree {
     fn from(value: CodeVec) -> Self {
         let mut root = CodeTree {
-            leafs: vec![quote! {
-                /// Fprime strings are stored on the stack with 16-bit lengths
-                pub type String<const N: usize> = heapless::String<N, u16>;
-            }],
+            leafs: vec![quote! { use fprime_core::*; }],
             modules: Default::default(),
         };
 
@@ -42,7 +39,7 @@ impl From<CodeVec> for CodeTree {
                         current_node.modules.insert(
                             q.clone(),
                             CodeTree {
-                                leafs: vec![],
+                                leafs: vec![quote! { use fprime_core::*; }],
                                 modules: Default::default(),
                             },
                         );

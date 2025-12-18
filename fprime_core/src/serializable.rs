@@ -1,8 +1,4 @@
-pub trait Serializable {
-    const SIZE: usize;
-
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize);
-}
+use crate::Serializable;
 
 impl Serializable for u8 {
     const SIZE: usize = 1;
@@ -110,5 +106,24 @@ impl<const N: usize> Serializable for crate::String<N> {
         (n as u16).serialize_to(to, offset);
         to[*offset..].copy_from_slice(self.as_bytes());
         *offset += n;
+    }
+}
+
+impl<T: Serializable, const N: usize> Serializable for [T; N] {
+    const SIZE: usize = T::SIZE * N;
+
+    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
+        for i in self {
+            i.serialize_to(to, offset);
+        }
+    }
+}
+
+impl Serializable for bool {
+    const SIZE: usize = 1;
+
+    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
+        let val: u8 = if *self { 1 } else { 0 };
+        val.serialize_to(to, offset);
     }
 }

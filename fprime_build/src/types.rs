@@ -26,7 +26,7 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
         TypeName::Bool => quote! { bool },
         TypeName::String { size } => {
             let size_u = Literal::u32_unsuffixed(*size);
-            quote! { crate::String<#size_u> }
+            quote! { String<#size_u> }
         }
         TypeName::QualifiedIdentifier { name } => {
             let (qualifier, name) = qualified_identifier(name);
@@ -56,7 +56,7 @@ fn enum_type_definition(ty: &EnumType) -> (Qualifier, TokenStream) {
     });
 
     let enum_def = quote! {
-        #[derive(Clone, Debug)]
+        #[derive(Clone, Copy, Debug, Serializable)]
         #[repr(#repr_ty)]
         pub enum #name {
             #(#constants)*
@@ -83,7 +83,7 @@ fn struct_type_definition(ty: &StructType) -> (Qualifier, TokenStream) {
     });
 
     let struct_def = quote! {
-        #[derive(Clone, Debug)]
+        #[derive(Clone, Debug, Serializable)]
         pub struct #name {
             #(#members)*
         }

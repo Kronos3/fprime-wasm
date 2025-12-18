@@ -15,7 +15,8 @@ pub fn command(cmd: &fprime_dictionary::Command) -> (Qualifier, TokenStream) {
 
     let arg_sizes = cmd.formal_params.iter().map(|arg| match &arg.type_name {
         TypeName::String { .. } => {
-            quote! { <crate::String<30> as Serializable>::SIZE }
+            let ty = type_name(&arg.type_name);
+            quote! { <#ty as Serializable>::SIZE }
         }
         _ => {
             let ty = type_name(&arg.type_name);
@@ -35,13 +36,17 @@ pub fn command(cmd: &fprime_dictionary::Command) -> (Qualifier, TokenStream) {
 
     let def = quote! {
         pub fn #name(#(#args)*) -> crate::fw::CmdResponse {
-            use crate::serializable::Serializable;
+            use fprime_core::Serializable;
 
-            let mut __encoded: [u8; crate::FwOpcodeType::SIZE #(+ #arg_sizes)*];
+            let mut __encoded: [u8; crate::FwOpcodeType::SIZE #(+ #arg_sizes)*] =
+                unsafe { core::mem::MaybeUninit::uninit().assume_init() };
+
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = #opcode;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             #(#ser)*
+
+            crate::fw::CmdResponse::Ok
         }
     };
 

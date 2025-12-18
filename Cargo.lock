@@ -27,7 +27,7 @@ checksum = "56254986775e3233ffa9c4d7d3faaf6d36a2c09d30b20687e9f88bc8bafc16c8"
 name = "example"
 version = "0.1.0"
 dependencies = [
- "heapless",
+ "fprime_core",
 ]
 
 [[package]]
@@ -45,6 +45,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "fprime_core"
+version = "0.1.0"
+dependencies = [
+ "fprime_macros",
+ "heapless",
+]
+
+[[package]]
 name = "fprime_dictionary"
 version = "0.1.0"
 dependencies = [
@@ -56,6 +64,15 @@ dependencies = [
 [[package]]
 name = "fprime_internal"
 version = "0.1.0"
+
+[[package]]
+name = "fprime_macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.111",
+]
 
 [[package]]
 name = "hash32"

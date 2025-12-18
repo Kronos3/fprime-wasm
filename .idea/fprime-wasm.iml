@@ -6,6 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/fprime_build/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/fprime_dictionary/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/fprime_internal/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/fprime_core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/fprime_macros/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
