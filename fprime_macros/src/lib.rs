@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
 use quote::quote;
-use syn::{parse_macro_input, Data, DataEnum, DeriveInput, ItemEnum};
+use syn::{parse_macro_input, Data, DeriveInput};
 
 /// Returns the repr integer type as a string (e.g. "u8", "i32") if present.
 fn enum_repr_type_name(attrs: &[syn::Attribute]) -> Option<Ident> {
@@ -39,12 +39,24 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
 
     match input.data {
         Data::Struct(s) => {
+            let size = s.fields.iter().map(|field| {
+                let ty = &field.ty;
+                quote! { <#ty as Serializable>::SIZE }
+            });
+
+            let serialize_to = s.fields.iter().map(|field| {
+                match &field.ident {
+                    None => quote! {},
+                    Some(name) => quote! { self.#name.serialize_to(to, offset); }
+                }
+            });
+
             quote! {
                 impl #impl_generics Serializable for #name #ty_generics #where_clause {
-                    const SIZE: usize = 1;
+                    const SIZE: usize = 0 #(+ #size)*;
 
                     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-                        // generated implementation
+                        #(#serialize_to)*
                     }
                 }
             }

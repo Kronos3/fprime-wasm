@@ -6,7 +6,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 
 pub fn command(cmd: &fprime_dictionary::Command) -> (Qualifier, TokenStream) {
-    let (q, name) = qualified_identifier(&cmd.name);
+    let (q, name) = qualified_identifier(&cmd.name, NameKind::Function);
     let args = cmd.formal_params.iter().map(|arg| {
         let name = format_name(NameKind::FormalParameter, &arg.name);
         let ty = type_name(&arg.type_name);
@@ -38,15 +38,21 @@ pub fn command(cmd: &fprime_dictionary::Command) -> (Qualifier, TokenStream) {
         pub fn #name(#(#args)*) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
 
-            let mut __encoded: [u8; crate::FwOpcodeType::SIZE #(+ #arg_sizes)*] =
-                unsafe { core::mem::MaybeUninit::uninit().assume_init() };
+            let mut __encoded: [u8; crate::FwOpcodeType::SIZE #(+ #arg_sizes)*] = unsafe {
+                #[allow(invalid_value)]
+                core::mem::MaybeUninit::uninit().assume_init()
+            };
 
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = #opcode;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             #(#ser)*
 
-            crate::fw::CmdResponse::Ok
+            unsafe {
+                core::mem::transmute(
+                    internal::command(&__encoded[0..__offset])
+                )
+            }
         }
     };
 

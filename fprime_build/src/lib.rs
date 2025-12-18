@@ -23,8 +23,13 @@ struct CodeTree {
 /// Consolidate definitions under the same module qualifier into a tree structure
 impl From<CodeVec> for CodeTree {
     fn from(value: CodeVec) -> Self {
+        let core_use = quote! {
+            #[allow(unused_imports)]
+            use fprime_core::*;
+        };
+
         let mut root = CodeTree {
-            leafs: vec![quote! { use fprime_core::*; }],
+            leafs: vec![core_use.clone()],
             modules: Default::default(),
         };
 
@@ -39,7 +44,7 @@ impl From<CodeVec> for CodeTree {
                         current_node.modules.insert(
                             q.clone(),
                             CodeTree {
-                                leafs: vec![quote! { use fprime_core::*; }],
+                                leafs: vec![core_use.clone()],
                                 modules: Default::default(),
                             },
                         );

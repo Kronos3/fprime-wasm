@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use fprime_core::*;
 /// The type of a telemetry packet identifier
 pub type FwTlmPacketizeIdType = u16;
@@ -31,62 +32,71 @@ pub type FwTimeBaseStoreType = u16;
 /// The type of an event identifier
 pub type FwEventIdType = crate::FwIdType;
 pub mod cdh_core {
+    #[allow(unused_imports)]
     use fprime_core::*;
     pub mod cmd_disp {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// No-op command
-        pub fn CmdNoOp() -> crate::fw::CmdResponse {
+        pub fn cmd_no_op() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// No-op string command
-        pub fn CmdNoOpString(arg_1: String<40>) -> crate::fw::CmdResponse {
+        pub fn cmd_no_op_string(arg_1: String<40>) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<40> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             arg_1.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// No-op command
-        pub fn CmdTestCmd1(arg_1: i32, arg_2: f32, arg_3: u8) -> crate::fw::CmdResponse {
+        pub fn cmd_test_cmd_1(
+            arg_1: i32,
+            arg_2: f32,
+            arg_3: u8,
+        ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + i32::SIZE + f32::SIZE
-                + u8::SIZE] = unsafe { core::mem::MaybeUninit::uninit().assume_init() };
+                + u8::SIZE] = unsafe {
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
+            };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             arg_1.serialize_to(&mut __encoded, &mut __offset);
             arg_2.serialize_to(&mut __encoded, &mut __offset);
             arg_3.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Clear command tracking info to recover from components not returning status
-        pub fn CmdClearTracking() -> crate::fw::CmdResponse {
+        pub fn cmd_clear_tracking() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000003;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod events {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Set filter for reporting events. Events are not stored in component.
-        pub fn SetEventFilter(
+        pub fn set_event_filter(
             filter_level: crate::svc::event_manager::FilterSeverity,
             filter_enabled: crate::svc::event_manager::Enabled,
         ) -> crate::fw::CmdResponse {
@@ -94,17 +104,17 @@ pub mod cdh_core {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::svc::event_manager::FilterSeverity::SIZE
                 + crate::svc::event_manager::Enabled::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1001000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             filter_level.serialize_to(&mut __encoded, &mut __offset);
             filter_enabled.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Filter a particular ID
-        pub fn SetIdFilter(
+        pub fn set_id_filter(
             id: crate::FwEventIdType,
             id_filter_enabled: crate::svc::event_manager::Enabled,
         ) -> crate::fw::CmdResponse {
@@ -112,61 +122,62 @@ pub mod cdh_core {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::FwEventIdType::SIZE
                 + crate::svc::event_manager::Enabled::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1001002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             id.serialize_to(&mut __encoded, &mut __offset);
             id_filter_enabled.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Dump the filter states via events
-        pub fn DumpFilterState() -> crate::fw::CmdResponse {
+        pub fn dump_filter_state() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1001003;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod health {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// A command to enable or disable health checks
-        pub fn HlthEnable(enable: crate::fw::Enabled) -> crate::fw::CmdResponse {
+        pub fn hlth_enable(enable: crate::fw::Enabled) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::fw::Enabled::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1002000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             enable.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Ignore a particular ping entry
-        pub fn HlthPingEnable(
+        pub fn hlth_ping_enable(
             entry: String<40>,
             enable: crate::fw::Enabled,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<40> as Serializable>::SIZE + crate::fw::Enabled::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1002001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             entry.serialize_to(&mut __encoded, &mut __offset);
             enable.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Change ping value
-        pub fn HlthChngPing(
+        pub fn hlth_chng_ping(
             entry: String<40>,
             warning_value: u32,
             fatal_value: u32,
@@ -174,7 +185,7 @@ pub mod cdh_core {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<40> as Serializable>::SIZE + u32::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1002002;
@@ -182,124 +193,131 @@ pub mod cdh_core {
             entry.serialize_to(&mut __encoded, &mut __offset);
             warning_value.serialize_to(&mut __encoded, &mut __offset);
             fatal_value.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod version {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// A command to enable or disable Event verbosity and Telemetry
-        pub fn Enable(enable: crate::svc::VersionEnabled) -> crate::fw::CmdResponse {
+        pub fn enable(enable: crate::svc::VersionEnabled) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::svc::VersionEnabled::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1003000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             enable.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Report version as Event
-        pub fn Version(version_type: crate::svc::VersionType) -> crate::fw::CmdResponse {
+        pub fn version(version_type: crate::svc::VersionType) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::svc::VersionType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1003001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             version_type.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
 }
 pub mod data_products {
+    #[allow(unused_imports)]
     use fprime_core::*;
     pub mod dp_cat {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Build catalog from data product directory. Will block until complete
-        pub fn BuildCatalog() -> crate::fw::CmdResponse {
+        pub fn build_catalog() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x4000000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Start transmitting catalog
-        pub fn StartXmitCatalog(wait: crate::fw::Wait) -> crate::fw::CmdResponse {
+        pub fn start_xmit_catalog(wait: crate::fw::Wait) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + crate::fw::Wait::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x4000001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             wait.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Stop transmitting catalog
-        pub fn StopXmitCatalog() -> crate::fw::CmdResponse {
+        pub fn stop_xmit_catalog() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x4000002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// clear existing catalog
-        pub fn ClearCatalog() -> crate::fw::CmdResponse {
+        pub fn clear_catalog() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x4000003;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod dp_mgr {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Clear event throttling
-        pub fn ClearEventThrottle() -> crate::fw::CmdResponse {
+        pub fn clear_event_throttle() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x4001000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod dp_writer {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Clear event throttling
-        pub fn ClearEventThrottle() -> crate::fw::CmdResponse {
+        pub fn clear_event_throttle() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x4002000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
 }
 pub mod file_handling {
+    #[allow(unused_imports)]
     use fprime_core::*;
     pub mod file_downlink {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Read a named file off the disk. Divide it into packets and send the packets for transmission to the ground.
-        pub fn SendFile(
+        pub fn send_file(
             source_file_name: String<100>,
             dest_file_name: String<100>,
         ) -> crate::fw::CmdResponse {
@@ -307,28 +325,28 @@ pub mod file_handling {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<100> as Serializable>::SIZE
                 + <String<100> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5001000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             source_file_name.serialize_to(&mut __encoded, &mut __offset);
             dest_file_name.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Cancel the downlink in progress, if any
-        pub fn Cancel() -> crate::fw::CmdResponse {
+        pub fn cancel() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5001001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Read a named file off the disk from a starting position. Divide it into packets and send the packets for transmission to the ground.
-        pub fn SendPartial(
+        pub fn send_partial(
             source_file_name: String<100>,
             dest_file_name: String<100>,
             start_offset: u32,
@@ -338,7 +356,7 @@ pub mod file_handling {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<100> as Serializable>::SIZE
                 + <String<100> as Serializable>::SIZE + u32::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5001002;
@@ -347,26 +365,27 @@ pub mod file_handling {
             dest_file_name.serialize_to(&mut __encoded, &mut __offset);
             start_offset.serialize_to(&mut __encoded, &mut __offset);
             length.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod file_manager {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Create a directory
-        pub fn CreateDirectory(dir_name: String<200>) -> crate::fw::CmdResponse {
+        pub fn create_directory(dir_name: String<200>) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             dir_name.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Move a file
-        pub fn MoveFile(
+        pub fn move_file(
             source_file_name: String<200>,
             dest_file_name: String<200>,
         ) -> crate::fw::CmdResponse {
@@ -374,47 +393,47 @@ pub mod file_handling {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             source_file_name.serialize_to(&mut __encoded, &mut __offset);
             dest_file_name.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Remove a directory, which must be empty
-        pub fn RemoveDirectory(dir_name: String<200>) -> crate::fw::CmdResponse {
+        pub fn remove_directory(dir_name: String<200>) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             dir_name.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Remove a file
-        pub fn RemoveFile(
+        pub fn remove_file(
             file_name: String<200>,
             ignore_errors: bool,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE + bool::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002003;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             file_name.serialize_to(&mut __encoded, &mut __offset);
             ignore_errors.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Perform a Linux shell command and write the output to a log file.
-        pub fn ShellCommand(
+        pub fn shell_command(
             command: String<256>,
             log_file_name: String<200>,
         ) -> crate::fw::CmdResponse {
@@ -422,17 +441,17 @@ pub mod file_handling {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<256> as Serializable>::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002004;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             command.serialize_to(&mut __encoded, &mut __offset);
             log_file_name.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Append 1 file's contents to the end of another.
-        pub fn AppendFile(
+        pub fn append_file(
             source: String<200>,
             target: String<200>,
         ) -> crate::fw::CmdResponse {
@@ -440,57 +459,59 @@ pub mod file_handling {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002005;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             source.serialize_to(&mut __encoded, &mut __offset);
             target.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
-        pub fn FileSize(file_name: String<200>) -> crate::fw::CmdResponse {
+        pub fn file_size(file_name: String<200>) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002006;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             file_name.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// List the contents of a directory
-        pub fn ListDirectory(dir_name: String<200>) -> crate::fw::CmdResponse {
+        pub fn list_directory(dir_name: String<200>) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002007;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             dir_name.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod prm_db {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Command to save parameter image to file. Uses file name passed to constructor
-        pub fn PrmSaveFile() -> crate::fw::CmdResponse {
+        pub fn prm_save_file() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5003000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
 }
 pub mod fw {
+    #[allow(unused_imports)]
     use fprime_core::*;
     /// Enum representing a command response
     #[derive(Clone, Copy, Debug, Serializable)]
@@ -563,6 +584,7 @@ pub mod fw {
         Enabled = 1,
     }
     pub mod dp_cfg {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// A bit mask for selecting the type of processing to perform on
         /// a container before writing it to disk.
@@ -579,6 +601,7 @@ pub mod fw {
     }
 }
 pub mod r#ref {
+    #[allow(unused_imports)]
     use fprime_core::*;
     #[derive(Clone, Debug, Serializable)]
     pub struct SignalPair {
@@ -670,9 +693,10 @@ pub mod r#ref {
         pub pair_history: crate::r#ref::SignalPairSet,
     }
     pub mod cmd_seq {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Run a command sequence file
-        pub fn CsRun(
+        pub fn cs_run(
             file_name: String<240>,
             block: crate::svc::cmd_sequencer::BlockState,
         ) -> crate::fw::CmdResponse {
@@ -680,96 +704,97 @@ pub mod r#ref {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<240> as Serializable>::SIZE
                 + crate::svc::cmd_sequencer::BlockState::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             file_name.serialize_to(&mut __encoded, &mut __offset);
             block.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Validate a command sequence file
-        pub fn CsValidate(file_name: String<240>) -> crate::fw::CmdResponse {
+        pub fn cs_validate(file_name: String<240>) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<240> as Serializable>::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             file_name.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Cancel a command sequence
-        pub fn CsCancel() -> crate::fw::CmdResponse {
+        pub fn cs_cancel() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Start running a command sequence
-        pub fn CsStart() -> crate::fw::CmdResponse {
+        pub fn cs_start() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006003;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Perform one step in a command sequence. Valid only if CmdSequencer is in MANUAL run mode.
-        pub fn CsStep() -> crate::fw::CmdResponse {
+        pub fn cs_step() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006004;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Set the run mode to AUTO.
-        pub fn CsAuto() -> crate::fw::CmdResponse {
+        pub fn cs_auto() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006005;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Set the run mode to MANUAL.
-        pub fn CsManual() -> crate::fw::CmdResponse {
+        pub fn cs_manual() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006006;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Wait for sequences that are running to finish. Allow user to run multiple seq files in SEQ_NO_BLOCK mode then wait for them to finish before allowing more seq run request.
-        pub fn CsJoinWait() -> crate::fw::CmdResponse {
+        pub fn cs_join_wait() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006007;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod dp_demo {
+        #[allow(unused_imports)]
         use fprime_core::*;
         pub type BoolAlias = bool;
         #[derive(Clone, Copy, Debug, Serializable)]
@@ -827,102 +852,105 @@ pub mod r#ref {
         /// Array of array of strings
         pub type ArrayOfStringArray = [crate::r#ref::dp_demo::StringArray; 3];
         /// Select color
-        pub fn SelectColor(
+        pub fn select_color(
             color: crate::r#ref::dp_demo::ColorEnum,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::dp_demo::ColorEnum::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0xA10;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             color.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Command for generating a DP
-        pub fn Dp(
+        pub fn dp(
             req_type: crate::r#ref::dp_demo::DpReqType,
             priority: u32,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::dp_demo::DpReqType::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0xA11;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             req_type.serialize_to(&mut __encoded, &mut __offset);
             priority.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod ping_rcvr {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Command to disable ping response
-        pub fn PrStopPings() -> crate::fw::CmdResponse {
+        pub fn pr_stop_pings() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10004000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod recv_buff_comp {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// A test parameter
-        pub fn Parameter1PrmSet(val: u32) -> crate::fw::CmdResponse {
+        pub fn parameter_1_prm_set(val: u32) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10022000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// A test parameter
-        pub fn Parameter1PrmSave() -> crate::fw::CmdResponse {
+        pub fn parameter_1_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10022001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// A test parameter
-        pub fn Parameter2PrmSet(val: i16) -> crate::fw::CmdResponse {
+        pub fn parameter_2_prm_set(val: i16) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + i16::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10022002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// A test parameter
-        pub fn Parameter2PrmSave() -> crate::fw::CmdResponse {
+        pub fn parameter_2_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10022003;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod send_buff {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Active state
         #[derive(Clone, Copy, Debug, Serializable)]
@@ -933,44 +961,51 @@ pub mod r#ref {
         }
     }
     pub mod send_buff_comp {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Command to start sending packets
-        pub fn SbStartPkts() -> crate::fw::CmdResponse {
+        pub fn sb_start_pkts() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10010000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Send a bad packet
-        pub fn SbInjectPktError() -> crate::fw::CmdResponse {
+        pub fn sb_inject_pkt_error() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10010001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Generate a FATAL EVR
-        pub fn SbGenFatal(arg_1: u32, arg_2: u32, arg_3: u32) -> crate::fw::CmdResponse {
+        pub fn sb_gen_fatal(
+            arg_1: u32,
+            arg_2: u32,
+            arg_3: u32,
+        ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE + u32::SIZE
-                + u32::SIZE] = unsafe { core::mem::MaybeUninit::uninit().assume_init() };
+                + u32::SIZE] = unsafe {
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
+            };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10010002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             arg_1.serialize_to(&mut __encoded, &mut __offset);
             arg_2.serialize_to(&mut __encoded, &mut __offset);
             arg_3.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Generate an ASSERT
-        pub fn SbGenAssert(
+        pub fn sb_gen_assert(
             arg_1: u32,
             arg_2: u32,
             arg_3: u32,
@@ -981,7 +1016,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE + u32::SIZE
                 + u32::SIZE + u32::SIZE + u32::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10010003;
@@ -992,59 +1027,60 @@ pub mod r#ref {
             arg_4.serialize_to(&mut __encoded, &mut __offset);
             arg_5.serialize_to(&mut __encoded, &mut __offset);
             arg_6.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// A test parameter
-        pub fn Parameter3PrmSet(val: u8) -> crate::fw::CmdResponse {
+        pub fn parameter_3_prm_set(val: u8) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u8::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1001000A;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// A test parameter
-        pub fn Parameter3PrmSave() -> crate::fw::CmdResponse {
+        pub fn parameter_3_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1001000B;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// A test parameter
-        pub fn Parameter4PrmSet(val: f32) -> crate::fw::CmdResponse {
+        pub fn parameter_4_prm_set(val: f32) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + f32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1001000C;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// A test parameter
-        pub fn Parameter4PrmSave() -> crate::fw::CmdResponse {
+        pub fn parameter_4_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1001000D;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod sg_1 {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
-        pub fn Settings(
+        pub fn settings(
             frequency: u32,
             amplitude: f32,
             phase: f32,
@@ -1053,7 +1089,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE + f32::SIZE
                 + f32::SIZE + crate::r#ref::SignalType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10011000;
@@ -1062,32 +1098,32 @@ pub mod r#ref {
             amplitude.serialize_to(&mut __encoded, &mut __offset);
             phase.serialize_to(&mut __encoded, &mut __offset);
             sig_type.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle() -> crate::fw::CmdResponse {
+        pub fn toggle() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10011001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Skip next sample
-        pub fn Skip() -> crate::fw::CmdResponse {
+        pub fn skip() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10011002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Signal Generator Settings
-        pub fn Dp(
+        pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
             priority: u32,
@@ -1095,7 +1131,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::signal_gen::DpReqType::SIZE + u32::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10011003;
@@ -1103,13 +1139,14 @@ pub mod r#ref {
             req_type.serialize_to(&mut __encoded, &mut __offset);
             records.serialize_to(&mut __encoded, &mut __offset);
             priority.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod sg_2 {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
-        pub fn Settings(
+        pub fn settings(
             frequency: u32,
             amplitude: f32,
             phase: f32,
@@ -1118,7 +1155,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE + f32::SIZE
                 + f32::SIZE + crate::r#ref::SignalType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10012000;
@@ -1127,32 +1164,32 @@ pub mod r#ref {
             amplitude.serialize_to(&mut __encoded, &mut __offset);
             phase.serialize_to(&mut __encoded, &mut __offset);
             sig_type.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle() -> crate::fw::CmdResponse {
+        pub fn toggle() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10012001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Skip next sample
-        pub fn Skip() -> crate::fw::CmdResponse {
+        pub fn skip() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10012002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Signal Generator Settings
-        pub fn Dp(
+        pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
             priority: u32,
@@ -1160,7 +1197,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::signal_gen::DpReqType::SIZE + u32::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10012003;
@@ -1168,13 +1205,14 @@ pub mod r#ref {
             req_type.serialize_to(&mut __encoded, &mut __offset);
             records.serialize_to(&mut __encoded, &mut __offset);
             priority.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod sg_3 {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
-        pub fn Settings(
+        pub fn settings(
             frequency: u32,
             amplitude: f32,
             phase: f32,
@@ -1183,7 +1221,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE + f32::SIZE
                 + f32::SIZE + crate::r#ref::SignalType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10013000;
@@ -1192,32 +1230,32 @@ pub mod r#ref {
             amplitude.serialize_to(&mut __encoded, &mut __offset);
             phase.serialize_to(&mut __encoded, &mut __offset);
             sig_type.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle() -> crate::fw::CmdResponse {
+        pub fn toggle() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10013001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Skip next sample
-        pub fn Skip() -> crate::fw::CmdResponse {
+        pub fn skip() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10013002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Signal Generator Settings
-        pub fn Dp(
+        pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
             priority: u32,
@@ -1225,7 +1263,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::signal_gen::DpReqType::SIZE + u32::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10013003;
@@ -1233,13 +1271,14 @@ pub mod r#ref {
             req_type.serialize_to(&mut __encoded, &mut __offset);
             records.serialize_to(&mut __encoded, &mut __offset);
             priority.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod sg_4 {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
-        pub fn Settings(
+        pub fn settings(
             frequency: u32,
             amplitude: f32,
             phase: f32,
@@ -1248,7 +1287,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE + f32::SIZE
                 + f32::SIZE + crate::r#ref::SignalType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10014000;
@@ -1257,32 +1296,32 @@ pub mod r#ref {
             amplitude.serialize_to(&mut __encoded, &mut __offset);
             phase.serialize_to(&mut __encoded, &mut __offset);
             sig_type.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle() -> crate::fw::CmdResponse {
+        pub fn toggle() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10014001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Skip next sample
-        pub fn Skip() -> crate::fw::CmdResponse {
+        pub fn skip() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10014002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Signal Generator Settings
-        pub fn Dp(
+        pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
             priority: u32,
@@ -1290,7 +1329,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::signal_gen::DpReqType::SIZE + u32::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10014003;
@@ -1298,13 +1337,14 @@ pub mod r#ref {
             req_type.serialize_to(&mut __encoded, &mut __offset);
             records.serialize_to(&mut __encoded, &mut __offset);
             priority.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod sg_5 {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
-        pub fn Settings(
+        pub fn settings(
             frequency: u32,
             amplitude: f32,
             phase: f32,
@@ -1313,7 +1353,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE + f32::SIZE
                 + f32::SIZE + crate::r#ref::SignalType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10015000;
@@ -1322,32 +1362,32 @@ pub mod r#ref {
             amplitude.serialize_to(&mut __encoded, &mut __offset);
             phase.serialize_to(&mut __encoded, &mut __offset);
             sig_type.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle() -> crate::fw::CmdResponse {
+        pub fn toggle() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10015001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Skip next sample
-        pub fn Skip() -> crate::fw::CmdResponse {
+        pub fn skip() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10015002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Signal Generator Settings
-        pub fn Dp(
+        pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
             priority: u32,
@@ -1355,7 +1395,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::signal_gen::DpReqType::SIZE + u32::SIZE + u32::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10015003;
@@ -1363,10 +1403,11 @@ pub mod r#ref {
             req_type.serialize_to(&mut __encoded, &mut __offset);
             records.serialize_to(&mut __encoded, &mut __offset);
             priority.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod signal_gen {
+        #[allow(unused_imports)]
         use fprime_core::*;
         #[derive(Clone, Copy, Debug, Serializable)]
         #[repr(i32)]
@@ -1376,77 +1417,79 @@ pub mod r#ref {
         }
     }
     pub mod system_resources {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// A command to enable or disable system resource telemetry
-        pub fn Enable(
+        pub fn enable(
             enable: crate::svc::SystemResourceEnabled,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::svc::SystemResourceEnabled::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10023000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             enable.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
     pub mod type_demo {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Single choice command
-        pub fn Choice(choice: crate::r#ref::Choice) -> crate::fw::CmdResponse {
+        pub fn choice(choice: crate::r#ref::Choice) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::Choice::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             choice.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Single enumeration parameter
-        pub fn ChoicePrmPrmSet(val: crate::r#ref::Choice) -> crate::fw::CmdResponse {
+        pub fn choice_prm_prm_set(val: crate::r#ref::Choice) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::Choice::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Single enumeration parameter
-        pub fn ChoicePrmPrmSave() -> crate::fw::CmdResponse {
+        pub fn choice_prm_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple choice command via Array
-        pub fn Choices(choices: crate::r#ref::ManyChoices) -> crate::fw::CmdResponse {
+        pub fn choices(choices: crate::r#ref::ManyChoices) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ManyChoices::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005003;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             choices.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple choice command via Array with a preceding and following argument
-        pub fn ChoicesWithFriends(
+        pub fn choices_with_friends(
             repeat: u8,
             choices: crate::r#ref::ManyChoices,
             repeat_max: u8,
@@ -1454,7 +1497,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u8::SIZE
                 + crate::r#ref::ManyChoices::SIZE + u8::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005004;
@@ -1462,51 +1505,51 @@ pub mod r#ref {
             repeat.serialize_to(&mut __encoded, &mut __offset);
             choices.serialize_to(&mut __encoded, &mut __offset);
             repeat_max.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple enumeration parameter via Array
-        pub fn ChoicesPrmPrmSet(
+        pub fn choices_prm_prm_set(
             val: crate::r#ref::ManyChoices,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ManyChoices::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005005;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple enumeration parameter via Array
-        pub fn ChoicesPrmPrmSave() -> crate::fw::CmdResponse {
+        pub fn choices_prm_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005006;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Too many choice command via Array
-        pub fn ExtraChoices(
+        pub fn extra_choices(
             choices: crate::r#ref::TooManyChoices,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::TooManyChoices::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005007;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             choices.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Too many choices command via Array with a preceding and following argument
-        pub fn ExtraChoicesWithFriends(
+        pub fn extra_choices_with_friends(
             repeat: u8,
             choices: crate::r#ref::TooManyChoices,
             repeat_max: u8,
@@ -1514,7 +1557,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u8::SIZE
                 + crate::r#ref::TooManyChoices::SIZE + u8::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005008;
@@ -1522,49 +1565,49 @@ pub mod r#ref {
             repeat.serialize_to(&mut __encoded, &mut __offset);
             choices.serialize_to(&mut __encoded, &mut __offset);
             repeat_max.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Too many enumeration parameter via Array
-        pub fn ExtraChoicesPrmPrmSet(
+        pub fn extra_choices_prm_prm_set(
             val: crate::r#ref::ManyChoices,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ManyChoices::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005009;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Too many enumeration parameter via Array
-        pub fn ExtraChoicesPrmPrmSave() -> crate::fw::CmdResponse {
+        pub fn extra_choices_prm_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000500A;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple choice command via Structure
-        pub fn ChoicePair(choices: crate::r#ref::ChoicePair) -> crate::fw::CmdResponse {
+        pub fn choice_pair(choices: crate::r#ref::ChoicePair) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ChoicePair::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000500B;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             choices.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple choices command via Structure with a preceding and following argument
-        pub fn ChoicePairWithFriends(
+        pub fn choice_pair_with_friends(
             repeat: u8,
             choices: crate::r#ref::ChoicePair,
             repeat_max: u8,
@@ -1572,7 +1615,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u8::SIZE
                 + crate::r#ref::ChoicePair::SIZE + u8::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000500C;
@@ -1580,51 +1623,51 @@ pub mod r#ref {
             repeat.serialize_to(&mut __encoded, &mut __offset);
             choices.serialize_to(&mut __encoded, &mut __offset);
             repeat_max.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple enumeration parameter via Structure
-        pub fn ChoicePairPrmPrmSet(
+        pub fn choice_pair_prm_prm_set(
             val: crate::r#ref::ChoicePair,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ChoicePair::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000500D;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple enumeration parameter via Structure
-        pub fn ChoicePairPrmPrmSave() -> crate::fw::CmdResponse {
+        pub fn choice_pair_prm_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000500E;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple choice command via Complex Structure
-        pub fn GluttonOfChoice(
+        pub fn glutton_of_choice(
             choices: crate::r#ref::ChoiceSlurry,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ChoiceSlurry::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000500F;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             choices.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple choices command via Complex Structure with a preceding and following argument
-        pub fn GluttonOfChoiceWithFriends(
+        pub fn glutton_of_choice_with_friends(
             repeat: u8,
             choices: crate::r#ref::ChoiceSlurry,
             repeat_max: u8,
@@ -1632,7 +1675,7 @@ pub mod r#ref {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u8::SIZE
                 + crate::r#ref::ChoiceSlurry::SIZE + u8::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005010;
@@ -1640,74 +1683,75 @@ pub mod r#ref {
             repeat.serialize_to(&mut __encoded, &mut __offset);
             choices.serialize_to(&mut __encoded, &mut __offset);
             repeat_max.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple enumeration parameter via Complex Structure
-        pub fn GluttonOfChoicePrmPrmSet(
+        pub fn glutton_of_choice_prm_prm_set(
             val: crate::r#ref::ChoiceSlurry,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ChoiceSlurry::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005011;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             val.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Multiple enumeration parameter via Complex Structure
-        pub fn GluttonOfChoicePrmPrmSave() -> crate::fw::CmdResponse {
+        pub fn glutton_of_choice_prm_prm_save() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005012;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Dump the typed parameters
-        pub fn DumpTypedParameters() -> crate::fw::CmdResponse {
+        pub fn dump_typed_parameters() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005013;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Dump the float values
-        pub fn DumpFloats() -> crate::fw::CmdResponse {
+        pub fn dump_floats() -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005014;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
         /// Send scalars
-        pub fn SendScalars(
+        pub fn send_scalars(
             scalar_input: crate::r#ref::ScalarStruct,
         ) -> crate::fw::CmdResponse {
             use fprime_core::Serializable;
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ScalarStruct::SIZE] = unsafe {
-                core::mem::MaybeUninit::uninit().assume_init()
+                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
             };
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10005015;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             scalar_input.serialize_to(&mut __encoded, &mut __offset);
-            crate::fw::CmdResponse::Ok
+            unsafe { core::mem::transmute(internal::command(&__encoded[0..__offset])) }
         }
     }
 }
 pub mod svc {
+    #[allow(unused_imports)]
     use fprime_core::*;
     /// An enumeration for Version Type
     #[derive(Clone, Copy, Debug, Serializable)]
@@ -1799,6 +1843,7 @@ pub mod svc {
         pub version_status: crate::svc::VersionStatus,
     }
     pub mod cmd_sequencer {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// The stage of the file read operation
         #[derive(Clone, Copy, Debug, Serializable)]
@@ -1830,6 +1875,7 @@ pub mod svc {
         }
     }
     pub mod event_manager {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Severity level for event filtering
         /// Similar to Fw::LogSeverity, but no FATAL event
@@ -1860,6 +1906,7 @@ pub mod svc {
         }
     }
     pub mod prm_db {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Parameter read error
         #[derive(Clone, Copy, Debug, Serializable)]
@@ -1893,6 +1940,7 @@ pub mod svc {
         }
     }
     pub mod version_cfg {
+        #[allow(unused_imports)]
         use fprime_core::*;
         /// Define a set of Version entries on a project-specific
         /// basis.

@@ -29,14 +29,14 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
             quote! { String<#size_u> }
         }
         TypeName::QualifiedIdentifier { name } => {
-            let (qualifier, name) = qualified_identifier(name);
+            let (qualifier, name) = qualified_identifier(name, NameKind::Definition);
             quote! { crate::#(#qualifier::)*#name }
         }
     }
 }
 
 fn array_type_definition(ty: &ArrayType) -> (Qualifier, TokenStream) {
-    let (q, name) = qualified_identifier(&ty.qualified_name);
+    let (q, name) = qualified_identifier(&ty.qualified_name, NameKind::Definition);
     let tn = type_name(&ty.element_type);
     let size = Literal::u32_unsuffixed(ty.size);
     let arr_def = quote! {
@@ -47,7 +47,7 @@ fn array_type_definition(ty: &ArrayType) -> (Qualifier, TokenStream) {
 }
 
 fn enum_type_definition(ty: &EnumType) -> (Qualifier, TokenStream) {
-    let (q, name) = qualified_identifier(&ty.qualified_name);
+    let (q, name) = qualified_identifier(&ty.qualified_name, NameKind::Definition);
     let repr_ty = type_name(&ty.representation_type);
     let constants = ty.enumerated_constants.iter().map(|c| {
         let name = format_name(NameKind::EnumConstant, &c.name);
@@ -67,7 +67,7 @@ fn enum_type_definition(ty: &EnumType) -> (Qualifier, TokenStream) {
 }
 
 fn struct_type_definition(ty: &StructType) -> (Qualifier, TokenStream) {
-    let (q, name) = qualified_identifier(&ty.qualified_name);
+    let (q, name) = qualified_identifier(&ty.qualified_name, NameKind::Definition);
     let members = ty.members.iter().map(|member| {
         let name = format_name(StructMember, &member.name);
         let ty = type_name(&member.type_name);
@@ -93,7 +93,7 @@ fn struct_type_definition(ty: &StructType) -> (Qualifier, TokenStream) {
 }
 
 fn alias_type_definition(ty: &AliasType) -> (Qualifier, TokenStream) {
-    let (q, name) = qualified_identifier(&ty.qualified_name);
+    let (q, name) = qualified_identifier(&ty.qualified_name, NameKind::Definition);
     let tn = type_name(&ty.type_name);
     let alias_def = quote! {
         pub type #name = #tn;

@@ -5,5 +5,10 @@ members = [
     "fprime_macros",
     "fprime_internal",
     "fprime_build",
-    "fprime_dictionary"
-, "fprime_core"]
+    "fprime_dictionary",
+    "fprime_core"
+]
+
+[profile.release]
+lto = true
+opt-level = 'z'

@@ -1,10 +1,10 @@
-use std::str::FromStr;
 use crate::Qualifier;
 use convert_case::{Case, Casing};
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::quote;
+use std::str::FromStr;
 
-pub(crate) fn qualified_identifier(qi: &str) -> (Qualifier, Ident) {
+pub(crate) fn qualified_identifier(qi: &str, name_kind: NameKind) -> (Qualifier, Ident) {
     let mut qn: Vec<&str> = qi.split('.').collect();
 
     let name = qn
@@ -15,7 +15,7 @@ pub(crate) fn qualified_identifier(qi: &str) -> (Qualifier, Ident) {
         qn.into_iter()
             .map(|q| format_name(NameKind::Module, q))
             .collect(),
-        format_name(NameKind::Definition, name),
+        format_name(name_kind, name),
     )
 }
 
@@ -38,6 +38,7 @@ pub enum NameKind {
     EnumConstant,
     StructMember,
     FormalParameter,
+    Function,
 }
 
 pub(crate) fn format_name(kind: NameKind, name: &str) -> Ident {
@@ -48,6 +49,7 @@ pub(crate) fn format_name(kind: NameKind, name: &str) -> Ident {
         NameKind::StructMember => Case::Snake,
         NameKind::Module => Case::Snake,
         NameKind::FormalParameter => Case::Snake,
+        NameKind::Function => Case::Snake,
     };
 
     match name.to_case(case).as_str() {
