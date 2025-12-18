@@ -107,6 +107,12 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
                 dict.type_definitions
                     .iter()
                     .map(types::type_definition)
+                    .chain(dict.commands.iter().map(commands::command))
+                    // .chain(
+                    //     dict.telemetry_channels
+                    //         .iter()
+                    //         .map(telemetry::telemetry_channel),
+                    // )
                     .collect(),
             ))
             .to_string()

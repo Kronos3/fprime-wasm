@@ -204,6 +204,7 @@ pub struct FormalParam {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Command {
+    pub name: String,
     #[serde(rename = "commandKind")]
     pub kind: CommandKind,
     pub opcode: u64,

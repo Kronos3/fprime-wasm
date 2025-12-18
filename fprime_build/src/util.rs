@@ -1,6 +1,7 @@
+use std::str::FromStr;
 use crate::Qualifier;
 use convert_case::{Case, Casing};
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::quote;
 
 pub(crate) fn qualified_identifier(qi: &str) -> (Qualifier, Ident) {
@@ -36,6 +37,7 @@ pub enum NameKind {
     Definition,
     EnumConstant,
     StructMember,
+    FormalParameter,
 }
 
 pub(crate) fn format_name(kind: NameKind, name: &str) -> Ident {
@@ -45,6 +47,7 @@ pub(crate) fn format_name(kind: NameKind, name: &str) -> Ident {
         NameKind::EnumConstant => Case::Pascal,
         NameKind::StructMember => Case::Snake,
         NameKind::Module => Case::Snake,
+        NameKind::FormalParameter => Case::Snake,
     };
 
     match name.to_case(case).as_str() {
@@ -57,4 +60,9 @@ pub(crate) fn format_name(kind: NameKind, name: &str) -> Ident {
         }
         name => Ident::new(name, Span::call_site())
     }
+}
+
+pub(crate) fn hex_literal(value: u64) -> Literal {
+    let hex_string = format!("0x{:X}", value);
+    Literal::from_str(&hex_string).expect("Failed to parse hex literal string")
 }

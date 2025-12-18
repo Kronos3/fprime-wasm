@@ -409,9 +409,7 @@ Dictionary {
                     StructMember {
                         name: "stringMember",
                         type_name: String {
-                            size: Some(
-                                80,
-                            ),
+                            size: 80,
                         },
                         index: 2,
                         size: None,
@@ -998,9 +996,7 @@ Dictionary {
                 qualified_name: "Ref.DpDemo.StringArray",
                 size: 2,
                 element_type: String {
-                    size: Some(
-                        80,
-                    ),
+                    size: 80,
                 },
                 format: None,
                 default: Array [
@@ -1016,14 +1012,10 @@ Dictionary {
             AliasType {
                 qualified_name: "Ref.DpDemo.StringAlias",
                 type_name: String {
-                    size: Some(
-                        80,
-                    ),
+                    size: 80,
                 },
                 underlying_type: String {
-                    size: Some(
-                        80,
-                    ),
+                    size: 80,
                 },
                 annotation: None,
             },
@@ -1588,9 +1580,7 @@ Dictionary {
                     StructMember {
                         name: "stringMember",
                         type_name: String {
-                            size: Some(
-                                80,
-                            ),
+                            size: 80,
                         },
                         index: 0,
                         size: None,
@@ -2222,9 +2212,7 @@ Dictionary {
                     StructMember {
                         name: "version_value",
                         type_name: String {
-                            size: Some(
-                                80,
-                            ),
+                            size: 80,
                         },
                         index: 1,
                         size: None,
@@ -2490,6 +2478,7 @@ Dictionary {
     ],
     commands: [
         Command {
+            name: "Ref.dpDemo.SelectColor",
             kind: Async,
             opcode: 2576,
             formal_params: [
@@ -2511,6 +2500,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.dpDemo.Dp",
             kind: Sync,
             opcode: 2577,
             formal_params: [
@@ -2538,6 +2528,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.cmdDisp.CMD_NO_OP",
             kind: Async,
             opcode: 16777216,
             formal_params: [],
@@ -2550,15 +2541,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.cmdDisp.CMD_NO_OP_STRING",
             kind: Async,
             opcode: 16777217,
             formal_params: [
                 FormalParam {
                     name: "arg1",
                     type_name: String {
-                        size: Some(
-                            40,
-                        ),
+                        size: 40,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -2575,6 +2565,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.cmdDisp.CMD_TEST_CMD_1",
             kind: Async,
             opcode: 16777218,
             formal_params: [
@@ -2618,6 +2609,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.cmdDisp.CMD_CLEAR_TRACKING",
             kind: Async,
             opcode: 16777219,
             formal_params: [],
@@ -2630,6 +2622,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.events.SET_EVENT_FILTER",
             kind: Sync,
             opcode: 16781312,
             formal_params: [
@@ -2661,6 +2654,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.events.SET_ID_FILTER",
             kind: Async,
             opcode: 16781314,
             formal_params: [
@@ -2692,6 +2686,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.events.DUMP_FILTER_STATE",
             kind: Async,
             opcode: 16781315,
             formal_params: [],
@@ -2704,6 +2699,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.health.HLTH_ENABLE",
             kind: Async,
             opcode: 16785408,
             formal_params: [
@@ -2727,15 +2723,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.health.HLTH_PING_ENABLE",
             kind: Async,
             opcode: 16785409,
             formal_params: [
                 FormalParam {
                     name: "entry",
                     type_name: String {
-                        size: Some(
-                            40,
-                        ),
+                        size: 40,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -2762,15 +2757,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.health.HLTH_CHNG_PING",
             kind: Async,
             opcode: 16785410,
             formal_params: [
                 FormalParam {
                     name: "entry",
                     type_name: String {
-                        size: Some(
-                            40,
-                        ),
+                        size: 40,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -2807,6 +2801,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.version.ENABLE",
             kind: Guarded,
             opcode: 16789504,
             formal_params: [
@@ -2828,6 +2823,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "CdhCore.version.VERSION",
             kind: Guarded,
             opcode: 16789505,
             formal_params: [
@@ -2849,6 +2845,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "DataProducts.dpCat.BUILD_CATALOG",
             kind: Async,
             opcode: 67108864,
             formal_params: [],
@@ -2861,6 +2858,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "DataProducts.dpCat.START_XMIT_CATALOG",
             kind: Async,
             opcode: 67108865,
             formal_params: [
@@ -2884,6 +2882,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "DataProducts.dpCat.STOP_XMIT_CATALOG",
             kind: Async,
             opcode: 67108866,
             formal_params: [],
@@ -2896,6 +2895,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "DataProducts.dpCat.CLEAR_CATALOG",
             kind: Async,
             opcode: 67108867,
             formal_params: [],
@@ -2908,6 +2908,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "DataProducts.dpMgr.CLEAR_EVENT_THROTTLE",
             kind: Async,
             opcode: 67112960,
             formal_params: [],
@@ -2920,6 +2921,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "DataProducts.dpWriter.CLEAR_EVENT_THROTTLE",
             kind: Async,
             opcode: 67117056,
             formal_params: [],
@@ -2932,15 +2934,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileDownlink.SendFile",
             kind: Async,
             opcode: 83890176,
             formal_params: [
                 FormalParam {
                     name: "sourceFileName",
                     type_name: String {
-                        size: Some(
-                            100,
-                        ),
+                        size: 100,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -2950,9 +2951,7 @@ Dictionary {
                 FormalParam {
                     name: "destFileName",
                     type_name: String {
-                        size: Some(
-                            100,
-                        ),
+                        size: 100,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -2969,6 +2968,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileDownlink.Cancel",
             kind: Async,
             opcode: 83890177,
             formal_params: [],
@@ -2981,15 +2981,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileDownlink.SendPartial",
             kind: Async,
             opcode: 83890178,
             formal_params: [
                 FormalParam {
                     name: "sourceFileName",
                     type_name: String {
-                        size: Some(
-                            100,
-                        ),
+                        size: 100,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -2999,9 +2998,7 @@ Dictionary {
                 FormalParam {
                     name: "destFileName",
                     type_name: String {
-                        size: Some(
-                            100,
-                        ),
+                        size: 100,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3038,15 +3035,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileManager.CreateDirectory",
             kind: Async,
             opcode: 83894272,
             formal_params: [
                 FormalParam {
                     name: "dirName",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3063,15 +3059,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileManager.MoveFile",
             kind: Async,
             opcode: 83894273,
             formal_params: [
                 FormalParam {
                     name: "sourceFileName",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3081,9 +3076,7 @@ Dictionary {
                 FormalParam {
                     name: "destFileName",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3100,15 +3093,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileManager.RemoveDirectory",
             kind: Async,
             opcode: 83894274,
             formal_params: [
                 FormalParam {
                     name: "dirName",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3125,15 +3117,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileManager.RemoveFile",
             kind: Async,
             opcode: 83894275,
             formal_params: [
                 FormalParam {
                     name: "fileName",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3158,15 +3149,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileManager.ShellCommand",
             kind: Async,
             opcode: 83894276,
             formal_params: [
                 FormalParam {
                     name: "command",
                     type_name: String {
-                        size: Some(
-                            256,
-                        ),
+                        size: 256,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3176,9 +3166,7 @@ Dictionary {
                 FormalParam {
                     name: "logFileName",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3195,15 +3183,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileManager.AppendFile",
             kind: Async,
             opcode: 83894277,
             formal_params: [
                 FormalParam {
                     name: "source",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3213,9 +3200,7 @@ Dictionary {
                 FormalParam {
                     name: "target",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3232,15 +3217,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.fileManager.FileSize",
             kind: Async,
             opcode: 83894278,
             formal_params: [
                 FormalParam {
                     name: "fileName",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3255,15 +3239,14 @@ Dictionary {
             annotation: None,
         },
         Command {
+            name: "FileHandling.fileManager.ListDirectory",
             kind: Async,
             opcode: 83894279,
             formal_params: [
                 FormalParam {
                     name: "dirName",
                     type_name: String {
-                        size: Some(
-                            200,
-                        ),
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3280,6 +3263,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "FileHandling.prmDb.PRM_SAVE_FILE",
             kind: Async,
             opcode: 83898368,
             formal_params: [],
@@ -3292,6 +3276,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.pingRcvr.PR_StopPings",
             kind: Async,
             opcode: 268451840,
             formal_params: [],
@@ -3304,6 +3289,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICE",
             kind: Sync,
             opcode: 268455936,
             formal_params: [
@@ -3325,6 +3311,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICE_PRM_PRM_SET",
             kind: Set,
             opcode: 268455937,
             formal_params: [
@@ -3344,6 +3331,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICE_PRM_PRM_SAVE",
             kind: Save,
             opcode: 268455938,
             formal_params: [],
@@ -3354,6 +3342,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICES",
             kind: Sync,
             opcode: 268455939,
             formal_params: [
@@ -3375,6 +3364,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICES_WITH_FRIENDS",
             kind: Sync,
             opcode: 268455940,
             formal_params: [
@@ -3416,6 +3406,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICES_PRM_PRM_SET",
             kind: Set,
             opcode: 268455941,
             formal_params: [
@@ -3435,6 +3426,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICES_PRM_PRM_SAVE",
             kind: Save,
             opcode: 268455942,
             formal_params: [],
@@ -3445,6 +3437,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.EXTRA_CHOICES",
             kind: Sync,
             opcode: 268455943,
             formal_params: [
@@ -3466,6 +3459,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.EXTRA_CHOICES_WITH_FRIENDS",
             kind: Sync,
             opcode: 268455944,
             formal_params: [
@@ -3507,6 +3501,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.EXTRA_CHOICES_PRM_PRM_SET",
             kind: Set,
             opcode: 268455945,
             formal_params: [
@@ -3526,6 +3521,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.EXTRA_CHOICES_PRM_PRM_SAVE",
             kind: Save,
             opcode: 268455946,
             formal_params: [],
@@ -3536,6 +3532,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICE_PAIR",
             kind: Sync,
             opcode: 268455947,
             formal_params: [
@@ -3557,6 +3554,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICE_PAIR_WITH_FRIENDS",
             kind: Sync,
             opcode: 268455948,
             formal_params: [
@@ -3598,6 +3596,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICE_PAIR_PRM_PRM_SET",
             kind: Set,
             opcode: 268455949,
             formal_params: [
@@ -3617,6 +3616,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.CHOICE_PAIR_PRM_PRM_SAVE",
             kind: Save,
             opcode: 268455950,
             formal_params: [],
@@ -3627,6 +3627,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.GLUTTON_OF_CHOICE",
             kind: Sync,
             opcode: 268455951,
             formal_params: [
@@ -3648,6 +3649,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.GLUTTON_OF_CHOICE_WITH_FRIENDS",
             kind: Sync,
             opcode: 268455952,
             formal_params: [
@@ -3689,6 +3691,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.GLUTTON_OF_CHOICE_PRM_PRM_SET",
             kind: Set,
             opcode: 268455953,
             formal_params: [
@@ -3708,6 +3711,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.GLUTTON_OF_CHOICE_PRM_PRM_SAVE",
             kind: Save,
             opcode: 268455954,
             formal_params: [],
@@ -3718,6 +3722,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.DUMP_TYPED_PARAMETERS",
             kind: Sync,
             opcode: 268455955,
             formal_params: [],
@@ -3728,6 +3733,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.DUMP_FLOATS",
             kind: Sync,
             opcode: 268455956,
             formal_params: [],
@@ -3738,6 +3744,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.typeDemo.SEND_SCALARS",
             kind: Sync,
             opcode: 268455957,
             formal_params: [
@@ -3757,15 +3764,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.cmdSeq.CS_RUN",
             kind: Async,
             opcode: 268460032,
             formal_params: [
                 FormalParam {
                     name: "fileName",
                     type_name: String {
-                        size: Some(
-                            240,
-                        ),
+                        size: 240,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3792,15 +3798,14 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.cmdSeq.CS_VALIDATE",
             kind: Async,
             opcode: 268460033,
             formal_params: [
                 FormalParam {
                     name: "fileName",
                     type_name: String {
-                        size: Some(
-                            240,
-                        ),
+                        size: 240,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3817,6 +3822,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.cmdSeq.CS_CANCEL",
             kind: Async,
             opcode: 268460034,
             formal_params: [],
@@ -3829,6 +3835,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.cmdSeq.CS_START",
             kind: Async,
             opcode: 268460035,
             formal_params: [],
@@ -3841,6 +3848,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.cmdSeq.CS_STEP",
             kind: Async,
             opcode: 268460036,
             formal_params: [],
@@ -3853,6 +3861,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.cmdSeq.CS_AUTO",
             kind: Async,
             opcode: 268460037,
             formal_params: [],
@@ -3865,6 +3874,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.cmdSeq.CS_MANUAL",
             kind: Async,
             opcode: 268460038,
             formal_params: [],
@@ -3877,6 +3887,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.cmdSeq.CS_JOIN_WAIT",
             kind: Async,
             opcode: 268460039,
             formal_params: [],
@@ -3889,6 +3900,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.sendBuffComp.SB_START_PKTS",
             kind: Async,
             opcode: 268500992,
             formal_params: [],
@@ -3901,6 +3913,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.sendBuffComp.SB_INJECT_PKT_ERROR",
             kind: Async,
             opcode: 268500993,
             formal_params: [],
@@ -3913,6 +3926,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.sendBuffComp.SB_GEN_FATAL",
             kind: Async,
             opcode: 268500994,
             formal_params: [
@@ -3956,6 +3970,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.sendBuffComp.SB_GEN_ASSERT",
             kind: Async,
             opcode: 268500995,
             formal_params: [
@@ -4029,6 +4044,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.sendBuffComp.PARAMETER3_PRM_SET",
             kind: Set,
             opcode: 268501002,
             formal_params: [
@@ -4048,6 +4064,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.sendBuffComp.PARAMETER3_PRM_SAVE",
             kind: Save,
             opcode: 268501003,
             formal_params: [],
@@ -4058,6 +4075,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.sendBuffComp.PARAMETER4_PRM_SET",
             kind: Set,
             opcode: 268501004,
             formal_params: [
@@ -4077,6 +4095,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.sendBuffComp.PARAMETER4_PRM_SAVE",
             kind: Save,
             opcode: 268501005,
             formal_params: [],
@@ -4087,6 +4106,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG1.Settings",
             kind: Async,
             opcode: 268505088,
             formal_params: [
@@ -4132,6 +4152,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG1.Toggle",
             kind: Async,
             opcode: 268505089,
             formal_params: [],
@@ -4144,6 +4165,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG1.Skip",
             kind: Async,
             opcode: 268505090,
             formal_params: [],
@@ -4156,6 +4178,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG1.Dp",
             kind: Async,
             opcode: 268505091,
             formal_params: [
@@ -4193,6 +4216,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG2.Settings",
             kind: Async,
             opcode: 268509184,
             formal_params: [
@@ -4238,6 +4262,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG2.Toggle",
             kind: Async,
             opcode: 268509185,
             formal_params: [],
@@ -4250,6 +4275,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG2.Skip",
             kind: Async,
             opcode: 268509186,
             formal_params: [],
@@ -4262,6 +4288,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG2.Dp",
             kind: Async,
             opcode: 268509187,
             formal_params: [
@@ -4299,6 +4326,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG3.Settings",
             kind: Async,
             opcode: 268513280,
             formal_params: [
@@ -4344,6 +4372,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG3.Toggle",
             kind: Async,
             opcode: 268513281,
             formal_params: [],
@@ -4356,6 +4385,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG3.Skip",
             kind: Async,
             opcode: 268513282,
             formal_params: [],
@@ -4368,6 +4398,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG3.Dp",
             kind: Async,
             opcode: 268513283,
             formal_params: [
@@ -4405,6 +4436,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG4.Settings",
             kind: Async,
             opcode: 268517376,
             formal_params: [
@@ -4450,6 +4482,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG4.Toggle",
             kind: Async,
             opcode: 268517377,
             formal_params: [],
@@ -4462,6 +4495,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG4.Skip",
             kind: Async,
             opcode: 268517378,
             formal_params: [],
@@ -4474,6 +4508,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG4.Dp",
             kind: Async,
             opcode: 268517379,
             formal_params: [
@@ -4511,6 +4546,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG5.Settings",
             kind: Async,
             opcode: 268521472,
             formal_params: [
@@ -4556,6 +4592,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG5.Toggle",
             kind: Async,
             opcode: 268521473,
             formal_params: [],
@@ -4568,6 +4605,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG5.Skip",
             kind: Async,
             opcode: 268521474,
             formal_params: [],
@@ -4580,6 +4618,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.SG5.Dp",
             kind: Async,
             opcode: 268521475,
             formal_params: [
@@ -4617,6 +4656,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.recvBuffComp.PARAMETER1_PRM_SET",
             kind: Set,
             opcode: 268574720,
             formal_params: [
@@ -4636,6 +4676,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.recvBuffComp.PARAMETER1_PRM_SAVE",
             kind: Save,
             opcode: 268574721,
             formal_params: [],
@@ -4646,6 +4687,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.recvBuffComp.PARAMETER2_PRM_SET",
             kind: Set,
             opcode: 268574722,
             formal_params: [
@@ -4665,6 +4707,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.recvBuffComp.PARAMETER2_PRM_SAVE",
             kind: Save,
             opcode: 268574723,
             formal_params: [],
@@ -4675,6 +4718,7 @@ Dictionary {
             ),
         },
         Command {
+            name: "Ref.systemResources.ENABLE",
             kind: Guarded,
             opcode: 268578816,
             formal_params: [
@@ -4753,9 +4797,7 @@ Dictionary {
             name: "CdhCore.version.FrameworkVersion",
             id: 16789504,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4768,9 +4810,7 @@ Dictionary {
             name: "CdhCore.version.ProjectVersion",
             id: 16789505,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4895,9 +4935,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion01",
             id: 16789516,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4910,9 +4948,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion02",
             id: 16789517,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4923,9 +4959,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion03",
             id: 16789518,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4936,9 +4970,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion04",
             id: 16789519,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4949,9 +4981,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion05",
             id: 16789520,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4962,9 +4992,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion06",
             id: 16789521,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4975,9 +5003,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion07",
             id: 16789522,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -4988,9 +5014,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion08",
             id: 16789523,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -5001,9 +5025,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion09",
             id: 16789524,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
@@ -5014,9 +5036,7 @@ Dictionary {
             name: "CdhCore.version.LibraryVersion10",
             id: 16789525,
             type_name: String {
-                size: Some(
-                    40,
-                ),
+                size: 40,
             },
             telemetry_update: Always,
             format: None,
