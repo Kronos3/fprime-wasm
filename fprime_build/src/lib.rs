@@ -1,3 +1,4 @@
+use fprime_dictionary::TypeDefinition;
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 use std::collections::BTreeMap;
@@ -103,18 +104,35 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     dict: &fprime_dictionary::Dictionary,
     writer: &mut BufWriter<W>,
 ) {
+    let cmd_response = match dict.type_definitions.iter().find(|ty| match ty {
+        TypeDefinition::Enum(ty) => ty.qualified_name == "Fw.CmdResponse",
+        _ => false,
+    }) {
+        None => {
+            panic!("no Fw.CmdResponse found in dictionary")
+        }
+        Some(r) => match r {
+            TypeDefinition::Enum(e) => e,
+            _ => unreachable!(),
+        },
+    };
+
     writer
         .write(
             Into::<CodeTree>::into(CodeVec(
                 dict.type_definitions
                     .iter()
                     .map(types::type_definition)
-                    .chain(dict.commands.iter().map(commands::command))
-                    // .chain(
-                    //     dict.telemetry_channels
-                    //         .iter()
-                    //         .map(telemetry::telemetry_channel),
-                    // )
+                    .chain(
+                        dict.commands
+                            .iter()
+                            .map(|cmd| commands::command(cmd, cmd_response)),
+                    )
+                    .chain(
+                        dict.telemetry_channels
+                            .iter()
+                            .map(telemetry::telemetry_channel),
+                    )
                     .collect(),
             ))
             .to_string()

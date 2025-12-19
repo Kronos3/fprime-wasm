@@ -1,4 +1,4 @@
-use crate::Serializable;
+use crate::{Serializable, String};
 
 impl Serializable for u8 {
     const SIZE: usize = 1;
@@ -7,6 +7,12 @@ impl Serializable for u8 {
         to[*offset] = *self;
         *offset += 1;
     }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = from[*offset];
+        *offset += 1;
+        out
+    }
 }
 
 impl Serializable for u16 {
@@ -14,8 +20,14 @@ impl Serializable for u16 {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.to_be_bytes();
-        to[*offset..].copy_from_slice(&bytes);
+        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
         *offset += Self::SIZE;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+        *offset += Self::SIZE;
+        out
     }
 }
 
@@ -24,8 +36,14 @@ impl Serializable for u32 {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.to_be_bytes();
-        to[*offset..].copy_from_slice(&bytes);
+        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
         *offset += Self::SIZE;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+        *offset += Self::SIZE;
+        out
     }
 }
 
@@ -34,8 +52,14 @@ impl Serializable for u64 {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.to_be_bytes();
-        to[*offset..].copy_from_slice(&bytes);
+        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
         *offset += Self::SIZE;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+        *offset += Self::SIZE;
+        out
     }
 }
 
@@ -46,6 +70,12 @@ impl Serializable for i8 {
         to[*offset] = *self as u8;
         *offset += 1;
     }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = from[*offset] as i8;
+        *offset += 1;
+        out
+    }
 }
 
 impl Serializable for i16 {
@@ -53,8 +83,14 @@ impl Serializable for i16 {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.to_be_bytes();
-        to[*offset..].copy_from_slice(&bytes);
+        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
         *offset += Self::SIZE;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+        *offset += Self::SIZE;
+        out
     }
 }
 
@@ -63,8 +99,14 @@ impl Serializable for i32 {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.to_be_bytes();
-        to[*offset..].copy_from_slice(&bytes);
+        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
         *offset += Self::SIZE;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+        *offset += Self::SIZE;
+        out
     }
 }
 
@@ -73,8 +115,14 @@ impl Serializable for i64 {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.to_be_bytes();
-        to[*offset..].copy_from_slice(&bytes);
+        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
         *offset += Self::SIZE;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+        *offset += Self::SIZE;
+        out
     }
 }
 
@@ -83,8 +131,14 @@ impl Serializable for f32 {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.to_be_bytes();
-        to[*offset..].copy_from_slice(&bytes);
+        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
         *offset += Self::SIZE;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+        *offset += Self::SIZE;
+        out
     }
 }
 
@@ -93,8 +147,14 @@ impl Serializable for f64 {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.to_be_bytes();
-        to[*offset..].copy_from_slice(&bytes);
+        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
         *offset += Self::SIZE;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+        *offset += Self::SIZE;
+        out
     }
 }
 
@@ -102,10 +162,20 @@ impl<const N: usize> Serializable for crate::String<N> {
     const SIZE: usize = 2 + N;
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let n = self.len();
+        let bytes = self.as_bytes();
+        let n = bytes.len();
         (n as u16).serialize_to(to, offset);
-        to[*offset..].copy_from_slice(self.as_bytes());
+        to[*offset..*offset + n].copy_from_slice(bytes);
         *offset += n;
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let n = u16::deserialize_from(from, offset) as usize;
+        let out =
+            String::from_utf8(heapless::Vec::from_slice(&from[*offset..*offset + n]).unwrap())
+                .unwrap();
+        *offset += n;
+        out
     }
 }
 
@@ -117,6 +187,19 @@ impl<T: Serializable, const N: usize> Serializable for [T; N] {
             i.serialize_to(to, offset);
         }
     }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        let mut out: [T; N] = unsafe {
+            #[allow(invalid_value)]
+            core::mem::MaybeUninit::uninit().assume_init()
+        };
+
+        for i in 0..N {
+            out[i] = T::deserialize_from(from, offset);
+        }
+
+        out
+    }
 }
 
 impl Serializable for bool {
@@ -125,5 +208,13 @@ impl Serializable for bool {
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let val: u8 = if *self { 1 } else { 0 };
         val.serialize_to(to, offset);
+    }
+
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+        if u8::deserialize_from(from, offset) != 0 {
+            true
+        } else {
+            false
+        }
     }
 }

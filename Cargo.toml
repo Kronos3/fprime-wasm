@@ -3,7 +3,13 @@ resolver = "3"
 members = [
     "example",
     "fprime_macros",
-    "fprime_internal",
+    "fprime_build",
+    "fprime_dictionary",
+    "fprime_core"
+]
+
+default-members = [
+    "fprime_macros",
     "fprime_build",
     "fprime_dictionary",
     "fprime_core"

@@ -1,11 +1,14 @@
 use crate::types::type_name;
 use crate::util::{annotate, format_name, hex_literal, qualified_identifier, NameKind};
 use crate::Qualifier;
-use fprime_dictionary::TypeName;
+use fprime_dictionary::{EnumType, TypeName};
 use proc_macro2::TokenStream;
 use quote::quote;
 
-pub fn command(cmd: &fprime_dictionary::Command) -> (Qualifier, TokenStream) {
+pub fn command(
+    cmd: &fprime_dictionary::Command,
+    cmd_response: &EnumType,
+) -> (Qualifier, TokenStream) {
     let (q, name) = qualified_identifier(&cmd.name, NameKind::Function);
     let args = cmd.formal_params.iter().map(|arg| {
         let name = format_name(NameKind::FormalParameter, &arg.name);
@@ -33,11 +36,10 @@ pub fn command(cmd: &fprime_dictionary::Command) -> (Qualifier, TokenStream) {
     });
 
     let opcode = hex_literal(cmd.opcode);
+    let response_repr_ty = type_name(&cmd_response.representation_type);
 
     let def = quote! {
         pub fn #name(#(#args)*) -> crate::fw::CmdResponse {
-            use fprime_core::Serializable;
-
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE #(+ #arg_sizes)*] = unsafe {
                 #[allow(invalid_value)]
                 core::mem::MaybeUninit::uninit().assume_init()
@@ -48,10 +50,9 @@ pub fn command(cmd: &fprime_dictionary::Command) -> (Qualifier, TokenStream) {
             __opcode.serialize_to(&mut __encoded, &mut __offset);
             #(#ser)*
 
+            let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe {
-                core::mem::transmute(
-                    internal::command(&__encoded[0..__offset])
-                )
+                core::mem::transmute(res as #response_repr_ty)
             }
         }
     };

@@ -1,172 +1,16 @@
 Dictionary {
     metadata: Metadata {
         deployment_name: "Ref.Ref",
-        project_version: "v4.0.1a1-38-ge34c019c3-dirty",
+        project_version: "v4.1.1-10-g064fe296f",
         library_versions: [],
         dictionary_spec_version: "1.0.0",
     },
     type_definitions: [
         Enum(
             EnumType {
-                qualified_name: "Svc.CmdSequencer.FileReadStage",
-                representation_type: Integer {
-                    name: I32,
-                },
-                enumerated_constants: [
-                    EnumConstant {
-                        name: "READ_HEADER",
-                        value: 0,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "READ_HEADER_SIZE",
-                        value: 1,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "DESER_SIZE",
-                        value: 2,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "DESER_NUM_RECORDS",
-                        value: 3,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "DESER_TIME_BASE",
-                        value: 4,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "DESER_TIME_CONTEXT",
-                        value: 5,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "READ_SEQ_CRC",
-                        value: 6,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "READ_SEQ_DATA",
-                        value: 7,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "READ_SEQ_DATA_SIZE",
-                        value: 8,
-                        annotation: None,
-                    },
-                ],
-                default: String("Svc.CmdSequencer.FileReadStage.READ_HEADER"),
-                annotation: Some(
-                    "The stage of the file read operation",
-                ),
-            },
-        ),
-        Struct(
-            StructType {
-                qualified_name: "Ref.SignalPair",
-                members: [
-                    StructMember {
-                        name: "time",
-                        type_name: Float {
-                            name: F32,
-                        },
-                        index: 0,
-                        size: None,
-                        format: Some(
-                            "{f}",
-                        ),
-                        annotation: None,
-                    },
-                    StructMember {
-                        name: "value",
-                        type_name: Float {
-                            name: F32,
-                        },
-                        index: 1,
-                        size: None,
-                        format: Some(
-                            "{f}",
-                        ),
-                        annotation: None,
-                    },
-                ],
-                default: Some(
-                    Object {
-                        "time": Number(0.0),
-                        "value": Number(0.0),
-                    },
-                ),
-                annotation: None,
-            },
-        ),
-        Alias(
-            AliasType {
-                qualified_name: "FwTlmPacketizeIdType",
-                type_name: Integer {
-                    name: U16,
-                },
-                underlying_type: Integer {
-                    name: U16,
-                },
-                annotation: Some(
-                    "The type of a telemetry packet identifier",
-                ),
-            },
-        ),
-        Alias(
-            AliasType {
-                qualified_name: "FwPacketDescriptorType",
-                type_name: Integer {
-                    name: U16,
-                },
-                underlying_type: Integer {
-                    name: U16,
-                },
-                annotation: Some(
-                    "The width of packet descriptors when they are serialized by the framework",
-                ),
-            },
-        ),
-        Array(
-            ArrayType {
-                qualified_name: "Ref.TooManyChoices",
-                size: 2,
-                element_type: QualifiedIdentifier {
-                    name: "Ref.ManyChoices",
-                },
-                format: None,
-                default: Array [
-                    Array [
-                        String("Ref.Choice.ONE"),
-                        String("Ref.Choice.ONE"),
-                    ],
-                    Array [
-                        String("Ref.Choice.ONE"),
-                        String("Ref.Choice.ONE"),
-                    ],
-                ],
-                annotation: Some(
-                    "Array of array",
-                ),
-            },
-        ),
-        Alias(
-            AliasType {
-                qualified_name: "Ref.DpDemo.BoolAlias",
-                type_name: Bool,
-                underlying_type: Bool,
-                annotation: None,
-            },
-        ),
-        Enum(
-            EnumType {
                 qualified_name: "Svc.VersionType",
                 representation_type: Integer {
-                    name: I32,
+                    name: U8,
                 },
                 enumerated_constants: [
                     EnumConstant {
@@ -209,6 +53,77 @@ Dictionary {
                 annotation: Some(
                     "An enumeration for Version Type",
                 ),
+            },
+        ),
+        Alias(
+            AliasType {
+                qualified_name: "FwIndexType",
+                type_name: QualifiedIdentifier {
+                    name: "PlatformIndexType",
+                },
+                underlying_type: Integer {
+                    name: I16,
+                },
+                annotation: Some(
+                    "The type of smaller indices internal to the software, used\nfor array indices, e.g., port indices. Must be signed.",
+                ),
+            },
+        ),
+        Enum(
+            EnumType {
+                qualified_name: "Fw.DpCfg.ProcType",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "PROC_TYPE_ZERO",
+                        value: 1,
+                        annotation: Some(
+                            "Processing type 0",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "PROC_TYPE_ONE",
+                        value: 2,
+                        annotation: Some(
+                            "Processing type 1",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "PROC_TYPE_TWO",
+                        value: 4,
+                        annotation: Some(
+                            "Processing type 2",
+                        ),
+                    },
+                ],
+                default: String("Fw.DpCfg.ProcType.PROC_TYPE_ZERO"),
+                annotation: Some(
+                    "A bit mask for selecting the type of processing to perform on\na container before writing it to disk.",
+                ),
+            },
+        ),
+        Alias(
+            AliasType {
+                qualified_name: "FwPacketDescriptorType",
+                type_name: Integer {
+                    name: U16,
+                },
+                underlying_type: Integer {
+                    name: U16,
+                },
+                annotation: Some(
+                    "The width of packet descriptors when they are serialized by the framework",
+                ),
+            },
+        ),
+        Alias(
+            AliasType {
+                qualified_name: "Ref.DpDemo.BoolAlias",
+                type_name: Bool,
+                underlying_type: Bool,
+                annotation: None,
             },
         ),
         Alias(
@@ -584,57 +499,25 @@ Dictionary {
         ),
         Enum(
             EnumType {
-                qualified_name: "Fw.CmdResponse",
+                qualified_name: "Svc.QueueType",
                 representation_type: Integer {
-                    name: I32,
+                    name: U8,
                 },
                 enumerated_constants: [
                     EnumConstant {
-                        name: "OK",
+                        name: "COM_QUEUE",
                         value: 0,
-                        annotation: Some(
-                            "Command successfully executed",
-                        ),
+                        annotation: None,
                     },
                     EnumConstant {
-                        name: "INVALID_OPCODE",
+                        name: "BUFFER_QUEUE",
                         value: 1,
-                        annotation: Some(
-                            "Invalid opcode dispatched",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "VALIDATION_ERROR",
-                        value: 2,
-                        annotation: Some(
-                            "Command failed validation",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "FORMAT_ERROR",
-                        value: 3,
-                        annotation: Some(
-                            "Command failed to deserialize",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "EXECUTION_ERROR",
-                        value: 4,
-                        annotation: Some(
-                            "Command had execution error",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "BUSY",
-                        value: 5,
-                        annotation: Some(
-                            "Component busy",
-                        ),
+                        annotation: None,
                     },
                 ],
-                default: String("Fw.CmdResponse.OK"),
+                default: String("Svc.QueueType.COM_QUEUE"),
                 annotation: Some(
-                    "Enum representing a command response",
+                    "An enumeration of queue data types",
                 ),
             },
         ),
@@ -655,30 +538,6 @@ Dictionary {
                 ],
                 annotation: Some(
                     "Array of integers",
-                ),
-            },
-        ),
-        Enum(
-            EnumType {
-                qualified_name: "Svc.CmdSequencer.BlockState",
-                representation_type: Integer {
-                    name: I32,
-                },
-                enumerated_constants: [
-                    EnumConstant {
-                        name: "BLOCK",
-                        value: 0,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "NO_BLOCK",
-                        value: 1,
-                        annotation: None,
-                    },
-                ],
-                default: String("Svc.CmdSequencer.BlockState.BLOCK"),
-                annotation: Some(
-                    "Sequencer blocking state",
                 ),
             },
         ),
@@ -792,30 +651,34 @@ Dictionary {
         ),
         Enum(
             EnumType {
-                qualified_name: "Svc.VersionStatus",
+                qualified_name: "Svc.PrmDb.PrmLoadAction",
                 representation_type: Integer {
-                    name: I32,
+                    name: U8,
                 },
                 enumerated_constants: [
                     EnumConstant {
-                        name: "OK",
+                        name: "SET_PARAMETER",
                         value: 0,
-                        annotation: Some(
-                            "Version was good",
-                        ),
+                        annotation: None,
                     },
                     EnumConstant {
-                        name: "FAILURE",
+                        name: "SAVE_FILE_COMMAND",
                         value: 1,
-                        annotation: Some(
-                            "Failure to get version",
-                        ),
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "LOAD_FILE_COMMAND",
+                        value: 2,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "COMMIT_STAGED_COMMAND",
+                        value: 3,
+                        annotation: None,
                     },
                 ],
-                default: String("Svc.VersionStatus.OK"),
-                annotation: Some(
-                    "An enumeration for version status",
-                ),
+                default: String("Svc.PrmDb.PrmLoadAction.SET_PARAMETER"),
+                annotation: None,
             },
         ),
         Alias(
@@ -842,6 +705,76 @@ Dictionary {
                     name: F64,
                 },
                 annotation: None,
+            },
+        ),
+        Alias(
+            AliasType {
+                qualified_name: "PlatformIndexType",
+                type_name: Integer {
+                    name: I16,
+                },
+                underlying_type: Integer {
+                    name: I16,
+                },
+                annotation: Some(
+                    "The type of smaller indices internal to the software, used\nfor array indices, e.g., port indices. Must be signed.",
+                ),
+            },
+        ),
+        Enum(
+            EnumType {
+                qualified_name: "Svc.EventManager.FilterSeverity",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "WARNING_HI",
+                        value: 0,
+                        annotation: Some(
+                            "Filter WARNING_HI events",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "WARNING_LO",
+                        value: 1,
+                        annotation: Some(
+                            "Filter WARNING_LO events",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "COMMAND",
+                        value: 2,
+                        annotation: Some(
+                            "Filter COMMAND events",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "ACTIVITY_HI",
+                        value: 3,
+                        annotation: Some(
+                            "Filter ACTIVITY_HI events",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "ACTIVITY_LO",
+                        value: 4,
+                        annotation: Some(
+                            "Filter ACTIVITY_LO events",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "DIAGNOSTIC",
+                        value: 5,
+                        annotation: Some(
+                            "Filter DIAGNOSTIC events",
+                        ),
+                    },
+                ],
+                default: String("Svc.EventManager.FilterSeverity.WARNING_HI"),
+                annotation: Some(
+                    "Severity level for event filtering\nSimilar to Fw::LogSeverity, but no FATAL event",
+                ),
             },
         ),
         Array(
@@ -901,40 +834,6 @@ Dictionary {
                 annotation: None,
             },
         ),
-        Enum(
-            EnumType {
-                qualified_name: "Fw.ParamValid",
-                representation_type: Integer {
-                    name: I32,
-                },
-                enumerated_constants: [
-                    EnumConstant {
-                        name: "UNINIT",
-                        value: 0,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "VALID",
-                        value: 1,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "INVALID",
-                        value: 2,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "DEFAULT",
-                        value: 3,
-                        annotation: None,
-                    },
-                ],
-                default: String("Fw.ParamValid.UNINIT"),
-                annotation: Some(
-                    "Enum representing parameter validity",
-                ),
-            },
-        ),
         Alias(
             AliasType {
                 qualified_name: "FwChanIdType",
@@ -951,9 +850,105 @@ Dictionary {
         ),
         Enum(
             EnumType {
+                qualified_name: "Svc.SendFileStatus",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "STATUS_OK",
+                        value: 0,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "STATUS_ERROR",
+                        value: 1,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "STATUS_INVALID",
+                        value: 2,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "STATUS_BUSY",
+                        value: 3,
+                        annotation: None,
+                    },
+                ],
+                default: String("Svc.SendFileStatus.STATUS_OK"),
+                annotation: Some(
+                    "Send file status enum",
+                ),
+            },
+        ),
+        Enum(
+            EnumType {
+                qualified_name: "Svc.PrmDb.Merge",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "MERGE",
+                        value: 0,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "RESET",
+                        value: 1,
+                        annotation: None,
+                    },
+                ],
+                default: String("Svc.PrmDb.Merge.MERGE"),
+                annotation: None,
+            },
+        ),
+        Enum(
+            EnumType {
+                qualified_name: "Svc.FprimeRouter.AllocationReason",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "FILE_UPLINK",
+                        value: 0,
+                        annotation: Some(
+                            "Buffer allocation for file uplink",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "USER_BUFFER",
+                        value: 1,
+                        annotation: Some(
+                            "Buffer allocation for user handled buffer",
+                        ),
+                    },
+                ],
+                default: String("Svc.FprimeRouter.AllocationReason.FILE_UPLINK"),
+                annotation: None,
+            },
+        ),
+        Alias(
+            AliasType {
+                qualified_name: "FwTimeContextStoreType",
+                type_name: Integer {
+                    name: U8,
+                },
+                underlying_type: Integer {
+                    name: U8,
+                },
+                annotation: Some(
+                    "The type used to serialize a time context value",
+                ),
+            },
+        ),
+        Enum(
+            EnumType {
                 qualified_name: "Svc.VersionEnabled",
                 representation_type: Integer {
-                    name: I32,
+                    name: U8,
                 },
                 enumerated_constants: [
                     EnumConstant {
@@ -975,49 +970,6 @@ Dictionary {
                 annotation: Some(
                     "Tracks versions for project, framework and user defined versions etc",
                 ),
-            },
-        ),
-        Alias(
-            AliasType {
-                qualified_name: "FwTimeContextStoreType",
-                type_name: Integer {
-                    name: U8,
-                },
-                underlying_type: Integer {
-                    name: U8,
-                },
-                annotation: Some(
-                    "The type used to serialize a time context value",
-                ),
-            },
-        ),
-        Array(
-            ArrayType {
-                qualified_name: "Ref.DpDemo.StringArray",
-                size: 2,
-                element_type: String {
-                    size: 80,
-                },
-                format: None,
-                default: Array [
-                    String(""),
-                    String(""),
-                ],
-                annotation: Some(
-                    "Array of strings",
-                ),
-            },
-        ),
-        Alias(
-            AliasType {
-                qualified_name: "Ref.DpDemo.StringAlias",
-                type_name: String {
-                    size: 80,
-                },
-                underlying_type: String {
-                    size: 80,
-                },
-                annotation: None,
             },
         ),
         Struct(
@@ -1111,60 +1063,33 @@ Dictionary {
                 ),
             },
         ),
-        Enum(
-            EnumType {
-                qualified_name: "Svc.EventManager.FilterSeverity",
-                representation_type: Integer {
-                    name: I32,
+        Array(
+            ArrayType {
+                qualified_name: "Ref.DpDemo.StringArray",
+                size: 2,
+                element_type: String {
+                    size: 80,
                 },
-                enumerated_constants: [
-                    EnumConstant {
-                        name: "WARNING_HI",
-                        value: 0,
-                        annotation: Some(
-                            "Filter WARNING_HI events",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "WARNING_LO",
-                        value: 1,
-                        annotation: Some(
-                            "Filter WARNING_LO events",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "COMMAND",
-                        value: 2,
-                        annotation: Some(
-                            "Filter COMMAND events",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "ACTIVITY_HI",
-                        value: 3,
-                        annotation: Some(
-                            "Filter ACTIVITY_HI events",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "ACTIVITY_LO",
-                        value: 4,
-                        annotation: Some(
-                            "Filter ACTIVITY_LO events",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "DIAGNOSTIC",
-                        value: 5,
-                        annotation: Some(
-                            "Filter DIAGNOSTIC events",
-                        ),
-                    },
+                format: None,
+                default: Array [
+                    String(""),
+                    String(""),
                 ],
-                default: String("Svc.EventManager.FilterSeverity.WARNING_HI"),
                 annotation: Some(
-                    "Severity level for event filtering\nSimilar to Fw::LogSeverity, but no FATAL event",
+                    "Array of strings",
                 ),
+            },
+        ),
+        Alias(
+            AliasType {
+                qualified_name: "Ref.DpDemo.StringAlias",
+                type_name: String {
+                    size: 80,
+                },
+                underlying_type: String {
+                    size: 80,
+                },
+                annotation: None,
             },
         ),
         Enum(
@@ -1301,57 +1226,103 @@ Dictionary {
         ),
         Enum(
             EnumType {
-                qualified_name: "Svc.SendFileStatus",
+                qualified_name: "Fw.CmdResponse",
                 representation_type: Integer {
-                    name: I32,
+                    name: U8,
                 },
                 enumerated_constants: [
                     EnumConstant {
-                        name: "STATUS_OK",
+                        name: "OK",
                         value: 0,
-                        annotation: None,
+                        annotation: Some(
+                            "Command successfully executed",
+                        ),
                     },
                     EnumConstant {
-                        name: "STATUS_ERROR",
+                        name: "INVALID_OPCODE",
                         value: 1,
-                        annotation: None,
+                        annotation: Some(
+                            "Invalid opcode dispatched",
+                        ),
                     },
                     EnumConstant {
-                        name: "STATUS_INVALID",
+                        name: "VALIDATION_ERROR",
                         value: 2,
-                        annotation: None,
+                        annotation: Some(
+                            "Command failed validation",
+                        ),
                     },
                     EnumConstant {
-                        name: "STATUS_BUSY",
+                        name: "FORMAT_ERROR",
                         value: 3,
-                        annotation: None,
+                        annotation: Some(
+                            "Command failed to deserialize",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "EXECUTION_ERROR",
+                        value: 4,
+                        annotation: Some(
+                            "Command had execution error",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "BUSY",
+                        value: 5,
+                        annotation: Some(
+                            "Component busy",
+                        ),
                     },
                 ],
-                default: String("Svc.SendFileStatus.STATUS_OK"),
+                default: String("Fw.CmdResponse.OK"),
                 annotation: Some(
-                    "Send file status enum",
+                    "Enum representing a command response",
                 ),
             },
         ),
-        Alias(
-            AliasType {
-                qualified_name: "FwIdType",
-                type_name: Integer {
-                    name: U32,
-                },
-                underlying_type: Integer {
-                    name: U32,
-                },
-                annotation: Some(
-                    "The id type.",
+        Struct(
+            StructType {
+                qualified_name: "Ref.SignalPair",
+                members: [
+                    StructMember {
+                        name: "time",
+                        type_name: Float {
+                            name: F32,
+                        },
+                        index: 0,
+                        size: None,
+                        format: Some(
+                            "{f}",
+                        ),
+                        annotation: None,
+                    },
+                    StructMember {
+                        name: "value",
+                        type_name: Float {
+                            name: F32,
+                        },
+                        index: 1,
+                        size: None,
+                        format: Some(
+                            "{f}",
+                        ),
+                        annotation: None,
+                    },
+                ],
+                default: Some(
+                    Object {
+                        "time": Number(0.0),
+                        "value": Number(0.0),
+                    },
                 ),
+                annotation: None,
             },
         ),
         Enum(
             EnumType {
                 qualified_name: "Svc.PrmDb.PrmReadError",
                 representation_type: Integer {
-                    name: I32,
+                    name: U8,
                 },
                 enumerated_constants: [
                     EnumConstant {
@@ -1416,6 +1387,79 @@ Dictionary {
                 ),
             },
         ),
+        Alias(
+            AliasType {
+                qualified_name: "FwIdType",
+                type_name: Integer {
+                    name: U32,
+                },
+                underlying_type: Integer {
+                    name: U32,
+                },
+                annotation: Some(
+                    "The id type.",
+                ),
+            },
+        ),
+        Enum(
+            EnumType {
+                qualified_name: "Svc.PrmDb.PrmWriteError",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "OPEN",
+                        value: 0,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "DELIMITER",
+                        value: 1,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "DELIMITER_SIZE",
+                        value: 2,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "RECORD_SIZE",
+                        value: 3,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "RECORD_SIZE_SIZE",
+                        value: 4,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "PARAMETER_ID",
+                        value: 5,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "PARAMETER_ID_SIZE",
+                        value: 6,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "PARAMETER_VALUE",
+                        value: 7,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "PARAMETER_VALUE_SIZE",
+                        value: 8,
+                        annotation: None,
+                    },
+                ],
+                default: String("Svc.PrmDb.PrmWriteError.OPEN"),
+                annotation: Some(
+                    "Parameter write error",
+                ),
+            },
+        ),
         Array(
             ArrayType {
                 qualified_name: "Ref.ManyChoices",
@@ -1433,6 +1477,34 @@ Dictionary {
                 ),
             },
         ),
+        Enum(
+            EnumType {
+                qualified_name: "Svc.EventManager.Enabled",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "ENABLED",
+                        value: 0,
+                        annotation: Some(
+                            "Enabled state",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "DISABLED",
+                        value: 1,
+                        annotation: Some(
+                            "Disabled state",
+                        ),
+                    },
+                ],
+                default: String("Svc.EventManager.Enabled.ENABLED"),
+                annotation: Some(
+                    "Enabled and disabled state",
+                ),
+            },
+        ),
         Alias(
             AliasType {
                 qualified_name: "Ref.DpDemo.I32Alias",
@@ -1445,63 +1517,40 @@ Dictionary {
                 annotation: None,
             },
         ),
-        Enum(
-            EnumType {
-                qualified_name: "Fw.DpCfg.ProcType",
-                representation_type: Integer {
-                    name: U8,
+        Alias(
+            AliasType {
+                qualified_name: "FwTlmPacketizeIdType",
+                type_name: Integer {
+                    name: U16,
                 },
-                enumerated_constants: [
-                    EnumConstant {
-                        name: "PROC_TYPE_ZERO",
-                        value: 1,
-                        annotation: Some(
-                            "Processing type 0",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "PROC_TYPE_ONE",
-                        value: 2,
-                        annotation: Some(
-                            "Processing type 1",
-                        ),
-                    },
-                    EnumConstant {
-                        name: "PROC_TYPE_TWO",
-                        value: 4,
-                        annotation: Some(
-                            "Processing type 2",
-                        ),
-                    },
-                ],
-                default: String("Fw.DpCfg.ProcType.PROC_TYPE_ZERO"),
+                underlying_type: Integer {
+                    name: U16,
+                },
                 annotation: Some(
-                    "A bit mask for selecting the type of processing to perform on\na container before writing it to disk.",
+                    "The type of a telemetry packet identifier",
                 ),
             },
         ),
         Enum(
             EnumType {
-                qualified_name: "Svc.CmdSequencer.SeqMode",
+                qualified_name: "Svc.WasmSequencer.BlockState",
                 representation_type: Integer {
                     name: I32,
                 },
                 enumerated_constants: [
                     EnumConstant {
-                        name: "STEP",
+                        name: "BLOCK",
                         value: 0,
                         annotation: None,
                     },
                     EnumConstant {
-                        name: "AUTO",
+                        name: "NO_BLOCK",
                         value: 1,
                         annotation: None,
                     },
                 ],
-                default: String("Svc.CmdSequencer.SeqMode.STEP"),
-                annotation: Some(
-                    "The sequencer mode",
-                ),
+                default: String("Svc.WasmSequencer.BlockState.BLOCK"),
+                annotation: None,
             },
         ),
         Alias(
@@ -1551,26 +1600,24 @@ Dictionary {
         ),
         Enum(
             EnumType {
-                qualified_name: "Svc.QueueType",
+                qualified_name: "Svc.SystemResourceEnabled",
                 representation_type: Integer {
-                    name: I32,
+                    name: U8,
                 },
                 enumerated_constants: [
                     EnumConstant {
-                        name: "COM_QUEUE",
+                        name: "DISABLED",
                         value: 0,
                         annotation: None,
                     },
                     EnumConstant {
-                        name: "BUFFER_QUEUE",
+                        name: "ENABLED",
                         value: 1,
                         annotation: None,
                     },
                 ],
-                default: String("Svc.QueueType.COM_QUEUE"),
-                annotation: Some(
-                    "An enumeration of queue data types",
-                ),
+                default: String("Svc.SystemResourceEnabled.DISABLED"),
+                annotation: None,
             },
         ),
         Struct(
@@ -1726,40 +1773,6 @@ Dictionary {
                 ),
             },
         ),
-        Enum(
-            EnumType {
-                qualified_name: "Svc.DpHdrField",
-                representation_type: Integer {
-                    name: I32,
-                },
-                enumerated_constants: [
-                    EnumConstant {
-                        name: "DESCRIPTOR",
-                        value: 0,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "ID",
-                        value: 1,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "PRIORITY",
-                        value: 2,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "CRC",
-                        value: 3,
-                        annotation: None,
-                    },
-                ],
-                default: String("Svc.DpHdrField.DESCRIPTOR"),
-                annotation: Some(
-                    "Header validation error",
-                ),
-            },
-        ),
         Array(
             ArrayType {
                 qualified_name: "Ref.FloatSet",
@@ -1794,29 +1807,50 @@ Dictionary {
         ),
         Enum(
             EnumType {
-                qualified_name: "Svc.EventManager.Enabled",
+                qualified_name: "TimeBase",
                 representation_type: Integer {
-                    name: I32,
+                    name: U16,
                 },
                 enumerated_constants: [
                     EnumConstant {
-                        name: "ENABLED",
+                        name: "TB_NONE",
                         value: 0,
                         annotation: Some(
-                            "Enabled state",
+                            "No time base has been established (Required)",
                         ),
                     },
                     EnumConstant {
-                        name: "DISABLED",
+                        name: "TB_PROC_TIME",
                         value: 1,
                         annotation: Some(
-                            "Disabled state",
+                            "Indicates time is processor cycle time. Not tied to external time",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "TB_WORKSTATION_TIME",
+                        value: 2,
+                        annotation: Some(
+                            "Time as reported on workstation where software is running. For testing. (Required)",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "TB_SC_TIME",
+                        value: 3,
+                        annotation: Some(
+                            "Time as reported by the spacecraft clock.",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "TB_DONT_CARE",
+                        value: 65535,
+                        annotation: Some(
+                            "Don't care value for sequences. If FwTimeBaseStoreType is changed, value should be changed (Required)",
                         ),
                     },
                 ],
-                default: String("Svc.EventManager.Enabled.ENABLED"),
+                default: String("TimeBase.TB_NONE"),
                 annotation: Some(
-                    "Enabled and disabled state",
+                    "Define enumeration for Time base types",
                 ),
             },
         ),
@@ -1984,6 +2018,21 @@ Dictionary {
                 ),
             },
         ),
+        Array(
+            ArrayType {
+                qualified_name: "Ref.DpDemo.BooleanArray",
+                size: 2,
+                element_type: Bool,
+                format: None,
+                default: Array [
+                    Bool(false),
+                    Bool(false),
+                ],
+                annotation: Some(
+                    "Array of booleans",
+                ),
+            },
+        ),
         Alias(
             AliasType {
                 qualified_name: "FwSizeStoreType",
@@ -2000,75 +2049,58 @@ Dictionary {
         ),
         Enum(
             EnumType {
-                qualified_name: "Svc.PrmDb.PrmWriteError",
+                qualified_name: "Svc.PrmDb.PrmDbFileLoadState",
                 representation_type: Integer {
-                    name: I32,
+                    name: U8,
                 },
                 enumerated_constants: [
                     EnumConstant {
-                        name: "OPEN",
+                        name: "IDLE",
                         value: 0,
                         annotation: None,
                     },
                     EnumConstant {
-                        name: "DELIMITER",
+                        name: "LOADING_FILE_UPDATES",
                         value: 1,
                         annotation: None,
                     },
                     EnumConstant {
-                        name: "DELIMITER_SIZE",
+                        name: "FILE_UPDATES_STAGED",
                         value: 2,
                         annotation: None,
                     },
-                    EnumConstant {
-                        name: "RECORD_SIZE",
-                        value: 3,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "RECORD_SIZE_SIZE",
-                        value: 4,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "PARAMETER_ID",
-                        value: 5,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "PARAMETER_ID_SIZE",
-                        value: 6,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "PARAMETER_VALUE",
-                        value: 7,
-                        annotation: None,
-                    },
-                    EnumConstant {
-                        name: "PARAMETER_VALUE_SIZE",
-                        value: 8,
-                        annotation: None,
-                    },
                 ],
-                default: String("Svc.PrmDb.PrmWriteError.OPEN"),
+                default: String("Svc.PrmDb.PrmDbFileLoadState.IDLE"),
                 annotation: Some(
-                    "Parameter write error",
+                    "State of parameter DB file load operations",
                 ),
             },
         ),
-        Array(
-            ArrayType {
-                qualified_name: "Ref.DpDemo.BooleanArray",
-                size: 2,
-                element_type: Bool,
-                format: None,
-                default: Array [
-                    Bool(false),
-                    Bool(false),
+        Enum(
+            EnumType {
+                qualified_name: "Svc.VersionStatus",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "OK",
+                        value: 0,
+                        annotation: Some(
+                            "Version was good",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FAILURE",
+                        value: 1,
+                        annotation: Some(
+                            "Failure to get version",
+                        ),
+                    },
                 ],
+                default: String("Svc.VersionStatus.OK"),
                 annotation: Some(
-                    "Array of booleans",
+                    "An enumeration for version status",
                 ),
             },
         ),
@@ -2143,26 +2175,70 @@ Dictionary {
                 ),
             },
         ),
-        Enum(
-            EnumType {
-                qualified_name: "Svc.SystemResourceEnabled",
-                representation_type: Integer {
-                    name: I32,
-                },
-                enumerated_constants: [
-                    EnumConstant {
-                        name: "DISABLED",
-                        value: 0,
-                        annotation: None,
+        Struct(
+            StructType {
+                qualified_name: "Fw.TimeValue",
+                members: [
+                    StructMember {
+                        name: "timeBase",
+                        type_name: QualifiedIdentifier {
+                            name: "TimeBase",
+                        },
+                        index: 0,
+                        size: None,
+                        format: None,
+                        annotation: Some(
+                            "basis of time (defined by system)",
+                        ),
                     },
-                    EnumConstant {
-                        name: "ENABLED",
-                        value: 1,
-                        annotation: None,
+                    StructMember {
+                        name: "timeContext",
+                        type_name: QualifiedIdentifier {
+                            name: "FwTimeContextStoreType",
+                        },
+                        index: 1,
+                        size: None,
+                        format: None,
+                        annotation: Some(
+                            "user settable value. Could be reboot count, node, etc",
+                        ),
+                    },
+                    StructMember {
+                        name: "seconds",
+                        type_name: Integer {
+                            name: U32,
+                        },
+                        index: 2,
+                        size: None,
+                        format: None,
+                        annotation: Some(
+                            "seconds portion of Time",
+                        ),
+                    },
+                    StructMember {
+                        name: "useconds",
+                        type_name: Integer {
+                            name: U32,
+                        },
+                        index: 3,
+                        size: None,
+                        format: None,
+                        annotation: Some(
+                            "microseconds portion of Time",
+                        ),
                     },
                 ],
-                default: String("Svc.SystemResourceEnabled.DISABLED"),
-                annotation: None,
+                default: Some(
+                    Object {
+                        "seconds": Number(0),
+                        "timeBase": String("TimeBase.TB_NONE"),
+                        "timeContext": Number(0),
+                        "useconds": Number(0),
+                    },
+                ),
+                annotation: Some(
+                    "Data structure for Time",
+                ),
             },
         ),
         Enum(
@@ -2190,6 +2266,40 @@ Dictionary {
                 default: String("Fw.Wait.WAIT"),
                 annotation: Some(
                     "Wait or don't wait for something",
+                ),
+            },
+        ),
+        Enum(
+            EnumType {
+                qualified_name: "Svc.DpHdrField",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "DESCRIPTOR",
+                        value: 0,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "ID",
+                        value: 1,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "PRIORITY",
+                        value: 2,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "CRC",
+                        value: 3,
+                        annotation: None,
+                    },
+                ],
+                default: String("Svc.DpHdrField.DESCRIPTOR"),
+                annotation: Some(
+                    "Header validation error",
                 ),
             },
         ),
@@ -2293,6 +2403,120 @@ Dictionary {
                 ),
             },
         ),
+        Enum(
+            EnumType {
+                qualified_name: "ComCfg.Apid",
+                representation_type: Integer {
+                    name: U16,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "FW_PACKET_COMMAND",
+                        value: 0,
+                        annotation: Some(
+                            "Command packet type - incoming",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FW_PACKET_TELEM",
+                        value: 1,
+                        annotation: Some(
+                            "Telemetry packet type - outgoing",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FW_PACKET_LOG",
+                        value: 2,
+                        annotation: Some(
+                            "Log type - outgoing",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FW_PACKET_FILE",
+                        value: 3,
+                        annotation: Some(
+                            "File type - incoming and outgoing",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FW_PACKET_PACKETIZED_TLM",
+                        value: 4,
+                        annotation: Some(
+                            "Packetized telemetry packet type",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FW_PACKET_DP",
+                        value: 5,
+                        annotation: Some(
+                            "Data Product packet type",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FW_PACKET_IDLE",
+                        value: 6,
+                        annotation: Some(
+                            "F Prime idle",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FW_PACKET_HAND",
+                        value: 254,
+                        annotation: Some(
+                            "F Prime handshake",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "FW_PACKET_UNKNOWN",
+                        value: 255,
+                        annotation: Some(
+                            "F Prime unknown packet",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "SPP_IDLE_PACKET",
+                        value: 2047,
+                        annotation: Some(
+                            "Per Space Packet Standard, all 1s (11bits) is reserved for Idle Packets",
+                        ),
+                    },
+                    EnumConstant {
+                        name: "INVALID_UNINITIALIZED",
+                        value: 2048,
+                        annotation: Some(
+                            "Anything equal or higher value is invalid and should not be used",
+                        ),
+                    },
+                ],
+                default: String("ComCfg.Apid.INVALID_UNINITIALIZED"),
+                annotation: Some(
+                    "APIDs are 11 bits in the Space Packet protocol, so we use U16. Max value 7FF",
+                ),
+            },
+        ),
+        Array(
+            ArrayType {
+                qualified_name: "Ref.TooManyChoices",
+                size: 2,
+                element_type: QualifiedIdentifier {
+                    name: "Ref.ManyChoices",
+                },
+                format: None,
+                default: Array [
+                    Array [
+                        String("Ref.Choice.ONE"),
+                        String("Ref.Choice.ONE"),
+                    ],
+                    Array [
+                        String("Ref.Choice.ONE"),
+                        String("Ref.Choice.ONE"),
+                    ],
+                ],
+                annotation: Some(
+                    "Array of array",
+                ),
+            },
+        ),
         Array(
             ArrayType {
                 qualified_name: "Ref.DpDemo.ArrayOfStringArray",
@@ -2387,6 +2611,40 @@ Dictionary {
                 annotation: None,
             },
         ),
+        Enum(
+            EnumType {
+                qualified_name: "Fw.ParamValid",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "UNINIT",
+                        value: 0,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "VALID",
+                        value: 1,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "INVALID",
+                        value: 2,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "DEFAULT",
+                        value: 3,
+                        annotation: None,
+                    },
+                ],
+                default: String("Fw.ParamValid.UNINIT"),
+                annotation: Some(
+                    "Enum representing parameter validity",
+                ),
+            },
+        ),
         Alias(
             AliasType {
                 qualified_name: "FwTimeBaseStoreType",
@@ -2448,12 +2706,34 @@ Dictionary {
             value: Number(200),
         },
         Constant {
-            annotation: None,
-            qualified_name: "Ref.dimension",
+            annotation: Some(
+                "Value encoded during serialization for boolean false",
+            ),
+            qualified_name: "FW_SERIALIZE_FALSE_VALUE",
             type_name: Integer {
                 name: U64,
             },
-            value: Number(2),
+            value: Number(0),
+        },
+        Constant {
+            annotation: Some(
+                "Fixed size of CCSDS TM frames",
+            ),
+            qualified_name: "ComCfg.TmFrameFixedSize",
+            type_name: Integer {
+                name: U64,
+            },
+            value: Number(1024),
+        },
+        Constant {
+            annotation: Some(
+                "Value encoded during serialization for boolean true",
+            ),
+            qualified_name: "FW_SERIALIZE_TRUE_VALUE",
+            type_name: Integer {
+                name: U64,
+            },
+            value: Number(255),
         },
         Constant {
             annotation: Some(
@@ -2474,6 +2754,24 @@ Dictionary {
                 name: U64,
             },
             value: Number(200),
+        },
+        Constant {
+            annotation: None,
+            qualified_name: "Ref.dimension",
+            type_name: Integer {
+                name: U64,
+            },
+            value: Number(2),
+        },
+        Constant {
+            annotation: Some(
+                "Spacecraft ID (10 bits) for CCSDS Data Link layer",
+            ),
+            qualified_name: "ComCfg.SpacecraftId",
+            type_name: Integer {
+                name: U64,
+            },
+            value: Number(68),
         },
     ],
     commands: [
@@ -2842,6 +3140,53 @@ Dictionary {
             queue_full_behavior: None,
             annotation: Some(
                 "Report version as Event",
+            ),
+        },
+        Command {
+            name: "ComCcsds.comQueue.FLUSH_QUEUE",
+            kind: Async,
+            opcode: 33554432,
+            formal_params: [
+                FormalParam {
+                    name: "queueType",
+                    type_name: QualifiedIdentifier {
+                        name: "Svc.QueueType",
+                    },
+                    is_ref: false,
+                    annotation: Some(
+                        "The Queue data type",
+                    ),
+                },
+                FormalParam {
+                    name: "indexType",
+                    type_name: QualifiedIdentifier {
+                        name: "FwIndexType",
+                    },
+                    is_ref: false,
+                    annotation: Some(
+                        "The index of the queue (within the supplied type) to flush",
+                    ),
+                },
+            ],
+            priority: None,
+            queue_full_behavior: Some(
+                Assert,
+            ),
+            annotation: Some(
+                "Flush a specific queue. This will discard all queued data in the specified queue removing it from eventual\ndownlink. Buffers requiring ownership return will be returned via the bufferReturnOut port.",
+            ),
+        },
+        Command {
+            name: "ComCcsds.comQueue.FLUSH_ALL_QUEUES",
+            kind: Async,
+            opcode: 33554433,
+            formal_params: [],
+            priority: None,
+            queue_full_behavior: Some(
+                Assert,
+            ),
+            annotation: Some(
+                "Flush all queues. This will discard all queued data removing it from eventual downlink. Buffers requiring\nownership return will be returned via the bufferReturnOut port.",
             ),
         },
         Command {
@@ -3273,6 +3618,53 @@ Dictionary {
             ),
             annotation: Some(
                 "Command to save parameter image to file. Uses file name passed to constructor",
+            ),
+        },
+        Command {
+            name: "FileHandling.prmDb.PRM_LOAD_FILE",
+            kind: Async,
+            opcode: 83898369,
+            formal_params: [
+                FormalParam {
+                    name: "fileName",
+                    type_name: String {
+                        size: 200,
+                    },
+                    is_ref: false,
+                    annotation: Some(
+                        "The name of the on-board file to set parameters from",
+                    ),
+                },
+                FormalParam {
+                    name: "merge",
+                    type_name: QualifiedIdentifier {
+                        name: "Svc.PrmDb.Merge",
+                    },
+                    is_ref: false,
+                    annotation: Some(
+                        "Whether to merge or fully reset the parameter database from the file contents",
+                    ),
+                },
+            ],
+            priority: None,
+            queue_full_behavior: Some(
+                Assert,
+            ),
+            annotation: Some(
+                "Loads a file from storage into the staging database. The file could have selective IDs and not the whole set.",
+            ),
+        },
+        Command {
+            name: "FileHandling.prmDb.PRM_COMMIT_STAGED",
+            kind: Async,
+            opcode: 83898370,
+            formal_params: [],
+            priority: None,
+            queue_full_behavior: Some(
+                Assert,
+            ),
+            annotation: Some(
+                "Commits the backup database to become the prime (active) database",
             ),
         },
         Command {
@@ -3764,14 +4156,14 @@ Dictionary {
             ),
         },
         Command {
-            name: "Ref.cmdSeq.CS_RUN",
+            name: "Ref.cmdSeq.RUN",
             kind: Async,
             opcode: 268460032,
             formal_params: [
                 FormalParam {
                     name: "fileName",
                     type_name: String {
-                        size: 240,
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3781,7 +4173,7 @@ Dictionary {
                 FormalParam {
                     name: "block",
                     type_name: QualifiedIdentifier {
-                        name: "Svc.CmdSequencer.BlockState",
+                        name: "Svc.WasmSequencer.BlockState",
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3789,23 +4181,25 @@ Dictionary {
                     ),
                 },
             ],
-            priority: None,
+            priority: Some(
+                7,
+            ),
             queue_full_behavior: Some(
                 Assert,
             ),
             annotation: Some(
-                "Run a command sequence file",
+                "Loads, validates and runs a sequence",
             ),
         },
         Command {
-            name: "Ref.cmdSeq.CS_VALIDATE",
+            name: "Ref.cmdSeq.VALIDATE",
             kind: Async,
             opcode: 268460033,
             formal_params: [
                 FormalParam {
                     name: "fileName",
                     type_name: String {
-                        size: 240,
+                        size: 200,
                     },
                     is_ref: false,
                     annotation: Some(
@@ -3813,90 +4207,55 @@ Dictionary {
                     ),
                 },
             ],
-            priority: None,
+            priority: Some(
+                7,
+            ),
             queue_full_behavior: Some(
                 Assert,
             ),
             annotation: Some(
-                "Validate a command sequence file",
+                "Loads and validates a sequence",
             ),
         },
         Command {
-            name: "Ref.cmdSeq.CS_CANCEL",
+            name: "Ref.cmdSeq.RUN_VALIDATED",
             kind: Async,
             opcode: 268460034,
-            formal_params: [],
-            priority: None,
+            formal_params: [
+                FormalParam {
+                    name: "block",
+                    type_name: QualifiedIdentifier {
+                        name: "Svc.WasmSequencer.BlockState",
+                    },
+                    is_ref: false,
+                    annotation: Some(
+                        "Return command status when complete or not",
+                    ),
+                },
+            ],
+            priority: Some(
+                7,
+            ),
             queue_full_behavior: Some(
                 Assert,
             ),
             annotation: Some(
-                "Cancel a command sequence",
+                "Must be called after VALIDATE. Runs the sequence that was validated.",
             ),
         },
         Command {
-            name: "Ref.cmdSeq.CS_START",
+            name: "Ref.cmdSeq.CANCEL",
             kind: Async,
             opcode: 268460035,
             formal_params: [],
-            priority: None,
+            priority: Some(
+                8,
+            ),
             queue_full_behavior: Some(
                 Assert,
             ),
             annotation: Some(
-                "Start running a command sequence",
-            ),
-        },
-        Command {
-            name: "Ref.cmdSeq.CS_STEP",
-            kind: Async,
-            opcode: 268460036,
-            formal_params: [],
-            priority: None,
-            queue_full_behavior: Some(
-                Assert,
-            ),
-            annotation: Some(
-                "Perform one step in a command sequence. Valid only if CmdSequencer is in MANUAL run mode.",
-            ),
-        },
-        Command {
-            name: "Ref.cmdSeq.CS_AUTO",
-            kind: Async,
-            opcode: 268460037,
-            formal_params: [],
-            priority: None,
-            queue_full_behavior: Some(
-                Assert,
-            ),
-            annotation: Some(
-                "Set the run mode to AUTO.",
-            ),
-        },
-        Command {
-            name: "Ref.cmdSeq.CS_MANUAL",
-            kind: Async,
-            opcode: 268460038,
-            formal_params: [],
-            priority: None,
-            queue_full_behavior: Some(
-                Assert,
-            ),
-            annotation: Some(
-                "Set the run mode to MANUAL.",
-            ),
-        },
-        Command {
-            name: "Ref.cmdSeq.CS_JOIN_WAIT",
-            kind: Async,
-            opcode: 268460039,
-            formal_params: [],
-            priority: None,
-            queue_full_behavior: Some(
-                Assert,
-            ),
-            annotation: Some(
-                "Wait for sequences that are running to finish. Allow user to run multiple seq files in SEQ_NO_BLOCK mode then wait for them to finish before allowing more seq run request.",
+                "Cancels a running or validated sequence. After running CANCEL, the sequencer\nshould return to IDLE",
             ),
         },
         Command {
@@ -5866,71 +6225,6 @@ Dictionary {
             limits: None,
             annotation: Some(
                 "Scalar F64 channel",
-            ),
-        },
-        TelemetryChannel {
-            name: "Ref.cmdSeq.CS_LoadCommands",
-            id: 268460032,
-            type_name: Integer {
-                name: U32,
-            },
-            telemetry_update: Always,
-            format: None,
-            limits: None,
-            annotation: Some(
-                "The number of Load commands executed",
-            ),
-        },
-        TelemetryChannel {
-            name: "Ref.cmdSeq.CS_CancelCommands",
-            id: 268460033,
-            type_name: Integer {
-                name: U32,
-            },
-            telemetry_update: Always,
-            format: None,
-            limits: None,
-            annotation: Some(
-                "The number of Cancel commands executed",
-            ),
-        },
-        TelemetryChannel {
-            name: "Ref.cmdSeq.CS_Errors",
-            id: 268460034,
-            type_name: Integer {
-                name: U32,
-            },
-            telemetry_update: Always,
-            format: None,
-            limits: None,
-            annotation: Some(
-                "The number of errors that have occurred",
-            ),
-        },
-        TelemetryChannel {
-            name: "Ref.cmdSeq.CS_CommandsExecuted",
-            id: 268460035,
-            type_name: Integer {
-                name: U32,
-            },
-            telemetry_update: Always,
-            format: None,
-            limits: None,
-            annotation: Some(
-                "The number of commands executed across all sequences.",
-            ),
-        },
-        TelemetryChannel {
-            name: "Ref.cmdSeq.CS_SequencesCompleted",
-            id: 268460036,
-            type_name: Integer {
-                name: U32,
-            },
-            telemetry_update: Always,
-            format: None,
-            limits: None,
-            annotation: Some(
-                "The number of sequences completed.",
             ),
         },
         TelemetryChannel {

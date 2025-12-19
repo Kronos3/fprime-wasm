@@ -44,12 +44,26 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                 quote! { <#ty as Serializable>::SIZE }
             });
 
-            let serialize_to = s.fields.iter().map(|field| {
+            let serialize_to = s.fields.iter().map(|field| match &field.ident {
+                None => quote! {},
+                Some(name) => quote! { self.#name.serialize_to(to, offset); },
+            });
+
+            let deserialize_from = s.fields.iter().map(|field| {
+                let ty = &field.ty;
                 match &field.ident {
                     None => quote! {},
-                    Some(name) => quote! { self.#name.serialize_to(to, offset); }
+                    Some(name) => {
+                        quote! { let #name: #ty = Serializable::deserialize_from(from, offset); }
+                    }
                 }
             });
+
+            let field_names: Vec<&Ident> = s
+                .fields
+                .iter()
+                .filter_map(|field| field.ident.as_ref())
+                .collect();
 
             quote! {
                 impl #impl_generics Serializable for #name #ty_generics #where_clause {
@@ -58,22 +72,48 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
                         #(#serialize_to)*
                     }
+
+                    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+                        #(#deserialize_from)*
+                        Self {
+                            #(#field_names,)*
+                        }
+                    }
                 }
             }
             .into()
         }
-        Data::Enum(_) => {
-            let repr = match enum_repr_type_name(&input.attrs) {
-                None => {
-                    return syn::Error::new_spanned(
+        Data::Enum(e) => {
+            let repr =
+                match enum_repr_type_name(&input.attrs) {
+                    None => return syn::Error::new_spanned(
                         input.ident,
                         "Serializable can only be derived on enums with explicit repr() attributes",
                     )
-                        .to_compile_error()
-                        .into()
+                    .to_compile_error()
+                    .into(),
+                    Some(repr) => repr,
+                };
+
+            let mut match_branches = vec![];
+            for variant in &e.variants {
+                match &variant.discriminant {
+                    None => {
+                        return syn::Error::new_spanned(
+                            input.ident,
+                            "Serializable can only be derived on enums with explicit values on all variants",
+                        )
+                            .to_compile_error()
+                            .into()
+                    }
+                    Some((_, value)) => {
+                        let name = &variant.ident;
+                        match_branches.push(quote! {
+                            #value => Self::#name,
+                        })
+                    }
                 }
-                Some(repr) => repr
-            };
+            }
 
             quote! {
                 impl #impl_generics Serializable for #name #ty_generics #where_clause {
@@ -81,6 +121,14 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
 
                     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
                         (*self as #repr).serialize_to(to, offset);
+                    }
+
+                    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+                        let raw: #repr = Serializable::deserialize_from(from, offset);
+                        match raw {
+                            #(#match_branches)*
+                            _ => panic!("invalid value: {}", raw),
+                        }
                     }
                 }
             }
