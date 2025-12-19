@@ -1,6 +1,5 @@
 #![no_std]
 
-mod panic;
 mod serializable;
 
 pub use fprime_macros::Serializable;
@@ -93,7 +92,7 @@ mod internal {
         /// * `us`: Time in microseconds to pause the runtime
         ///
         /// returns: ()
-        pub(crate) fn sleep(us: u32);
+        pub(crate) fn rsleep(us: u64);
 
         /// Panic the runtime with a message.
         /// This function should not return and the runtime should be stopped
@@ -114,6 +113,31 @@ pub enum FprimeErr {
 }
 
 pub type FprimeResult<T> = Result<T, FprimeErr>;
+
+pub struct FprimeEvents;
+pub use core::fmt::Write;
+
+impl Write for FprimeEvents {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        sys::message(s);
+        Ok(())
+    }
+}
+
+#[macro_export]
+macro_rules! println {
+    // Base case with no arguments
+    () => {
+        println!("");
+    };
+    // Main case that accepts a format string and arguments
+    ($fmt:expr $(, $($arg:tt)*)?) => {
+        // Use the core::write! macro internally, passing our custom writer
+        let mut event_str: crate::String<120> = crate::String::new();
+        write!(event_str, $fmt $(, $($arg)*)?).ok();
+        sys::message(&event_str);
+    };
+}
 
 pub mod sys {
     use crate::{internal, FprimeErr, FprimeResult};
@@ -202,7 +226,23 @@ pub mod sys {
     /// * `us`: Time in microseconds to pause the runtime
     ///
     /// returns: ()
-    pub fn sleep(us: u32) {
-        unsafe { internal::sleep(us) }
+    pub fn sleep(us: u64) {
+        unsafe { internal::rsleep(us) }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[panic_handler]
+    fn panic(info: &core::panic::PanicInfo) -> ! {
+        #[cfg(target_arch = "wasm32")]
+        use core::fmt::Write;
+
+        let mut host_stderr: crate::String<120> = crate::String::new();
+
+        // logs "panicked at '$reason', src/main.rs:27:4" to the host stderr
+        writeln!(host_stderr, "{}", info).ok();
+
+        unsafe {
+            crate::internal::panic(host_stderr.as_ptr() as u32, host_stderr.len() as u32);
+        }
     }
 }

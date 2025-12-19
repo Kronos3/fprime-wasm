@@ -6,7 +6,3 @@ edition = "2024"
 [dependencies]
 fprime_macros = { path = "../fprime_macros" }
 heapless = "0.9.2"
-serde = { version = "1.0.228", features = ["derive"] }
-
-[build]
-target = "wasm32-unknown-unknown"
