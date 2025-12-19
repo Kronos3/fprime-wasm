@@ -143,19 +143,22 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     writer.flush().expect("failed to flush file")
 }
 
-pub fn generate(dictionary_json: &Path) {
+pub fn generate(dictionary_json: &str) {
     println!("cargo::rerun-if-changed=build.rs");
 
     // Get the output directory provided by Cargo
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("dictionary.rs");
 
-    let dict = fprime_dictionary::parse(dictionary_json);
+    let dict = fprime_dictionary::parse(Path::new(dictionary_json));
 
     let file = fs::File::create(dest_path).expect("failed to open destination file");
     let mut writer = BufWriter::new(file);
 
     generate_to_file(&dict, &mut writer);
+
+    println!("cargo::rerun-if-changed=Cargo.toml");
+    println!("cargo::rerun-if-changed={}", dictionary_json);
 }
 
 #[cfg(test)]

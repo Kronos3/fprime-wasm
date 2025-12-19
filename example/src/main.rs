@@ -1,11 +1,11 @@
 #![no_std]
 #![no_main]
 
-mod RefTopologyDictionary;
+mod dictionary;
 
 use core::fmt::{Display, Formatter};
+pub use dictionary::*;
 use fprime_core::*;
-pub use RefTopologyDictionary::*;
 
 impl Display for fw::TimeValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {

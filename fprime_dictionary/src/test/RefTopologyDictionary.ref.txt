@@ -228,6 +228,28 @@ Dictionary {
                 ),
             },
         ),
+        Enum(
+            EnumType {
+                qualified_name: "Fw.TlmValid",
+                representation_type: Integer {
+                    name: U8,
+                },
+                enumerated_constants: [
+                    EnumConstant {
+                        name: "VALID",
+                        value: 0,
+                        annotation: None,
+                    },
+                    EnumConstant {
+                        name: "INVALID",
+                        value: 1,
+                        annotation: None,
+                    },
+                ],
+                default: String("Fw.TlmValid.VALID"),
+                annotation: None,
+            },
+        ),
         Struct(
             StructType {
                 qualified_name: "Ref.PacketStat",
