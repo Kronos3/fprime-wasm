@@ -100,7 +100,7 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                 match &variant.discriminant {
                     None => {
                         return syn::Error::new_spanned(
-                            input.ident,
+                            &variant.ident,
                             "Serializable can only be derived on enums with explicit values on all variants",
                         )
                             .to_compile_error()
