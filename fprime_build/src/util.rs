@@ -32,6 +32,36 @@ pub(crate) fn annotate(inner: TokenStream, annotation: &Option<String>) -> Token
     }
 }
 
+pub(crate) fn annotate_with_args(
+    inner: TokenStream,
+    annotation: &Option<String>,
+    arg_annotations: Vec<(String, Option<String>)>,
+) -> TokenStream {
+    if arg_annotations.len() == 0 {
+        return annotate(inner, annotation);
+    }
+
+    let brief = match annotation {
+        None => "".to_string(),
+        Some(annotation) => annotation.clone(),
+    };
+
+    let args = arg_annotations
+        .iter()
+        .map(|(name, annot)| match annot {
+            None => format!(" * `{}`", name),
+            Some(arg_a) => format!(" * `{}` - {}", name, arg_a),
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    let annot = quote_doctest::doc_comment(format!("{}\n\n{}", brief, args));
+    quote! {
+        #annot
+        #inner
+    }
+}
+
 pub enum NameKind {
     Module,
     Definition,

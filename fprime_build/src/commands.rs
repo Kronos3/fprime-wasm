@@ -1,8 +1,8 @@
 use crate::types::type_name;
-use crate::util::{annotate, format_name, hex_literal, qualified_identifier, NameKind};
+use crate::util::{annotate_with_args, format_name, hex_literal, qualified_identifier, NameKind};
 use crate::Qualifier;
 use fprime_dictionary::{EnumType, TypeName};
-use proc_macro2::TokenStream;
+use proc_macro2::{Literal, TokenStream};
 use quote::quote;
 
 pub fn command(
@@ -12,8 +12,13 @@ pub fn command(
     let (q, name) = qualified_identifier(&cmd.name, NameKind::Function);
     let args = cmd.formal_params.iter().map(|arg| {
         let name = format_name(NameKind::FormalParameter, &arg.name);
-        let ty = type_name(&arg.type_name);
-        quote! { #name: #ty, }
+        match &arg.type_name {
+            TypeName::String { .. } => quote! { #name: &str, },
+            _ => {
+                let ty = type_name(&arg.type_name);
+                quote! { #name: #ty, }
+            }
+        }
     });
 
     let arg_sizes = cmd.formal_params.iter().map(|arg| match &arg.type_name {
@@ -29,9 +34,24 @@ pub fn command(
 
     let ser = cmd.formal_params.iter().map(|arg| {
         let name = format_name(NameKind::FormalParameter, &arg.name);
+        let value = match &arg.type_name {
+            TypeName::String { size } => {
+                let ty = type_name(&arg.type_name);
+                // TODO(tumbar) Make string commanding configurable
+                // Panic if string doesn't fit
+                // quote! { <#ty as TryFrom<&str>>::try_from(#name).unwrap() }
+
+                // Truncate string (fast)
+                let size_lit = Literal::u32_unsuffixed(*size);
+                quote! { <#ty as StrTruncate<#size_lit>>::truncate(#name) }
+            }
+            _ => {
+                quote! { #name }
+            }
+        };
 
         quote! {
-            #name.serialize_to(&mut __encoded, &mut __offset);
+            #value.serialize_to(&mut __encoded, &mut __offset);
         }
     });
 
@@ -57,5 +77,15 @@ pub fn command(
         }
     };
 
-    (q, annotate(def, &cmd.annotation))
+    (
+        q,
+        annotate_with_args(
+            def,
+            &cmd.annotation,
+            cmd.formal_params
+                .iter()
+                .map(|arg| (arg.name.clone(), arg.annotation.clone()))
+                .collect(),
+        ),
+    )
 }

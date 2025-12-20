@@ -16,17 +16,11 @@ impl Display for fw::TimeValue {
     }
 }
 
-fn seq() -> FprimeResult<()> {
-    cdh_core::cmd_disp::cmd_no_op();
-
+#[unsafe(no_mangle)]
+pub extern "C" fn main() {
     loop {
-        let (val, time) = r#ref::system_resources::cpu()?;
+        let (val, time) = unsafe { r#ref::system_resources::cpu().unwrap_unchecked() };
         println!("[{}] {}", time, val);
         sys::sleep(1_000_000)
     }
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn main() {
-    seq().expect("sequence failed")
 }

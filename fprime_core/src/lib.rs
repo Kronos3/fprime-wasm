@@ -8,6 +8,24 @@ pub use fprime_macros::Serializable;
 /// The capacity specifies the
 pub type String<const N: usize> = heapless::String<N, u16>;
 
+pub trait StrTruncate<const N: usize> {
+    fn truncate(s: &str) -> Self;
+}
+
+impl<const N: usize> StrTruncate<N> for String<N> {
+    fn truncate(s: &str) -> String<N> {
+        let mut out: heapless::Vec<u8, N, u16> = heapless::Vec::new();
+        let n = core::cmp::min(s.len(), N);
+        unsafe {
+            for (i, c) in s.get_unchecked(..n).as_bytes().iter().enumerate() {
+                *out.get_unchecked_mut(i) = *c;
+            }
+            out.set_len(n);
+            heapless::String::from_utf8_unchecked(out)
+        }
+    }
+}
+
 pub trait Serializable: Sized {
     const SIZE: usize;
 
@@ -102,6 +120,7 @@ mod internal {
         /// * `msg_ptr`: Pointer to the panic string
         /// * `size`: length of the panic string
         #[cfg(target_arch = "wasm32")]
+        #[cfg(not(test))]
         pub(crate) fn panic(msg_ptr: u32, size: u32) -> !;
     }
 }
@@ -126,21 +145,14 @@ impl Write for FprimeEvents {
 
 #[macro_export]
 macro_rules! println {
-    // Base case with no arguments
-    () => {
-        println!("");
-    };
-    // Main case that accepts a format string and arguments
-    ($fmt:expr $(, $($arg:tt)*)?) => {
-        // Use the core::write! macro internally, passing our custom writer
-        let mut event_str: crate::String<120> = crate::String::new();
-        write!(event_str, $fmt $(, $($arg)*)?).ok();
-        sys::message(&event_str);
+    ($($arg:tt)*) => {
+        sys::messagef(core::format_args!($($arg)*));
     };
 }
 
 pub mod sys {
     use crate::{internal, FprimeErr, FprimeResult};
+    use core::fmt::Arguments;
 
     /// Dispatch a command given a Fw::ComBuffer
     /// This command should be run synchronously and return the response
@@ -219,6 +231,12 @@ pub mod sys {
         unsafe { internal::message(ptr, len) }
     }
 
+    #[inline]
+    pub fn messagef(args: Arguments<'_>) {
+        let s: crate::String<120> = heapless::string::format(args).unwrap();
+        message(&s)
+    }
+
     /// Pause the runtime for a specified time
     ///
     /// # Arguments
@@ -231,18 +249,18 @@ pub mod sys {
     }
 
     #[cfg(target_arch = "wasm32")]
+    #[cfg(not(test))]
     #[panic_handler]
     fn panic(info: &core::panic::PanicInfo) -> ! {
-        #[cfg(target_arch = "wasm32")]
-        use core::fmt::Write;
-
-        let mut host_stderr: crate::String<120> = crate::String::new();
-
-        // logs "panicked at '$reason', src/main.rs:27:4" to the host stderr
-        writeln!(host_stderr, "{}", info).ok();
+        // TODO(tumbar) Panic should transfer location information without formatting in-place
+        // This can explode code-size so we avoid fmt here
+        let filename = match info.location() {
+            None => "no location",
+            Some(loc) => loc.file(),
+        };
 
         unsafe {
-            crate::internal::panic(host_stderr.as_ptr() as u32, host_stderr.len() as u32);
+            internal::panic(filename.as_ptr() as u32, filename.len() as u32);
         }
     }
 }

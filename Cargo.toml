@@ -17,4 +17,7 @@ default-members = [
 
 [profile.release]
 lto = true
-opt-level = 'z'
+opt-level = "z"
+panic = "abort"
+debug = false
+strip = true

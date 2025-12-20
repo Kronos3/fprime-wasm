@@ -70,7 +70,9 @@ pub mod cdh_core {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// No-op string command
-        pub fn cmd_no_op_string(arg_1: String<40>) -> crate::fw::CmdResponse {
+        ///
+        ///  * `arg1` - The String command argument
+        pub fn cmd_no_op_string(arg_1: &str) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<40> as Serializable>::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -78,11 +80,16 @@ pub mod cdh_core {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1000001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            arg_1.serialize_to(&mut __encoded, &mut __offset);
+            <String<40> as StrTruncate<40>>::truncate(arg_1)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// No-op command
+        ///
+        ///  * `arg1` - The I32 command argument
+        ///  * `arg2` - The F32 command argument
+        ///  * `arg3` - The U8 command argument
         pub fn cmd_test_cmd_1(
             arg_1: i32,
             arg_2: f32,
@@ -159,6 +166,9 @@ pub mod cdh_core {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Set filter for reporting events. Events are not stored in component.
+        ///
+        ///  * `filterLevel` - Filter level
+        ///  * `filterEnabled` - Filter state
         pub fn set_event_filter(
             filter_level: crate::svc::event_manager::FilterSeverity,
             filter_enabled: crate::svc::event_manager::Enabled,
@@ -177,6 +187,9 @@ pub mod cdh_core {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Filter a particular ID
+        ///
+        ///  * `ID`
+        ///  * `idFilterEnabled` - ID filter state
         pub fn set_id_filter(
             id: crate::FwEventIdType,
             id_filter_enabled: crate::svc::event_manager::Enabled,
@@ -210,6 +223,8 @@ pub mod cdh_core {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// A command to enable or disable health checks
+        ///
+        ///  * `enable` - whether or not health checks are enabled
         pub fn hlth_enable(enable: crate::fw::Enabled) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::fw::Enabled::SIZE] = unsafe {
@@ -223,8 +238,11 @@ pub mod cdh_core {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Ignore a particular ping entry
+        ///
+        ///  * `entry` - The entry to enable/disable
+        ///  * `enable` - whether or not a port is pinged
         pub fn hlth_ping_enable(
-            entry: String<40>,
+            entry: &str,
             enable: crate::fw::Enabled,
         ) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
@@ -234,14 +252,19 @@ pub mod cdh_core {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1002001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            entry.serialize_to(&mut __encoded, &mut __offset);
+            <String<40> as StrTruncate<40>>::truncate(entry)
+                .serialize_to(&mut __encoded, &mut __offset);
             enable.serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Change ping value
+        ///
+        ///  * `entry` - The entry to modify
+        ///  * `warningValue` - Ping warning threshold
+        ///  * `fatalValue` - Ping fatal threshold
         pub fn hlth_chng_ping(
-            entry: String<40>,
+            entry: &str,
             warning_value: u32,
             fatal_value: u32,
         ) -> crate::fw::CmdResponse {
@@ -252,7 +275,8 @@ pub mod cdh_core {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x1002002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            entry.serialize_to(&mut __encoded, &mut __offset);
+            <String<40> as StrTruncate<40>>::truncate(entry)
+                .serialize_to(&mut __encoded, &mut __offset);
             warning_value.serialize_to(&mut __encoded, &mut __offset);
             fatal_value.serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
@@ -277,6 +301,8 @@ pub mod cdh_core {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// A command to enable or disable Event verbosity and Telemetry
+        ///
+        ///  * `enable` - whether or not Version telemetry is enabled
         pub fn enable(enable: crate::svc::VersionEnabled) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::svc::VersionEnabled::SIZE] = unsafe {
@@ -290,6 +316,8 @@ pub mod cdh_core {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Report version as Event
+        ///
+        ///  * `version_type` - which version type Event is requested
         pub fn version(version_type: crate::svc::VersionType) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::svc::VersionType::SIZE] = unsafe {
@@ -622,6 +650,9 @@ pub mod com_ccsds {
         use fprime_core::*;
         /// Flush a specific queue. This will discard all queued data in the specified queue removing it from eventual
         /// downlink. Buffers requiring ownership return will be returned via the bufferReturnOut port.
+        ///
+        ///  * `queueType` - The Queue data type
+        ///  * `indexType` - The index of the queue (within the supplied type) to flush
         pub fn flush_queue(
             queue_type: crate::svc::QueueType,
             index_type: crate::FwIndexType,
@@ -881,6 +912,8 @@ pub mod data_products {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Start transmitting catalog
+        ///
+        ///  * `wait` - have START_XMIT command complete wait for catalog to complete transmitting
         pub fn start_xmit_catalog(wait: crate::fw::Wait) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + crate::fw::Wait::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -1109,9 +1142,12 @@ pub mod file_handling {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Read a named file off the disk. Divide it into packets and send the packets for transmission to the ground.
+        ///
+        ///  * `sourceFileName` - The name of the on-board file to send
+        ///  * `destFileName` - The name of the destination file on the ground
         pub fn send_file(
-            source_file_name: String<100>,
-            dest_file_name: String<100>,
+            source_file_name: &str,
+            dest_file_name: &str,
         ) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<100> as Serializable>::SIZE
@@ -1121,8 +1157,10 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5001000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            source_file_name.serialize_to(&mut __encoded, &mut __offset);
-            dest_file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<100> as StrTruncate<100>>::truncate(source_file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
+            <String<100> as StrTruncate<100>>::truncate(dest_file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
@@ -1138,9 +1176,14 @@ pub mod file_handling {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Read a named file off the disk from a starting position. Divide it into packets and send the packets for transmission to the ground.
+        ///
+        ///  * `sourceFileName` - The name of the on-board file to send
+        ///  * `destFileName` - The name of the destination file on the ground
+        ///  * `startOffset` - Starting offset of the source file
+        ///  * `length` - Number of bytes to send from starting offset. Length of 0 implies until the end of the file
         pub fn send_partial(
-            source_file_name: String<100>,
-            dest_file_name: String<100>,
+            source_file_name: &str,
+            dest_file_name: &str,
             start_offset: u32,
             length: u32,
         ) -> crate::fw::CmdResponse {
@@ -1152,8 +1195,10 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5001002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            source_file_name.serialize_to(&mut __encoded, &mut __offset);
-            dest_file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<100> as StrTruncate<100>>::truncate(source_file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
+            <String<100> as StrTruncate<100>>::truncate(dest_file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             start_offset.serialize_to(&mut __encoded, &mut __offset);
             length.serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
@@ -1206,7 +1251,9 @@ pub mod file_handling {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Create a directory
-        pub fn create_directory(dir_name: String<200>) -> crate::fw::CmdResponse {
+        ///
+        ///  * `dirName` - The directory to create
+        pub fn create_directory(dir_name: &str) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -1214,14 +1261,18 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            dir_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(dir_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Move a file
+        ///
+        ///  * `sourceFileName` - The source file name
+        ///  * `destFileName` - The destination file name
         pub fn move_file(
-            source_file_name: String<200>,
-            dest_file_name: String<200>,
+            source_file_name: &str,
+            dest_file_name: &str,
         ) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE
@@ -1231,13 +1282,17 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            source_file_name.serialize_to(&mut __encoded, &mut __offset);
-            dest_file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(source_file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(dest_file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Remove a directory, which must be empty
-        pub fn remove_directory(dir_name: String<200>) -> crate::fw::CmdResponse {
+        ///
+        ///  * `dirName` - The directory to remove
+        pub fn remove_directory(dir_name: &str) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -1245,13 +1300,17 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002002;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            dir_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(dir_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Remove a file
+        ///
+        ///  * `fileName` - The file to remove
+        ///  * `ignoreErrors` - Ignore nonexistent files
         pub fn remove_file(
-            file_name: String<200>,
+            file_name: &str,
             ignore_errors: bool,
         ) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
@@ -1261,15 +1320,19 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002003;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             ignore_errors.serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Perform a Linux shell command and write the output to a log file.
+        ///
+        ///  * `command` - The shell command string
+        ///  * `logFileName` - The name of the log file
         pub fn shell_command(
-            command: String<256>,
-            log_file_name: String<200>,
+            command: &str,
+            log_file_name: &str,
         ) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<256> as Serializable>::SIZE
@@ -1279,16 +1342,18 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002004;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            command.serialize_to(&mut __encoded, &mut __offset);
-            log_file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<256> as StrTruncate<256>>::truncate(command)
+                .serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(log_file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Append 1 file's contents to the end of another.
-        pub fn append_file(
-            source: String<200>,
-            target: String<200>,
-        ) -> crate::fw::CmdResponse {
+        ///
+        ///  * `source` - The name of the file to take content from
+        ///  * `target` - The name of the file to append to
+        pub fn append_file(source: &str, target: &str) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
@@ -1297,12 +1362,17 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002005;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            source.serialize_to(&mut __encoded, &mut __offset);
-            target.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(source)
+                .serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(target)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
-        pub fn file_size(file_name: String<200>) -> crate::fw::CmdResponse {
+        ///
+        ///
+        ///  * `fileName` - The file to get the size of
+        pub fn file_size(file_name: &str) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -1310,12 +1380,15 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002006;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// List the contents of a directory
-        pub fn list_directory(dir_name: String<200>) -> crate::fw::CmdResponse {
+        ///
+        ///  * `dirName` - The directory to list
+        pub fn list_directory(dir_name: &str) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -1323,7 +1396,8 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5002007;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            dir_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(dir_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
@@ -1417,8 +1491,11 @@ pub mod file_handling {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Loads a file from storage into the staging database. The file could have selective IDs and not the whole set.
+        ///
+        ///  * `fileName` - The name of the on-board file to set parameters from
+        ///  * `merge` - Whether to merge or fully reset the parameter database from the file contents
         pub fn prm_load_file(
-            file_name: String<200>,
+            file_name: &str,
             merge: crate::svc::prm_db::Merge,
         ) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
@@ -1429,7 +1506,8 @@ pub mod file_handling {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x5003001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             merge.serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
@@ -1669,8 +1747,11 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Loads, validates and runs a sequence
+        ///
+        ///  * `fileName` - The name of the sequence file
+        ///  * `block` - Return command status when complete or not
         pub fn run(
-            file_name: String<200>,
+            file_name: &str,
             block: crate::svc::wasm_sequencer::BlockState,
         ) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
@@ -1681,13 +1762,16 @@ pub mod r#ref {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006000;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             block.serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Loads and validates a sequence
-        pub fn validate(file_name: String<200>) -> crate::fw::CmdResponse {
+        ///
+        ///  * `fileName` - The name of the sequence file
+        pub fn validate(file_name: &str) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + <String<200> as Serializable>::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -1695,11 +1779,14 @@ pub mod r#ref {
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = 0x10006001;
             __opcode.serialize_to(&mut __encoded, &mut __offset);
-            file_name.serialize_to(&mut __encoded, &mut __offset);
+            <String<200> as StrTruncate<200>>::truncate(file_name)
+                .serialize_to(&mut __encoded, &mut __offset);
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Must be called after VALIDATE. Runs the sequence that was validated.
+        ///
+        ///  * `block` - Return command status when complete or not
         pub fn run_validated(
             block: crate::svc::wasm_sequencer::BlockState,
         ) -> crate::fw::CmdResponse {
@@ -1786,6 +1873,8 @@ pub mod r#ref {
         /// Array of array of strings
         pub type ArrayOfStringArray = [crate::r#ref::dp_demo::StringArray; 3];
         /// Select color
+        ///
+        ///  * `color`
         pub fn select_color(
             color: crate::r#ref::dp_demo::ColorEnum,
         ) -> crate::fw::CmdResponse {
@@ -1801,6 +1890,9 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Command for generating a DP
+        ///
+        ///  * `reqType`
+        ///  * `priority`
         pub fn dp(
             req_type: crate::r#ref::dp_demo::DpReqType,
             priority: u32,
@@ -1947,6 +2039,8 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// A test parameter
+        ///
+        ///  * `val`
         pub fn parameter_1_prm_set(val: u32) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u32::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -1970,6 +2064,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// A test parameter
+        ///
+        ///  * `val`
         pub fn parameter_2_prm_set(val: i16) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + i16::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -2102,6 +2198,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Generate a FATAL EVR
+        ///
+        ///  * `arg1` - First FATAL Argument
+        ///  * `arg2` - Second FATAL Argument
+        ///  * `arg3` - Third FATAL Argument
         pub fn sb_gen_fatal(
             arg_1: u32,
             arg_2: u32,
@@ -2121,6 +2221,13 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Generate an ASSERT
+        ///
+        ///  * `arg1` - First ASSERT Argument
+        ///  * `arg2` - Second ASSERT Argument
+        ///  * `arg3` - Third ASSERT Argument
+        ///  * `arg4` - Fourth ASSERT Argument
+        ///  * `arg5` - Fifth ASSERT Argument
+        ///  * `arg6` - Sixth ASSERT Argument
         pub fn sb_gen_assert(
             arg_1: u32,
             arg_2: u32,
@@ -2146,6 +2253,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// A test parameter
+        ///
+        ///  * `val`
         pub fn parameter_3_prm_set(val: u8) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + u8::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -2169,6 +2278,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// A test parameter
+        ///
+        ///  * `val`
         pub fn parameter_4_prm_set(val: f32) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE + f32::SIZE] = unsafe {
                 #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
@@ -2270,6 +2381,11 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
+        ///
+        ///  * `Frequency`
+        ///  * `Amplitude`
+        ///  * `Phase`
+        ///  * `SigType`
         pub fn settings(
             frequency: u32,
             amplitude: f32,
@@ -2313,6 +2429,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Signal Generator Settings
+        ///
+        ///  * `reqType`
+        ///  * `records`
+        ///  * `priority`
         pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
@@ -2456,6 +2576,11 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
+        ///
+        ///  * `Frequency`
+        ///  * `Amplitude`
+        ///  * `Phase`
+        ///  * `SigType`
         pub fn settings(
             frequency: u32,
             amplitude: f32,
@@ -2499,6 +2624,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Signal Generator Settings
+        ///
+        ///  * `reqType`
+        ///  * `records`
+        ///  * `priority`
         pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
@@ -2642,6 +2771,11 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
+        ///
+        ///  * `Frequency`
+        ///  * `Amplitude`
+        ///  * `Phase`
+        ///  * `SigType`
         pub fn settings(
             frequency: u32,
             amplitude: f32,
@@ -2685,6 +2819,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Signal Generator Settings
+        ///
+        ///  * `reqType`
+        ///  * `records`
+        ///  * `priority`
         pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
@@ -2828,6 +2966,11 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
+        ///
+        ///  * `Frequency`
+        ///  * `Amplitude`
+        ///  * `Phase`
+        ///  * `SigType`
         pub fn settings(
             frequency: u32,
             amplitude: f32,
@@ -2871,6 +3014,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Signal Generator Settings
+        ///
+        ///  * `reqType`
+        ///  * `records`
+        ///  * `priority`
         pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
@@ -3014,6 +3161,11 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Signal Generator Settings
+        ///
+        ///  * `Frequency`
+        ///  * `Amplitude`
+        ///  * `Phase`
+        ///  * `SigType`
         pub fn settings(
             frequency: u32,
             amplitude: f32,
@@ -3057,6 +3209,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Signal Generator Settings
+        ///
+        ///  * `reqType`
+        ///  * `records`
+        ///  * `priority`
         pub fn dp(
             req_type: crate::r#ref::signal_gen::DpReqType,
             records: u32,
@@ -3210,6 +3366,8 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// A command to enable or disable system resource telemetry
+        ///
+        ///  * `enable` - whether or not system resource telemetry is enabled
         pub fn enable(
             enable: crate::svc::SystemResourceEnabled,
         ) -> crate::fw::CmdResponse {
@@ -3523,6 +3681,8 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Single choice command
+        ///
+        ///  * `choice` - A single choice
         pub fn choice(choice: crate::r#ref::Choice) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::Choice::SIZE] = unsafe {
@@ -3536,6 +3696,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Single enumeration parameter
+        ///
+        ///  * `val`
         pub fn choice_prm_prm_set(val: crate::r#ref::Choice) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::Choice::SIZE] = unsafe {
@@ -3560,6 +3722,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple choice command via Array
+        ///
+        ///  * `choices` - A set of choices
         pub fn choices(choices: crate::r#ref::ManyChoices) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ManyChoices::SIZE] = unsafe {
@@ -3573,6 +3737,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple choice command via Array with a preceding and following argument
+        ///
+        ///  * `repeat` - Number of times to repeat the choices
+        ///  * `choices` - A set of choices
+        ///  * `repeat_max` - Limit to the number of repetitions
         pub fn choices_with_friends(
             repeat: u8,
             choices: crate::r#ref::ManyChoices,
@@ -3592,6 +3760,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple enumeration parameter via Array
+        ///
+        ///  * `val`
         pub fn choices_prm_prm_set(
             val: crate::r#ref::ManyChoices,
         ) -> crate::fw::CmdResponse {
@@ -3618,6 +3788,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Too many choice command via Array
+        ///
+        ///  * `choices` - Way to many choices to make
         pub fn extra_choices(
             choices: crate::r#ref::TooManyChoices,
         ) -> crate::fw::CmdResponse {
@@ -3633,6 +3805,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Too many choices command via Array with a preceding and following argument
+        ///
+        ///  * `repeat` - Number of times to repeat the choices
+        ///  * `choices` - Way to many choices to make
+        ///  * `repeat_max` - Limit to the number of repetitions
         pub fn extra_choices_with_friends(
             repeat: u8,
             choices: crate::r#ref::TooManyChoices,
@@ -3652,6 +3828,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Too many enumeration parameter via Array
+        ///
+        ///  * `val`
         pub fn extra_choices_prm_prm_set(
             val: crate::r#ref::ManyChoices,
         ) -> crate::fw::CmdResponse {
@@ -3678,6 +3856,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple choice command via Structure
+        ///
+        ///  * `choices` - A pair of choices
         pub fn choice_pair(choices: crate::r#ref::ChoicePair) -> crate::fw::CmdResponse {
             let mut __encoded: [u8; crate::FwOpcodeType::SIZE
                 + crate::r#ref::ChoicePair::SIZE] = unsafe {
@@ -3691,6 +3871,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple choices command via Structure with a preceding and following argument
+        ///
+        ///  * `repeat` - Number of times to repeat the choices
+        ///  * `choices` - A pair of choices
+        ///  * `repeat_max` - Limit to the number of repetitions
         pub fn choice_pair_with_friends(
             repeat: u8,
             choices: crate::r#ref::ChoicePair,
@@ -3710,6 +3894,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple enumeration parameter via Structure
+        ///
+        ///  * `val`
         pub fn choice_pair_prm_prm_set(
             val: crate::r#ref::ChoicePair,
         ) -> crate::fw::CmdResponse {
@@ -3736,6 +3922,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple choice command via Complex Structure
+        ///
+        ///  * `choices` - A phenomenal amount of choice
         pub fn glutton_of_choice(
             choices: crate::r#ref::ChoiceSlurry,
         ) -> crate::fw::CmdResponse {
@@ -3751,6 +3939,10 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple choices command via Complex Structure with a preceding and following argument
+        ///
+        ///  * `repeat` - Number of times to repeat the choices
+        ///  * `choices` - A phenomenal amount of choice
+        ///  * `repeat_max` - Limit to the number of repetitions
         pub fn glutton_of_choice_with_friends(
             repeat: u8,
             choices: crate::r#ref::ChoiceSlurry,
@@ -3770,6 +3962,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Multiple enumeration parameter via Complex Structure
+        ///
+        ///  * `val`
         pub fn glutton_of_choice_prm_prm_set(
             val: crate::r#ref::ChoiceSlurry,
         ) -> crate::fw::CmdResponse {
@@ -3818,6 +4012,8 @@ pub mod r#ref {
             unsafe { core::mem::transmute(res as u8) }
         }
         /// Send scalars
+        ///
+        ///  * `scalar_input`
         pub fn send_scalars(
             scalar_input: crate::r#ref::ScalarStruct,
         ) -> crate::fw::CmdResponse {

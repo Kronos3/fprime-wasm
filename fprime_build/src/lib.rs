@@ -7,11 +7,9 @@ use std::path::Path;
 use std::{env, fs};
 
 mod commands;
-mod context;
 mod telemetry;
 mod types;
 mod util;
-mod value;
 
 pub(crate) type Qualifier = Vec<Ident>;
 struct CodeVec(Vec<(Qualifier, TokenStream)>);
