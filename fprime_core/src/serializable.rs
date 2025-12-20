@@ -1,164 +1,54 @@
-use crate::{Serializable, String};
+use crate::{String};
 
-impl Serializable for u8 {
-    const SIZE: usize = 1;
+pub trait Serializable: Sized {
+    const SIZE: usize;
 
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        to[*offset] = *self;
-        *offset += 1;
-    }
+    fn serialize_to(&self, to: &mut [u8], offset: &mut usize);
+    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self;
 
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = from[*offset];
-        *offset += 1;
-        out
-    }
-}
+    fn deserialize<const SIZE: usize>(from: [u8; SIZE]) -> Self {
+        // Rust doesn't support complex generic evaluation statically
+        // https://github.com/rust-lang/rust/issues/76560
+        assert_eq!(Self::SIZE, SIZE);
 
-impl Serializable for u16 {
-    const SIZE: usize = 2;
-
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let bytes = self.to_be_bytes();
-        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
-        *offset += Self::SIZE;
-    }
-
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
-        *offset += Self::SIZE;
-        out
+        let mut offset: usize = 0;
+        Self::deserialize_from(&from, &mut offset)
     }
 }
 
-impl Serializable for u32 {
-    const SIZE: usize = 4;
+macro_rules! primitive {
+    ($primitive: ty) => {
+        impl Serializable for $primitive {
+            const SIZE: usize = size_of::<$primitive>();
 
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let bytes = self.to_be_bytes();
-        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
-        *offset += Self::SIZE;
-    }
+            fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
+                let bytes = self.to_be_bytes();
+                to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
+                *offset += Self::SIZE;
+            }
 
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
-        *offset += Self::SIZE;
-        out
-    }
+            fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
+                let out =
+                    Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+                *offset += Self::SIZE;
+                out
+            }
+        }
+    };
 }
 
-impl Serializable for u64 {
-    const SIZE: usize = 8;
+primitive!(u8);
+primitive!(i8);
+primitive!(u16);
+primitive!(i16);
+primitive!(u32);
+primitive!(i32);
+primitive!(u64);
+primitive!(i64);
+primitive!(f32);
+primitive!(f64);
 
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let bytes = self.to_be_bytes();
-        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
-        *offset += Self::SIZE;
-    }
-
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
-        *offset += Self::SIZE;
-        out
-    }
-}
-
-impl Serializable for i8 {
-    const SIZE: usize = 1;
-
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        to[*offset] = *self as u8;
-        *offset += 1;
-    }
-
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = from[*offset] as i8;
-        *offset += 1;
-        out
-    }
-}
-
-impl Serializable for i16 {
-    const SIZE: usize = 2;
-
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let bytes = self.to_be_bytes();
-        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
-        *offset += Self::SIZE;
-    }
-
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
-        *offset += Self::SIZE;
-        out
-    }
-}
-
-impl Serializable for i32 {
-    const SIZE: usize = 4;
-
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let bytes = self.to_be_bytes();
-        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
-        *offset += Self::SIZE;
-    }
-
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
-        *offset += Self::SIZE;
-        out
-    }
-}
-
-impl Serializable for i64 {
-    const SIZE: usize = 8;
-
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let bytes = self.to_be_bytes();
-        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
-        *offset += Self::SIZE;
-    }
-
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
-        *offset += Self::SIZE;
-        out
-    }
-}
-
-impl Serializable for f32 {
-    const SIZE: usize = 4;
-
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let bytes = self.to_be_bytes();
-        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
-        *offset += Self::SIZE;
-    }
-
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
-        *offset += Self::SIZE;
-        out
-    }
-}
-
-impl Serializable for f64 {
-    const SIZE: usize = 8;
-
-    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-        let bytes = self.to_be_bytes();
-        to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
-        *offset += Self::SIZE;
-    }
-
-    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-        let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
-        *offset += Self::SIZE;
-        out
-    }
-}
-
-impl<const N: usize> Serializable for crate::String<N> {
+impl<const N: usize> Serializable for String<N> {
     const SIZE: usize = 2 + N;
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
