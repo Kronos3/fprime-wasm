@@ -56,7 +56,7 @@ fn enum_type_definition(ty: &EnumType) -> (Qualifier, TokenStream) {
     });
 
     let enum_def = quote! {
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(#repr_ty)]
         pub enum #name {
             #(#constants)*

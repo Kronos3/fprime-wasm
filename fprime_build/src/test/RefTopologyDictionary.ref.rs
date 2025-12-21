@@ -32,7 +32,7 @@ pub type FwOpcodeType = crate::FwIdType;
 /// e.g., memory buffer sizes, file sizes. Must be unsigned.
 pub type FwSizeType = crate::PlatformSizeType;
 /// Define enumeration for Time base types
-#[derive(Clone, Copy, Debug, Serializable)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
 #[repr(u16)]
 pub enum TimeBase {
     /// No time base has been established (Required)
@@ -793,7 +793,7 @@ pub mod com_cfg {
     #[allow(unused_imports)]
     use fprime_core::*;
     /// APIDs are 11 bits in the Space Packet protocol, so we use U16. Max value 7FF
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u16)]
     pub enum Apid {
         /// Command packet type - incoming
@@ -1528,13 +1528,13 @@ pub mod file_handling {
 pub mod fw {
     #[allow(unused_imports)]
     use fprime_core::*;
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum TlmValid {
         Valid = 0,
         Invalid = 1,
     }
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum DpState {
         /// The untransmitted state
@@ -1547,7 +1547,7 @@ pub mod fw {
         Transmitted = 2,
     }
     /// Enum representing a command response
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum CmdResponse {
         /// Command successfully executed
@@ -1564,7 +1564,7 @@ pub mod fw {
         Busy = 5,
     }
     /// Deserialization status
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum DeserialStatus {
         Ok = 0,
@@ -1590,7 +1590,7 @@ pub mod fw {
         pub useconds: u32,
     }
     /// Wait or don't wait for something
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum Wait {
         /// Wait for something
@@ -1599,7 +1599,7 @@ pub mod fw {
         NoWait = 1,
     }
     /// Enabled and disabled states
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum Enabled {
         /// Disabled state
@@ -1608,7 +1608,7 @@ pub mod fw {
         Enabled = 1,
     }
     /// Enum representing parameter validity
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum ParamValid {
         Uninit = 0,
@@ -1621,7 +1621,7 @@ pub mod fw {
         use fprime_core::*;
         /// A bit mask for selecting the type of processing to perform on
         /// a container before writing it to disk.
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum ProcType {
             /// Processing type 0
@@ -1646,7 +1646,7 @@ pub mod r#ref {
         /// Packet Status
         pub packet_status: crate::r#ref::PacketRecvStatus,
     }
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(i32)]
     pub enum SignalType {
         Triangle = 0,
@@ -1656,7 +1656,7 @@ pub mod r#ref {
     }
     pub type SignalPairSet = [crate::r#ref::SignalPair; 4];
     /// Enumeration type for use later
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(i32)]
     pub enum Choice {
         One = 0,
@@ -1672,7 +1672,7 @@ pub mod r#ref {
     /// Enumeration array
     pub type ManyChoices = [crate::r#ref::Choice; 2];
     /// Packet receive status
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(i32)]
     pub enum PacketRecvStatus {
         PacketStateNoPackets = 0,
@@ -1818,14 +1818,14 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         pub type BoolAlias = bool;
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(i32)]
         pub enum ColorEnum {
             Red = 0,
             Green = 1,
             Blue = 2,
         }
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(i32)]
         pub enum DpReqType {
             Immediate = 0,
@@ -2165,7 +2165,7 @@ pub mod r#ref {
         #[allow(unused_imports)]
         use fprime_core::*;
         /// Active state
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(i32)]
         pub enum ActiveState {
             SendIdle = 0,
@@ -3355,7 +3355,7 @@ pub mod r#ref {
     pub mod signal_gen {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(i32)]
         pub enum DpReqType {
             Immediate = 0,
@@ -4328,7 +4328,7 @@ pub mod svc {
     #[allow(unused_imports)]
     use fprime_core::*;
     /// An enumeration for Version Type
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum VersionType {
         /// project version
@@ -4347,14 +4347,14 @@ pub mod svc {
     /// Array of queue depths for Fw::Buffer types
     pub type BuffQueueDepth = [u32; 1];
     /// An enumeration of queue data types
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum QueueType {
         ComQueue = 0,
         BufferQueue = 1,
     }
     /// Send file status enum
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum SendFileStatus {
         StatusOk = 0,
@@ -4363,7 +4363,7 @@ pub mod svc {
         StatusBusy = 3,
     }
     /// Tracks versions for project, framework and user defined versions etc
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum VersionEnabled {
         /// verbosity disabled
@@ -4382,14 +4382,14 @@ pub mod svc {
         pub blocks: u32,
         pub state: crate::fw::DpState,
     }
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum SystemResourceEnabled {
         Disabled = 0,
         Enabled = 1,
     }
     /// An enumeration for version status
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum VersionStatus {
         /// Version was good
@@ -4398,7 +4398,7 @@ pub mod svc {
         Failure = 1,
     }
     /// Header validation error
-    #[derive(Clone, Copy, Debug, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
     #[repr(u8)]
     pub enum DpHdrField {
         Descriptor = 0,
@@ -4421,7 +4421,7 @@ pub mod svc {
         use fprime_core::*;
         /// Severity level for event filtering
         /// Similar to Fw::LogSeverity, but no FATAL event
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum FilterSeverity {
             /// Filter WARNING_HI events
@@ -4438,7 +4438,7 @@ pub mod svc {
             Diagnostic = 5,
         }
         /// Enabled and disabled state
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum Enabled {
             /// Enabled state
@@ -4450,7 +4450,7 @@ pub mod svc {
     pub mod fprime_router {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum AllocationReason {
             /// Buffer allocation for file uplink
@@ -4462,7 +4462,7 @@ pub mod svc {
     pub mod prm_db {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum PrmLoadAction {
             SetParameter = 0,
@@ -4470,14 +4470,14 @@ pub mod svc {
             LoadFileCommand = 2,
             CommitStagedCommand = 3,
         }
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum Merge {
             Merge = 0,
             Reset = 1,
         }
         /// Parameter read error
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum PrmReadError {
             Open = 0,
@@ -4493,7 +4493,7 @@ pub mod svc {
             ParameterValueSize = 10,
         }
         /// Parameter write error
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum PrmWriteError {
             Open = 0,
@@ -4507,7 +4507,7 @@ pub mod svc {
             ParameterValueSize = 8,
         }
         /// State of parameter DB file load operations
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum PrmDbFileLoadState {
             Idle = 0,
@@ -4520,7 +4520,7 @@ pub mod svc {
         use fprime_core::*;
         /// Define a set of Version entries on a project-specific
         /// basis.
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(u32)]
         pub enum VersionEnum {
             /// Entry 0
@@ -4548,7 +4548,7 @@ pub mod svc {
     pub mod wasm_sequencer {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[derive(Clone, Copy, Debug, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
         #[repr(i32)]
         pub enum BlockState {
             Block = 0,
