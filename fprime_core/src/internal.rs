@@ -1,6 +1,5 @@
 #[link(wasm_import_module = "fprime_core")]
 unsafe extern "C" {
-
     /// Dispatch a command given a Fw::ComBuffer
     /// This command should be run synchronously and return the response
     /// once the command has finished

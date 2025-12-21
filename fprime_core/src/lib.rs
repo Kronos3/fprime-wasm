@@ -127,7 +127,7 @@ pub mod sys {
     ///
     /// * `msg`: message string to emit via F Prime event
     ///
-    /// ```
+    /// returns: ()
     pub fn message(msg: &str) {
         let ptr = msg.as_ptr() as u32;
         let len = msg.len() as u32;

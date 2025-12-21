@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use proc_macro2::Ident;
+use proc_macro2::{Ident, Span, Literal};
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput};
 
@@ -44,25 +44,38 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                 quote! { <#ty as Serializable>::SIZE }
             });
 
-            let serialize_to = s.fields.iter().map(|field| match &field.ident {
-                None => quote! {},
+            let serialize_to = s.fields.iter().enumerate().map(|(i, field)| match &field.ident {
+                None => {
+                    let name = Literal::usize_unsuffixed(i);
+                    quote! { self.#name.serialize_to(to, offset); }
+                },
                 Some(name) => quote! { self.#name.serialize_to(to, offset); },
             });
 
-            let deserialize_from = s.fields.iter().map(|field| {
+            let deserialize_from = s.fields.iter().enumerate().map(|(i, field)| {
                 let ty = &field.ty;
-                match &field.ident {
-                    None => quote! {},
-                    Some(name) => {
-                        quote! { let #name: #ty = Serializable::deserialize_from(from, offset); }
-                    }
-                }
+                let name = match &field.ident {
+                    None => &Ident::new(
+                        &format!("_{}", Literal::usize_unsuffixed(i)),
+                        Span::call_site(),
+                    ),
+                    Some(name) => name,
+                };
+
+                quote! { let #name: #ty = Serializable::deserialize_from(from, offset); }
             });
 
-            let field_names: Vec<&Ident> = s
+            let field_names: Vec<Ident> = s
                 .fields
                 .iter()
-                .filter_map(|field| field.ident.as_ref())
+                .enumerate()
+                .map(|(i, field)| match &field.ident {
+                    None => Ident::new(
+                        &format!("_{}", Literal::usize_unsuffixed(i)),
+                        Span::call_site(),
+                    ),
+                    Some(name) => name.clone(),
+                })
                 .collect();
 
             quote! {
