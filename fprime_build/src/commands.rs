@@ -38,10 +38,9 @@ pub fn command(
             TypeName::String { size } => {
                 let ty = type_name(&arg.type_name);
                 // TODO(tumbar) Make string commanding configurable
-                // Panic if string doesn't fit
-                // quote! { <#ty as TryFrom<&str>>::try_from(#name).unwrap() }
+                // Currently we accept &str and truncate size to fit
 
-                // Truncate string (fast)
+                // Truncate string
                 let size_lit = Literal::u32_unsuffixed(*size);
                 quote! { <#ty as StrTruncate<#size_lit>>::truncate(#name) }
             }
