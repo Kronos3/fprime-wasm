@@ -19,7 +19,7 @@ impl Display for fw::TimeValue {
 #[unsafe(no_mangle)]
 pub extern "C" fn main() {
     loop {
-        let (val, time) = unsafe { r#ref::system_resources::cpu().unwrap_unchecked() };
+        let (val, time) = r#ref::system_resources::cpu().unwrap();
         println!("[{}] {}", time, val);
         sys::sleep(1_000_000)
     }
