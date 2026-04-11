@@ -6,6 +6,8 @@ mod serializable;
 pub use fprime_macros::Serializable;
 pub use serializable::*;
 
+pub use heapless;
+
 /// Stack-backed String type
 /// The capacity specifies the
 pub type String<const N: usize> = heapless::String<N, u16>;
@@ -47,9 +49,16 @@ impl Write for FprimeEvents {
 }
 
 #[macro_export]
-macro_rules! println {
-    ($($arg:tt)*) => {
-        sys::messagef(core::format_args!($($arg)*));
+macro_rules! print_event {
+    ($($arg:tt)+) => {
+        sys::messagef(format_args!($($arg)+));
+    };
+}
+
+#[macro_export]
+macro_rules! format {
+    ($size:expr, $($arg:tt)+) => {
+        fprime_core::heapless::string::format::<$size, u16>(format_args!($($arg)+)).unwrap()
     };
 }
 

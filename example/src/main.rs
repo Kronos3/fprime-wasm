@@ -4,7 +4,9 @@
 mod dictionary;
 
 use core::fmt::{Display, Formatter};
+pub use dictionary::r#ref::*;
 pub use dictionary::*;
+use fprime_core::sys::sleep;
 use fprime_core::*;
 
 impl Display for fw::TimeValue {
@@ -18,9 +20,19 @@ impl Display for fw::TimeValue {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn main() {
-    loop {
-        let (val, time) = r#ref::system_resources::cpu().unwrap();
-        println!("[{}] {}", time, val);
-        sys::sleep(1_000_000)
+    cdh_core::cmd_disp::cmd_no_op_string("Hello");
+    cdh_core::cmd_disp::cmd_no_op();
+    cdh_core::cmd_disp::cmd_no_op();
+    cdh_core::cmd_disp::cmd_no_op();
+    cdh_core::cmd_disp::cmd_no_op();
+    cdh_core::cmd_disp::cmd_no_op();
+
+    // Poll the CPU telemetry every second
+    for _ in 0..10 {
+        let (val, time) = system_resources::cpu().unwrap();
+        // print_event!("CPU {time} {}", val as u8);
+
+        // Sleep 1 second
+        sleep(1_000_000)
     }
 }
