@@ -1,4 +1,4 @@
-#[link(wasm_import_module = "fprime_core")]
+#[link(wasm_import_module = "fprime_v1")]
 unsafe extern "C" {
     /// Dispatch a command given a Fw::ComBuffer
     /// This command should be run synchronously and return the response
@@ -16,7 +16,7 @@ unsafe extern "C" {
     /// * `size`: Length of the com buffer
     ///
     /// returns: i32 (Fw::CmdResponse)
-    pub(crate) fn command(com_buffer_ptr: u32, size: u32) -> i32;
+    pub(crate) fn cmd(com_buffer_ptr: u32, size: u32) -> i32;
 
     /// Request last reported telemetry value
     ///
@@ -29,7 +29,7 @@ unsafe extern "C" {
     /// * `value_size`: Length of the value buffer
     ///
     /// returns: i32 (Fw::TlmValid)
-    pub(crate) fn telemetry(
+    pub(crate) fn tlm(
         id: u32,
         time_ptr: u32,
         time_size: u32,
@@ -42,10 +42,11 @@ unsafe extern "C" {
     ///
     /// # Arguments
     ///
+    /// * Event severity level
     /// * `str_ptr`: pointer to the message string
     /// * `size`: length of the message string
     ///
-    pub(crate) fn message(str_ptr: u32, size: u32);
+    pub(crate) fn event(severity: i32, str_ptr: u32, size: u32);
 
     /// Exit the runtime given a status.
     /// This function should not return and should stop the WASM runtime
@@ -66,6 +67,15 @@ unsafe extern "C" {
     /// returns: ()
     pub(crate) fn rsleep(us: u64);
 
+    /// Pause the runtime until a specified time
+    ///
+    /// # Arguments
+    ///
+    /// * `time`: Microseconds from system epoch to pause until
+    ///
+    /// returns: ()
+    pub(crate) fn asleep(time: u64);
+
     /// Panic the runtime with a message.
     /// This function should not return and the runtime should be stopped
     ///
@@ -75,5 +85,5 @@ unsafe extern "C" {
     /// * `size`: length of the panic string
     #[cfg(target_arch = "wasm32")]
     #[cfg(not(test))]
-    pub(crate) fn panic(msg_ptr: u32, size: u32) -> !;
+    pub(crate) fn panic(code: i32) -> !;
 }

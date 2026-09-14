@@ -1,8 +1,69 @@
-use crate::Qualifier;
+use crate::tree::Qualifier;
 use convert_case::{Case, Casing};
+use fprime_dictionary::{Command, Dictionary, FloatKind, IntegerKind, TypeDefinition, TypeName};
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::quote;
 use std::str::FromStr;
+
+fn type_name_size(dictionary: Dictionary, ty: TypeName) -> usize {
+    match ty {
+        TypeName::Integer { name } => match name {
+            IntegerKind::U8 | IntegerKind::I8 => 1,
+            IntegerKind::U16 | IntegerKind::I16 => 2,
+            IntegerKind::U32 | IntegerKind::I32 => 4,
+            IntegerKind::U64 | IntegerKind::I64 => 8,
+        },
+        TypeName::Float { name } => match name {
+            FloatKind::F32 => 4,
+            FloatKind::F64 => 8,
+        },
+        TypeName::Bool => 1,
+        TypeName::String { size } => {
+            // Size prefix
+            type_name_size(dictionary, TypeName::QualifiedIdentifier {
+                name: "FwSizeType".to_string()
+            }) + (size as usize)
+        }
+        TypeName::QualifiedIdentifier { name } => {
+            dictionary.type_definitions.iter().find(|d| d.qualified_name() == name)
+        }
+    }
+}
+
+fn type_definition_size(dictionary: Dictionary, ty: TypeDefinition) -> usize {
+    match ty {
+        TypeDefinition::Array(a) => (a.size as usize) * type_name_size(dictionary, a.element_type),
+        TypeDefinition::Enum(e) => type_name_size(dictionary, e.representation_type),
+        TypeDefinition::Struct(s) => s.members.iter().fold(0, |size, m| {
+            size + (type_name_size(dictionary, m.type_name) * (m.size.unwrap_or(1) as usize))
+        }),
+        TypeDefinition::Alias(a) => type_name_size(dictionary, a.underlying_type),
+    }
+}
+
+fn cmd_size(dictionary: Dictionary, cmd: &Command) -> usize {
+    dictionary.type_definitions.iter().find_map(|f| match f {
+        TypeDefinition::Alias(a) => {
+            if a.qualified_name == "FwOpcodeType" {
+                Some()
+            }
+        }
+        _ => None,
+    })
+}
+
+pub(crate) fn global_memory(dictionary: Dictionary) -> TokenStream {
+    // Compute the upper bound scratch space needed
+    // Scratch memory is used for telemetry, commands and parameters
+    let max_size = 0usize;
+    for d in dictionary.commands.iter() {}
+
+    quote! {
+        const __SCRATCH_SIZE: usize = 512;
+        static mut __SCRATCH: [u8; __SCRATCH_SIZE] = [0x0; __SCRATCH_SIZE];
+        static mut __TIME: [u8; fw::TimeValue::SIZE] = [0; fw::TimeValue::SIZE];
+    }
+}
 
 pub(crate) fn qualified_identifier(qi: &str, name_kind: NameKind) -> (Qualifier, Ident) {
     let mut qn: Vec<&str> = qi.split('.').collect();

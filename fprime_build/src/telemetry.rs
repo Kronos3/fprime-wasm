@@ -1,6 +1,6 @@
 use crate::types::type_name;
 use crate::util::{annotate, hex_literal, qualified_identifier, NameKind};
-use crate::Qualifier;
+use crate::tree::Qualifier;
 use proc_macro2::TokenStream;
 use quote::quote;
 

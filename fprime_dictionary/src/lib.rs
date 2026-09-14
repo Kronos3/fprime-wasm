@@ -160,6 +160,17 @@ pub enum TypeDefinition {
     Alias(AliasType),
 }
 
+impl TypeDefinition {
+    pub fn qualified_name(&self) -> &str {
+        match self {
+            TypeDefinition::Array(a) => &a.qualified_name,
+            TypeDefinition::Enum(e) => &e.qualified_name,
+            TypeDefinition::Struct(s) => &s.qualified_name,
+            TypeDefinition::Alias(a) => &a.qualified_name,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Constant {

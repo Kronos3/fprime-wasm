@@ -1,6 +1,6 @@
 use crate::util::NameKind::StructMember;
 use crate::util::{annotate, format_name, qualified_identifier, NameKind};
-use crate::Qualifier;
+use crate::tree::Qualifier;
 use fprime_dictionary::{
     AliasType, ArrayType, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition, TypeName,
 };

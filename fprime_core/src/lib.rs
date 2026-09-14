@@ -41,17 +41,21 @@ pub type FprimeResult<T> = Result<T, FprimeErr>;
 pub struct FprimeEvents;
 pub use core::fmt::Write;
 
-impl Write for FprimeEvents {
-    fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        sys::message(s);
-        Ok(())
-    }
+#[repr(i32)]
+pub enum EventSeverity {
+    Fatal = 1,
+    WarningHi = 2,
+    WarningLow = 3,
+    Command = 4,
+    ActivityHigh = 5,
+    ActivityLo = 6,
+    Diagnostic = 7,
 }
 
 #[macro_export]
 macro_rules! print_event {
-    ($($arg:tt)+) => {
-        sys::messagef(format_args!($($arg)+));
+    ($sev:expr, $($arg:tt)+) => {
+        fprime_core::sys::messagef($sev, format_args!($($arg)+));
     };
 }
 
@@ -63,7 +67,7 @@ macro_rules! format {
 }
 
 pub mod sys {
-    use crate::{internal, FprimeErr, FprimeResult};
+    use crate::{FprimeErr, FprimeResult, internal};
     use core::fmt::Arguments;
 
     /// Dispatch a command given a Fw::ComBuffer
@@ -86,7 +90,7 @@ pub mod sys {
     ///
     /// returns: i32 (Fw::CmdResponse)
     pub unsafe fn command(com_buffer: &[u8]) -> i32 {
-        unsafe { internal::command(com_buffer.as_ptr() as u32, com_buffer.len() as u32) }
+        unsafe { internal::cmd(com_buffer.as_ptr() as u32, com_buffer.len() as u32) }
     }
 
     /// Request last reported telemetry value
@@ -104,7 +108,7 @@ pub mod sys {
         value_buf: &mut [u8],
     ) -> FprimeResult<()> {
         match unsafe {
-            internal::telemetry(
+            internal::tlm(
                 id,
                 time_buf.as_ptr() as u32,
                 time_buf.len() as u32,
@@ -137,16 +141,16 @@ pub mod sys {
     /// * `msg`: message string to emit via F Prime event
     ///
     /// returns: ()
-    pub fn message(msg: &str) {
+    pub fn message(severity: crate::EventSeverity, msg: &str) {
         let ptr = msg.as_ptr() as u32;
         let len = msg.len() as u32;
-        unsafe { internal::message(ptr, len) }
+        unsafe { internal::event(severity as i32, ptr, len) }
     }
 
     #[inline]
-    pub fn messagef(args: Arguments<'_>) {
+    pub fn messagef(severity: crate::EventSeverity, args: Arguments<'_>) {
         let s: crate::String<120> = heapless::string::format(args).unwrap();
-        message(&s)
+        message(severity, &s)
     }
 
     /// Pause the runtime for a specified time
@@ -156,23 +160,27 @@ pub mod sys {
     /// * `us`: Time in microseconds to pause the runtime
     ///
     /// returns: ()
-    pub fn sleep(us: u64) {
+    pub fn rsleep(us: u64) {
         unsafe { internal::rsleep(us) }
+    }
+
+    /// Pause the runtime until a specified time
+    ///
+    /// # Arguments
+    ///
+    /// * `us`: Microseconds from system epoch to pause until
+    ///
+    /// returns: ()
+    pub fn asleep(time: u64) {
+        unsafe { internal::asleep(time) }
     }
 
     #[cfg(target_arch = "wasm32")]
     #[cfg(not(test))]
     #[panic_handler]
-    fn panic(info: &core::panic::PanicInfo) -> ! {
-        // TODO(tumbar) Panic should transfer location information without formatting in-place
-        // This can explode code-size so we avoid fmt here
-        let filename = match info.location() {
-            None => "no location",
-            Some(loc) => loc.file(),
-        };
-
+    fn panic(_info: &core::panic::PanicInfo) -> ! {
         unsafe {
-            internal::panic(filename.as_ptr() as u32, filename.len() as u32);
+            internal::panic(1);
         }
     }
 }

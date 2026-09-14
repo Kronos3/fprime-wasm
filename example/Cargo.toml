@@ -2,20 +2,13 @@
 name = "example"
 version = "0.1.0"
 edition = "2024"
+publish = false
 
 [dependencies]
 fprime_core = { path = "../fprime_core" }
 
 [build-dependencies]
 fprime_build = { path = "../fprime_build" }
-
-[target.wasm32-unknown-unknown]
-
-rustflags = [
-    "-Ctarget-cpu=mvp",
-    "-Ctarget-feature=+mutable-globals",
-    "-Ctarget-feature=+bulk-memory"
-]
 
 [[bin]]
 name = "example"

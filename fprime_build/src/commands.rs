@@ -1,6 +1,6 @@
+use crate::tree::Qualifier;
 use crate::types::type_name;
-use crate::util::{annotate_with_args, format_name, hex_literal, qualified_identifier, NameKind};
-use crate::Qualifier;
+use crate::util::{NameKind, annotate_with_args, format_name, hex_literal, qualified_identifier};
 use fprime_dictionary::{EnumType, TypeName};
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
@@ -18,17 +18,6 @@ pub fn command(
                 let ty = type_name(&arg.type_name);
                 quote! { #name: #ty, }
             }
-        }
-    });
-
-    let arg_sizes = cmd.formal_params.iter().map(|arg| match &arg.type_name {
-        TypeName::String { .. } => {
-            let ty = type_name(&arg.type_name);
-            quote! { <#ty as Serializable>::SIZE }
-        }
-        _ => {
-            let ty = type_name(&arg.type_name);
-            quote! { #ty::SIZE }
         }
     });
 
@@ -50,23 +39,27 @@ pub fn command(
         };
 
         quote! {
-            #value.serialize_to(&mut __encoded, &mut __offset);
+            #value.serialize_to(__encoded, &mut __offset);
         }
     });
 
     let opcode = hex_literal(cmd.opcode);
     let response_repr_ty = type_name(&cmd_response.representation_type);
+    let scratch_ns1 = (0..q.len()).map(|_| quote!(super::));
+    let scratch_ns2 = (0..q.len()).map(|_| quote!(super::));
 
     let def = quote! {
         pub fn #name(#(#args)*) -> crate::fw::CmdResponse {
-            let mut __encoded: [u8; crate::FwOpcodeType::SIZE #(+ #arg_sizes)*] = unsafe {
-                #[allow(invalid_value)]
-                core::mem::MaybeUninit::uninit().assume_init()
+            let __encoded = unsafe {
+                let ptr = (&raw mut #(#scratch_ns1)* __SCRATCH) as *mut u8;
+                let len = #(#scratch_ns2)* __SCRATCH_SIZE;
+
+                core::slice::from_raw_parts_mut(ptr, len)
             };
 
             let mut __offset: usize = 0;
             let __opcode: crate::FwOpcodeType = #opcode;
-            __opcode.serialize_to(&mut __encoded, &mut __offset);
+            __opcode.serialize_to(__encoded, &mut __offset);
             #(#ser)*
 
             let res = unsafe { sys::command(&__encoded[0..__offset]) };
