@@ -5,7 +5,7 @@ use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::quote;
 use std::str::FromStr;
 
-fn type_name_size(dictionary: Dictionary, ty: TypeName) -> usize {
+fn type_name_size(dictionary: &Dictionary, ty: &TypeName) -> usize {
     match ty {
         TypeName::Integer { name } => match name {
             IntegerKind::U8 | IntegerKind::I8 => 1,
@@ -20,46 +20,65 @@ fn type_name_size(dictionary: Dictionary, ty: TypeName) -> usize {
         TypeName::Bool => 1,
         TypeName::String { size } => {
             // Size prefix
-            type_name_size(dictionary, TypeName::QualifiedIdentifier {
-                name: "FwSizeType".to_string()
-            }) + (size as usize)
+            type_name_size(
+                &dictionary,
+                &TypeName::QualifiedIdentifier {
+                    name: "FwSizeType".to_string(),
+                },
+            ) + (*size as usize)
         }
-        TypeName::QualifiedIdentifier { name } => {
-            dictionary.type_definitions.iter().find(|d| d.qualified_name() == name)
-        }
+        TypeName::QualifiedIdentifier { name } => type_definition_size(
+            &dictionary,
+            &dictionary
+                .type_definitions
+                .get(&*name)
+                .expect("Expected type definition"),
+        ),
     }
 }
 
-fn type_definition_size(dictionary: Dictionary, ty: TypeDefinition) -> usize {
+fn type_definition_size(dictionary: &Dictionary, ty: &TypeDefinition) -> usize {
     match ty {
-        TypeDefinition::Array(a) => (a.size as usize) * type_name_size(dictionary, a.element_type),
-        TypeDefinition::Enum(e) => type_name_size(dictionary, e.representation_type),
+        TypeDefinition::Array(a) => (a.size as usize) * type_name_size(dictionary, &a.element_type),
+        TypeDefinition::Enum(e) => type_name_size(dictionary, &e.representation_type),
         TypeDefinition::Struct(s) => s.members.iter().fold(0, |size, m| {
-            size + (type_name_size(dictionary, m.type_name) * (m.size.unwrap_or(1) as usize))
+            size + (type_name_size(dictionary, &m.type_name) * (m.size.unwrap_or(1) as usize))
         }),
-        TypeDefinition::Alias(a) => type_name_size(dictionary, a.underlying_type),
+        TypeDefinition::Alias(a) => type_name_size(dictionary, &a.underlying_type),
     }
 }
 
-fn cmd_size(dictionary: Dictionary, cmd: &Command) -> usize {
-    dictionary.type_definitions.iter().find_map(|f| match f {
-        TypeDefinition::Alias(a) => {
-            if a.qualified_name == "FwOpcodeType" {
-                Some()
-            }
-        }
-        _ => None,
-    })
+fn cmd_size(dictionary: &Dictionary, cmd: &Command) -> usize {
+    let opcode_size = type_definition_size(
+        &dictionary,
+        dictionary.type_definitions.get("FwOpcodeType").unwrap(),
+    );
+
+    opcode_size
+        + cmd.formal_params.iter().fold(0, |size, param| {
+            type_name_size(dictionary, &param.type_name) + size
+        })
 }
 
-pub(crate) fn global_memory(dictionary: Dictionary) -> TokenStream {
+pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
     // Compute the upper bound scratch space needed
     // Scratch memory is used for telemetry, commands and parameters
-    let max_size = 0usize;
-    for d in dictionary.commands.iter() {}
+    // TODO(tumbar) Add parameters
+    let max_size = dictionary
+        .commands
+        .iter()
+        .map(|cmd| cmd_size(&dictionary, &cmd))
+        .chain(
+            dictionary
+                .telemetry_channels
+                .iter()
+                .map(|tlm| type_name_size(&dictionary, &tlm.type_name)),
+        )
+        .max()
+        .unwrap_or(0);
 
     quote! {
-        const __SCRATCH_SIZE: usize = 512;
+        const __SCRATCH_SIZE: usize = #max_size;
         static mut __SCRATCH: [u8; __SCRATCH_SIZE] = [0x0; __SCRATCH_SIZE];
         static mut __TIME: [u8; fw::TimeValue::SIZE] = [0; fw::TimeValue::SIZE];
     }

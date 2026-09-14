@@ -25,17 +25,8 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     dict: &fprime_dictionary::Dictionary,
     writer: &mut BufWriter<W>,
 ) {
-    let cmd_response = match dict.type_definitions.iter().find(|ty| match ty {
-        TypeDefinition::Enum(ty) => ty.qualified_name == "Fw.CmdResponse",
-        _ => false,
-    }) {
-        None => {
-            panic!("no Fw.CmdResponse found in dictionary")
-        }
-        Some(r) => match r {
-            TypeDefinition::Enum(e) => e,
-            _ => unreachable!(),
-        },
+    let Some(TypeDefinition::Enum(cmd_response)) = &dict.type_definitions.get("Fw.CmdResponse") else {
+        panic!("Fw.CmdResponse not found in dictionary");
     };
 
     let mut definitions = vec![];
@@ -43,10 +34,10 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     // Generate all namespace nested definitions
     definitions.push(Definition {
         qualifier: Vec::with_capacity(0),
-        tokens: util::global_memory(),
+        tokens: util::global_memory(dict),
     });
 
-    for ty in &dict.type_definitions {
+    for (_, ty) in &dict.type_definitions {
         let (qualifier, tokens) = types::type_definition(ty);
 
         definitions.push(Definition { qualifier, tokens });
@@ -65,7 +56,7 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
         impls.push(Definition { qualifier, tokens });
     }
 
-    // Collect all the code into a heirarchy
+    // Collect all the code into a hierarchy
     let definitions: CodeTree = definitions.into();
     let impls: CodeTree = impls.into();
 

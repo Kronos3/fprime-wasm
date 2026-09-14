@@ -1,10 +1,10 @@
 use serde::de::Error;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Metadata {
     pub deployment_name: String,
@@ -13,7 +13,7 @@ pub struct Metadata {
     pub dictionary_spec_version: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq)]
 pub enum IntegerKind {
     U8,
     I8,
@@ -25,13 +25,13 @@ pub enum IntegerKind {
     I64,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq)]
 pub enum FloatKind {
     F32,
     F64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum TypeName {
     Integer { name: IntegerKind },
@@ -41,7 +41,7 @@ pub enum TypeName {
     QualifiedIdentifier { name: String },
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EnumConstant {
     pub name: String,
@@ -50,7 +50,7 @@ pub struct EnumConstant {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct StructMemberRaw {
     #[serde(rename = "type")]
@@ -62,7 +62,7 @@ struct StructMemberRaw {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StructMember {
     pub name: String,
@@ -75,7 +75,7 @@ pub struct StructMember {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArrayType {
     pub qualified_name: String,
@@ -87,7 +87,7 @@ pub struct ArrayType {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EnumType {
     pub qualified_name: String,
@@ -129,7 +129,7 @@ where
         .collect()
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StructType {
     pub qualified_name: String,
@@ -140,7 +140,7 @@ pub struct StructType {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AliasType {
     pub qualified_name: String,
@@ -151,7 +151,7 @@ pub struct AliasType {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum TypeDefinition {
     Array(ArrayType),
@@ -171,7 +171,29 @@ impl TypeDefinition {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+fn deserialize_type_definitions<'de, D>(
+    deserializer: D,
+) -> Result<HashMap<String, TypeDefinition>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let initial: Vec<TypeDefinition> = Vec::deserialize(deserializer)?;
+    let mut out = HashMap::with_capacity(initial.len());
+
+    for definition in initial {
+        let qualified_name = definition.qualified_name().to_string();
+        if out.insert(qualified_name.clone(), definition).is_some() {
+            return Err(D::Error::custom(format!(
+                "Duplicate type definition {}",
+                qualified_name
+            )));
+        }
+    }
+
+    Ok(out)
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Constant {
     pub annotation: Option<String>,
@@ -181,7 +203,7 @@ pub struct Constant {
     pub value: serde_json::Value,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum CommandKind {
     Async,
@@ -191,7 +213,7 @@ pub enum CommandKind {
     Save,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum QueueFull {
     Assert,
@@ -200,7 +222,7 @@ pub enum QueueFull {
     Hook,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FormalParam {
     pub name: String,
@@ -212,7 +234,7 @@ pub struct FormalParam {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Command {
     pub name: String,
@@ -226,7 +248,7 @@ pub struct Command {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum TelemetryUpdate {
     Always,
@@ -234,7 +256,7 @@ pub enum TelemetryUpdate {
     OnChange,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TelemetryChannelLimit {
     pub red: Option<serde_json::Value>,
@@ -242,14 +264,14 @@ pub struct TelemetryChannelLimit {
     pub yellow: Option<serde_json::Value>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TelemetryChannelLimits {
     pub low: Option<TelemetryChannelLimit>,
     pub high: Option<TelemetryChannelLimit>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TelemetryChannel {
     pub name: String,
@@ -263,11 +285,12 @@ pub struct TelemetryChannel {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub struct Dictionary {
     pub metadata: Metadata,
-    pub type_definitions: Vec<TypeDefinition>,
+    #[serde(deserialize_with = "deserialize_type_definitions")]
+    pub type_definitions: HashMap<String, TypeDefinition>,
     pub constants: Vec<Constant>,
     pub commands: Vec<Command>,
     pub telemetry_channels: Vec<TelemetryChannel>,
