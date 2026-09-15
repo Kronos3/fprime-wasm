@@ -15,7 +15,7 @@ pub use serializable::*;
 pub use sleep::*;
 pub use tlm::*;
 
-pub use fprime_macros::Serializable;
+pub use fprime_macros::*;
 pub use heapless;
 
 pub struct FprimeEvents;

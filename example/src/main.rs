@@ -1,29 +1,18 @@
 #![no_std]
 #![no_main]
 
+use fprime_core::*;
 mod dictionary;
-pub use dictionary::*;
+use dictionary::*;
 
 use crate::Defs::Fw::DpCfg::ProcType;
 use crate::Defs::Ref::DpDemo::DpReqType;
 use crate::Defs::Svc::EventManager::{Enabled, FilterSeverity};
 
-use fprime_core::*;
-
-#[panic_handler]
-fn __panic_handler(info: &core::panic::PanicInfo) -> ! {
-    if let Some(msg) = info.message().as_str() {
-        message(EventSeverity::WarningHi, msg);
-    } else {
-        message(EventSeverity::WarningHi, "rust panic")
-    }
-
-    panic(PanicCode::RustPanic);
-}
-
-#[unsafe(no_mangle)]
+#[fprime_main]
 pub fn main() {
     CdhCore.cmdDisp.CMD_NO_OP();
+    CdhCore.cmdDisp.CMD_NO_OP_STRING("STRINGS");
     CdhCore
         .events
         .SET_EVENT_FILTER(FilterSeverity::ACTIVITY_HI, Enabled::DISABLED);

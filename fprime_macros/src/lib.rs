@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
-use proc_macro2::{Ident, Span, Literal};
+use proc_macro2::{Ident, Literal, Span};
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput};
+use syn::{Data, DeriveInput, ItemFn, parse_macro_input};
 
 /// Returns the repr integer type as a string (e.g. "u8", "i32") if present.
 fn enum_repr_type_name(attrs: &[syn::Attribute]) -> Option<Ident> {
@@ -44,13 +44,17 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                 quote! { <#ty as Serializable>::SIZE }
             });
 
-            let serialize_to = s.fields.iter().enumerate().map(|(i, field)| match &field.ident {
-                None => {
-                    let name = Literal::usize_unsuffixed(i);
-                    quote! { self.#name.serialize_to(to, offset); }
-                },
-                Some(name) => quote! { self.#name.serialize_to(to, offset); },
-            });
+            let serialize_to = s
+                .fields
+                .iter()
+                .enumerate()
+                .map(|(i, field)| match &field.ident {
+                    None => {
+                        let name = Literal::usize_unsuffixed(i);
+                        quote! { self.#name.serialize_to(to, offset); }
+                    }
+                    Some(name) => quote! { self.#name.serialize_to(to, offset); },
+                });
 
             let deserialize_from = s.fields.iter().enumerate().map(|(i, field)| {
                 let ty = &field.ty;
@@ -154,4 +158,38 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
         .to_compile_error()
         .into(),
     }
+}
+
+#[proc_macro_attribute]
+pub fn fprime_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    // 1. Parse the input function AST using syn
+    let input_fn = parse_macro_input!(item as ItemFn);
+
+    // 2. Extract function parts
+    let sig = &input_fn.sig;
+    let block = &input_fn.block;
+    let attrs = &input_fn.attrs;
+
+    // 3. Generate modified Rust code using quote!
+    let expanded = quote! {
+        #[panic_handler]
+        fn __panic_handler(info: &core::panic::PanicInfo) -> ! {
+            if let Some(msg) = info.message().as_str() {
+                message(fprime_core::EventSeverity::WarningHi, msg);
+            } else {
+                message(fprime_core::EventSeverity::WarningHi, "rust panic")
+            }
+
+            panic(fprime_core::PanicCode::RustPanic);
+        }
+
+        #[unsafe(no_mangle)]
+        #(#attrs)*
+        pub #sig {
+            #block
+        }
+    };
+
+    // 4. Convert generated code back into TokenStream
+    TokenStream::from(expanded)
 }

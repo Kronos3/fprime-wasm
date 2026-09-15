@@ -7,6 +7,7 @@ mod inner {
 pub use inner::*;
 
 impl Defs::Fw::CmdResponse {
+    #[allow(dead_code)]
     pub fn check(&self) {
         match self {
             Defs::Fw::CmdResponse::OK => {}
