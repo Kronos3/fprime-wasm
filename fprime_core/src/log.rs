@@ -1,4 +1,4 @@
-use crate::{EventSeverity, abi};
+use crate::abi;
 use core::fmt::Arguments;
 
 /// Stack-backed String type
@@ -35,6 +35,16 @@ macro_rules! format {
     ($size:expr, $($arg:tt)+) => {
         fprime_core::heapless::string::format::<$size, u16>(format_args!($($arg)+)).unwrap()
     };
+}
+
+#[derive(Copy, Clone, Debug)]
+#[repr(i32)]
+pub enum EventSeverity {
+    WarningHi = 2,
+    WarningLow = 3,
+    ActivityHigh = 5,
+    ActivityLo = 6,
+    Diagnostic = 7,
 }
 
 /// Emit a message via the F Prime event system.

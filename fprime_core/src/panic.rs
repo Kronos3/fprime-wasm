@@ -1,0 +1,34 @@
+use crate::abi;
+
+#[derive(Copy, Clone, Debug)]
+#[repr(i32)]
+pub enum PanicCode {
+    /// Telemetry value is invalid
+    TlmInvalid = 0,
+    /// A command failed
+    CmdFailed = 1,
+    /// Code reserved for Rust global panic handler (abort)
+    RustPanic = 2,
+}
+
+/// Exit the runtime due to a system/response failure
+///
+/// There are a fixed set of failure codes reserved. If the program needs to
+/// exit with failure use [exit] with a non-zero status.
+pub fn panic(code: PanicCode) -> ! {
+    unsafe {
+        abi::panic(code as i32);
+    }
+}
+
+/// Exit the runtime given a status.
+/// This function should not return and should stop the WASM runtime
+///
+/// # Arguments
+///
+/// * `code`: Exit code signaling status
+///
+/// returns: ! Never returns
+pub fn exit(code: i32) -> ! {
+    unsafe { abi::exit(code) }
+}
