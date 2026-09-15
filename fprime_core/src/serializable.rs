@@ -1,4 +1,4 @@
-use crate::{String};
+use crate::String;
 
 pub trait Serializable: Sized {
     const SIZE: usize;
@@ -28,8 +28,7 @@ macro_rules! primitive {
             }
 
             fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-                let out =
-                    Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+                let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
                 *offset += Self::SIZE;
                 out
             }
@@ -61,9 +60,7 @@ impl<const N: usize> Serializable for String<N> {
 
     fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
         let n = u16::deserialize_from(from, offset) as usize;
-        let out =
-            String::from_utf8(heapless::Vec::from_slice(&from[*offset..*offset + n]).unwrap())
-                .unwrap();
+        let out = String::from_utf8(heapless::Vec::from_slice(&from[*offset..*offset + n]).unwrap()).unwrap();
         *offset += n;
         out
     }

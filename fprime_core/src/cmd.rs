@@ -14,10 +14,7 @@ pub enum FailMode {
 static CMD_MODE_CHECKED: AtomicBool = AtomicBool::new(false);
 
 pub fn set_fail_mode(mode: FailMode) {
-    CMD_MODE_CHECKED.store(
-        mode == FailMode::Permissive,
-        core::sync::atomic::Ordering::SeqCst,
-    );
+    CMD_MODE_CHECKED.store(mode == FailMode::Permissive, core::sync::atomic::Ordering::SeqCst);
 }
 
 /// Dispatch a command given a Fw::ComBuffer

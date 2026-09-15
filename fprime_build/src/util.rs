@@ -48,15 +48,13 @@ fn type_definition_size(dictionary: &Dictionary, ty: &TypeDefinition) -> usize {
 }
 
 fn cmd_size(dictionary: &Dictionary, cmd: &Command) -> usize {
-    let opcode_size = type_definition_size(
-        &dictionary,
-        dictionary.type_definitions.get("FwOpcodeType").unwrap(),
-    );
+    let opcode_size = type_definition_size(&dictionary, dictionary.type_definitions.get("FwOpcodeType").unwrap());
 
     opcode_size
-        + cmd.formal_params.iter().fold(0, |size, param| {
-            type_name_size(dictionary, &param.type_name) + size
-        })
+        + cmd
+            .formal_params
+            .iter()
+            .fold(0, |size, param| type_name_size(dictionary, &param.type_name) + size)
 }
 
 pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
@@ -86,9 +84,7 @@ pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
 pub(crate) fn split_identifier(qi: &str, name_kind: NameKind) -> (Qualifier, Ident) {
     let mut qn: Vec<&str> = qi.split('.').collect();
 
-    let name = qn
-        .pop()
-        .expect(&format!("invalid qualified identifier: '{}'", qi));
+    let name = qn.pop().expect(&format!("invalid qualified identifier: '{}'", qi));
 
     (
         qn.iter().map(|s| s.to_string()).collect(),

@@ -20,12 +20,8 @@ fn render_tokens(ts: TokenStream) -> String {
     }
 }
 
-pub(crate) fn generate_to_file<W: ?Sized + Write>(
-    dict: &fprime_dictionary::Dictionary,
-    writer: &mut BufWriter<W>,
-) {
-    let Some(TypeDefinition::Enum(cmd_response)) = &dict.type_definitions.get("Fw.CmdResponse")
-    else {
+pub(crate) fn generate_to_file<W: ?Sized + Write>(dict: &fprime_dictionary::Dictionary, writer: &mut BufWriter<W>) {
+    let Some(TypeDefinition::Enum(cmd_response)) = &dict.type_definitions.get("Fw.CmdResponse") else {
         panic!("Fw.CmdResponse not found in dictionary");
     };
 

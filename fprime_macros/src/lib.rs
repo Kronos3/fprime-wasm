@@ -44,25 +44,18 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                 quote! { <#ty as Serializable>::SIZE }
             });
 
-            let serialize_to = s
-                .fields
-                .iter()
-                .enumerate()
-                .map(|(i, field)| match &field.ident {
-                    None => {
-                        let name = Literal::usize_unsuffixed(i);
-                        quote! { self.#name.serialize_to(to, offset); }
-                    }
-                    Some(name) => quote! { self.#name.serialize_to(to, offset); },
-                });
+            let serialize_to = s.fields.iter().enumerate().map(|(i, field)| match &field.ident {
+                None => {
+                    let name = Literal::usize_unsuffixed(i);
+                    quote! { self.#name.serialize_to(to, offset); }
+                }
+                Some(name) => quote! { self.#name.serialize_to(to, offset); },
+            });
 
             let deserialize_from = s.fields.iter().enumerate().map(|(i, field)| {
                 let ty = &field.ty;
                 let name = match &field.ident {
-                    None => &Ident::new(
-                        &format!("_{}", Literal::usize_unsuffixed(i)),
-                        Span::call_site(),
-                    ),
+                    None => &Ident::new(&format!("_{}", Literal::usize_unsuffixed(i)), Span::call_site()),
                     Some(name) => name,
                 };
 
@@ -74,10 +67,7 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                 .iter()
                 .enumerate()
                 .map(|(i, field)| match &field.ident {
-                    None => Ident::new(
-                        &format!("_{}", Literal::usize_unsuffixed(i)),
-                        Span::call_site(),
-                    ),
+                    None => Ident::new(&format!("_{}", Literal::usize_unsuffixed(i)), Span::call_site()),
                     Some(name) => name.clone(),
                 })
                 .collect();
@@ -101,16 +91,17 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
             .into()
         }
         Data::Enum(e) => {
-            let repr =
-                match enum_repr_type_name(&input.attrs) {
-                    None => return syn::Error::new_spanned(
+            let repr = match enum_repr_type_name(&input.attrs) {
+                None => {
+                    return syn::Error::new_spanned(
                         input.ident,
                         "Serializable can only be derived on enums with explicit repr() attributes",
                     )
                     .to_compile_error()
-                    .into(),
-                    Some(repr) => repr,
-                };
+                    .into();
+                }
+                Some(repr) => repr,
+            };
 
             let mut match_branches = vec![];
             for variant in &e.variants {
@@ -120,8 +111,8 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                             &variant.ident,
                             "Serializable can only be derived on enums with explicit values on all variants",
                         )
-                            .to_compile_error()
-                            .into()
+                        .to_compile_error()
+                        .into();
                     }
                     Some((_, value)) => {
                         let name = &variant.ident;
@@ -151,12 +142,11 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
             }
             .into()
         }
-        Data::Union(_) => syn::Error::new_spanned(
-            input.ident,
-            "Serializable can only be derived for structs and enums",
-        )
-        .to_compile_error()
-        .into(),
+        Data::Union(_) => {
+            syn::Error::new_spanned(input.ident, "Serializable can only be derived for structs and enums")
+                .to_compile_error()
+                .into()
+        }
     }
 }
 

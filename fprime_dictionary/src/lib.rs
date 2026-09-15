@@ -1,5 +1,5 @@
-use serde::de::Error;
 use serde::Deserialize;
+use serde::de::Error;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -111,10 +111,7 @@ where
         .enumerate()
         .map(|(index, (name, member))| {
             if index != member.index as usize {
-                Err(D::Error::custom(format!(
-                    "Missing struct member with index {}",
-                    index
-                )))
+                Err(D::Error::custom(format!("Missing struct member with index {}", index)))
             } else {
                 Ok(StructMember {
                     name,
@@ -171,9 +168,7 @@ impl TypeDefinition {
     }
 }
 
-fn deserialize_type_definitions<'de, D>(
-    deserializer: D,
-) -> Result<HashMap<String, TypeDefinition>, D::Error>
+fn deserialize_type_definitions<'de, D>(deserializer: D) -> Result<HashMap<String, TypeDefinition>, D::Error>
 where
     D: serde::Deserializer<'de>,
 {

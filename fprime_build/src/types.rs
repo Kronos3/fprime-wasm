@@ -1,9 +1,7 @@
-use crate::util::NameKind::StructMember;
-use crate::util::{annotate, format_name, split_identifier, NameKind, str_to_ident};
 use crate::tree::Qualifier;
-use fprime_dictionary::{
-    AliasType, ArrayType, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition, TypeName,
-};
+use crate::util::NameKind::StructMember;
+use crate::util::{NameKind, annotate, format_name, split_identifier, str_to_ident};
+use fprime_dictionary::{AliasType, ArrayType, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition, TypeName};
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
 

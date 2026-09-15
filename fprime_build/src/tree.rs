@@ -125,12 +125,9 @@ impl CodeTree {
             let member_name_ty: Vec<_> = members
                 .iter()
                 .map(|member_name| {
-                    let member_name =
-                        str_to_ident(&format_name(NameKind::StructMember, &member_name));
-                    let ty_name = str_to_ident(
-                        &format!("{}_{}", scope.join("_"), member_name.to_string())
-                            .to_case(Case::Pascal),
-                    );
+                    let member_name = str_to_ident(&format_name(NameKind::StructMember, &member_name));
+                    let ty_name =
+                        str_to_ident(&format!("{}_{}", scope.join("_"), member_name.to_string()).to_case(Case::Pascal));
 
                     (member_name, ty_name)
                 })

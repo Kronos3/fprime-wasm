@@ -53,13 +53,7 @@ unsafe extern "C" {
     /// * `value_size`: Size allocated for value_ptr
     ///
     /// returns: i32 (Fw::TlmValid)
-    pub(crate) fn tlm(
-        id: i64,
-        time_ptr: u32,
-        time_size: u32,
-        value_ptr: u32,
-        value_size: u32,
-    ) -> i32;
+    pub(crate) fn tlm(id: i64, time_ptr: u32, time_size: u32, value_ptr: u32, value_size: u32) -> i32;
 
     /// Read a parameter value and write it to the specified memory addresses
     ///
@@ -136,11 +130,5 @@ unsafe extern "C" {
     /// returns: i32 (FprimeQueueStatus). Status on whether or not a message was received
     /// (blocking always returns OK = 0; EMPTY = 1 for a non-blocking call on an empty
     /// queue).
-    pub(crate) fn serial_recv(
-        index: i32,
-        data_ptr: u32,
-        data_size: u32,
-        actual_size_ptr: u32,
-        block_type: i32,
-    ) -> i32;
+    pub(crate) fn serial_recv(index: i32, data_ptr: u32, data_size: u32, actual_size_ptr: u32, block_type: i32) -> i32;
 }
