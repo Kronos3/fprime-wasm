@@ -1,4 +1,10 @@
-include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
+#[allow(nonstandard_style)]
+#[allow(dead_code)]
+mod inner {
+    include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
+}
+
+pub use inner::*;
 
 impl Defs::Fw::CmdResponse {
     pub fn check(&self) {

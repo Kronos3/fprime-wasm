@@ -1,14 +1,12 @@
 #![no_std]
 #![no_main]
 
-#[allow(nonstandard_style)]
-#[allow(dead_code)]
 mod dictionary;
+pub use dictionary::*;
 
 use crate::Defs::Fw::DpCfg::ProcType;
 use crate::Defs::Ref::DpDemo::DpReqType;
 use crate::Defs::Svc::EventManager::{Enabled, FilterSeverity};
-pub use dictionary::*;
 
 use fprime_core::*;
 
