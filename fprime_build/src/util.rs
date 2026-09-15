@@ -1,8 +1,11 @@
 use crate::tree::Qualifier;
+use fprime_dictionary::naming::split_qualified_name;
 use fprime_dictionary::{Command, Dictionary, FloatKind, IntegerKind, TypeDefinition, TypeName};
-use proc_macro2::{Ident, Literal, Span, TokenStream};
+use proc_macro2::{Ident, Literal, TokenStream};
 use quote::quote;
 use std::str::FromStr;
+
+pub(crate) use fprime_dictionary::naming::str_to_ident;
 
 fn type_name_size(dictionary: &Dictionary, ty: &TypeName) -> usize {
     match ty {
@@ -81,15 +84,10 @@ pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
     }
 }
 
-pub(crate) fn split_identifier(qi: &str, name_kind: NameKind) -> (Qualifier, Ident) {
-    let mut qn: Vec<&str> = qi.split('.').collect();
+pub(crate) fn split_identifier(qi: &str) -> (Qualifier, Ident) {
+    let (qualifier, name) = split_qualified_name(qi);
 
-    let name = qn.pop().expect(&format!("invalid qualified identifier: '{}'", qi));
-
-    (
-        qn.iter().map(|s| s.to_string()).collect(),
-        str_to_ident(&format_name(name_kind, name)),
-    )
+    (qualifier.iter().map(|s| s.to_string()).collect(), str_to_ident(name))
 }
 
 pub(crate) fn annotate(inner: TokenStream, annotation: &Option<String>) -> TokenStream {
@@ -132,45 +130,6 @@ pub(crate) fn annotate_with_args(
     quote! {
         #annot
         #inner
-    }
-}
-
-pub enum NameKind {
-    Module,
-    Definition,
-    EnumConstant,
-    StructMember,
-    FormalParameter,
-    Function,
-    Constant,
-}
-
-pub(crate) fn format_name(_kind: NameKind, name: &str) -> String {
-    // TODO(tumbar) Add a compiler context to manage settings
-    // let case = match kind {
-    //     NameKind::Definition => Case::Pascal,
-    //     NameKind::EnumConstant => Case::Pascal,
-    //     NameKind::StructMember => Case::Snake,
-    //     NameKind::Module => Case::Snake,
-    //     NameKind::FormalParameter => Case::Snake,
-    //     NameKind::Function => Case::Snake,
-    // };
-    //
-    // name.to_case(case)
-
-    name.to_string()
-}
-
-pub(crate) fn str_to_ident(name: &str) -> Ident {
-    match name {
-        // Keywords
-        name @ ("as" | "async" | "await" | "break" | "const" | "continue" | "crate" | "dyn" | "else" | "enum" | "extern" | "false" | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod" | "move" | "mut" | "pub" | "ref" | "return" | "self" | "Self" | "static" | "struct" | "super" | "trait" | "true" | "type" | "unsafe" | "use" | "where" | "while" |
-        // Restricted
-        "names" | "abstract" | "become" | "box" | "do" | "final" | "gen" | "macro" | "override" | "priv" | "try" | "typeof" | "unsized" | "virtual" | "yield") => {
-            // Protect against Rust keyword overlap
-            Ident::new_raw(name, Span::call_site())
-        }
-        name => Ident::new(name, Span::call_site())
     }
 }
 

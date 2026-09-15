@@ -73,7 +73,10 @@ pub fn generate(dictionary_json: &str) {
     println!("cargo::rerun-if-changed=build.rs");
     // println!("cargo::rustc-flags=--remap-path-prefix={}=/b", out_dir.to_str().unwrap());
 
-    let dict = fprime_dictionary::parse(Path::new(dictionary_json));
+    let dictionary_path = fs::canonicalize(dictionary_json)
+        .unwrap_or_else(|err| panic!("failed to resolve dictionary '{}': {}", dictionary_json, err));
+
+    let dict = fprime_dictionary::parse(&dictionary_path);
 
     let file = fs::File::create(dest_path).expect("failed to open destination file");
     let mut writer = BufWriter::new(file);
@@ -82,6 +85,11 @@ pub fn generate(dictionary_json: &str) {
 
     println!("cargo::rerun-if-changed=Cargo.toml");
     println!("cargo::rerun-if-changed={}", dictionary_json);
+    println!(
+        "cargo::rustc-env={}={}",
+        fprime_dictionary::DICTIONARY_ENV,
+        dictionary_path.display()
+    );
 }
 
 #[cfg(test)]

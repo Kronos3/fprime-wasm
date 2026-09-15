@@ -1,14 +1,14 @@
 use crate::tree::Qualifier;
 use crate::types::type_name;
-use crate::util::{NameKind, annotate_with_args, format_name, hex_literal, split_identifier, str_to_ident};
+use crate::util::{annotate_with_args, hex_literal, split_identifier, str_to_ident};
 use fprime_dictionary::{EnumType, TypeName};
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
 
 pub fn command(cmd: &fprime_dictionary::Command, cmd_response: &EnumType) -> (Qualifier, TokenStream) {
-    let (q, name) = split_identifier(&cmd.name, NameKind::Function);
+    let (q, name) = split_identifier(&cmd.name);
     let args = cmd.formal_params.iter().map(|arg| {
-        let name = str_to_ident(&format_name(NameKind::FormalParameter, &arg.name));
+        let name = str_to_ident(&arg.name);
         match &arg.type_name {
             TypeName::String { .. } => quote! { #name: &str, },
             _ => {
@@ -19,7 +19,7 @@ pub fn command(cmd: &fprime_dictionary::Command, cmd_response: &EnumType) -> (Qu
     });
 
     let ser = cmd.formal_params.iter().map(|arg| {
-        let name = str_to_ident(&format_name(NameKind::FormalParameter, &arg.name));
+        let name = str_to_ident(&arg.name);
         let value = match &arg.type_name {
             TypeName::String { size } => {
                 let ty = type_name(&arg.type_name);

@@ -1,5 +1,5 @@
 use crate::util;
-use crate::util::{NameKind, format_name, str_to_ident};
+use crate::util::str_to_ident;
 use convert_case::{Case, Casing};
 use fprime_dictionary::Dictionary;
 use proc_macro2::TokenStream;
@@ -62,7 +62,7 @@ impl CodeTree {
             .into_iter()
             .map(|(q, g)| {
                 let inner: TokenStream = g.module_nesting_impl();
-                let mod_name = str_to_ident(&format_name(NameKind::Module, &q));
+                let mod_name = str_to_ident(&q);
                 quote! {
                     pub mod #mod_name {
                         #[allow(unused_imports)]
@@ -125,7 +125,7 @@ impl CodeTree {
             let member_name_ty: Vec<_> = members
                 .iter()
                 .map(|member_name| {
-                    let member_name = str_to_ident(&format_name(NameKind::StructMember, &member_name));
+                    let member_name = str_to_ident(&member_name);
                     let ty_name =
                         str_to_ident(&format!("{}_{}", scope.join("_"), member_name.to_string()).to_case(Case::Pascal));
 
@@ -170,8 +170,8 @@ impl CodeTree {
             .modules
             .keys()
             .map(|top_level_mod| {
-                let type_name = str_to_ident(&format_name(NameKind::Definition, top_level_mod));
-                let var_name = str_to_ident(&format_name(NameKind::Constant, top_level_mod));
+                let type_name = str_to_ident(top_level_mod);
+                let var_name = str_to_ident(top_level_mod);
 
                 quote! {
                     pub const #var_name: Impl::#type_name = Impl::#type_name::DEFAULT;

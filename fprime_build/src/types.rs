@@ -1,6 +1,6 @@
 use crate::tree::Qualifier;
-use crate::util::NameKind::StructMember;
-use crate::util::{NameKind, annotate, format_name, split_identifier, str_to_ident};
+use crate::util::{annotate, split_identifier, str_to_ident};
+use fprime_dictionary::naming::definition_path;
 use fprime_dictionary::{AliasType, ArrayType, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition, TypeName};
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
@@ -26,17 +26,12 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
             let size_u = Literal::u32_unsuffixed(*size);
             quote! { String<#size_u> }
         }
-        TypeName::QualifiedIdentifier { name } => {
-            let (qualifier, name) = split_identifier(name, NameKind::Definition);
-            let qualifier_ident = qualifier.iter().map(|q| str_to_ident(q));
-
-            quote! { crate::Defs::#(#qualifier_ident::)*#name }
-        }
+        TypeName::QualifiedIdentifier { name } => definition_path(name),
     }
 }
 
 fn array_type_definition(ty: &ArrayType) -> (Qualifier, TokenStream) {
-    let (q, name) = split_identifier(&ty.qualified_name, NameKind::Definition);
+    let (q, name) = split_identifier(&ty.qualified_name);
     let tn = type_name(&ty.element_type);
     let size = Literal::u32_unsuffixed(ty.size);
     let arr_def = quote! {
@@ -47,10 +42,10 @@ fn array_type_definition(ty: &ArrayType) -> (Qualifier, TokenStream) {
 }
 
 fn enum_type_definition(ty: &EnumType) -> (Qualifier, TokenStream) {
-    let (q, name) = split_identifier(&ty.qualified_name, NameKind::Definition);
+    let (q, name) = split_identifier(&ty.qualified_name);
     let repr_ty = type_name(&ty.representation_type);
     let constants = ty.enumerated_constants.iter().map(|c| {
-        let name = str_to_ident(&format_name(NameKind::EnumConstant, &c.name));
+        let name = str_to_ident(&c.name);
         let val = Literal::i64_unsuffixed(c.value);
         annotate(quote! { #name = #val, }, &c.annotation)
     });
@@ -67,9 +62,9 @@ fn enum_type_definition(ty: &EnumType) -> (Qualifier, TokenStream) {
 }
 
 fn struct_type_definition(ty: &StructType) -> (Qualifier, TokenStream) {
-    let (q, name) = split_identifier(&ty.qualified_name, NameKind::Definition);
+    let (q, name) = split_identifier(&ty.qualified_name);
     let members = ty.members.iter().map(|member| {
-        let name = str_to_ident(&format_name(StructMember, &member.name));
+        let name = str_to_ident(&member.name);
         let ty = type_name(&member.type_name);
 
         let inner = match member.size {
@@ -93,7 +88,7 @@ fn struct_type_definition(ty: &StructType) -> (Qualifier, TokenStream) {
 }
 
 fn alias_type_definition(ty: &AliasType) -> (Qualifier, TokenStream) {
-    let (q, name) = split_identifier(&ty.qualified_name, NameKind::Definition);
+    let (q, name) = split_identifier(&ty.qualified_name);
     let tn = type_name(&ty.type_name);
     let alias_def = quote! {
         pub type #name = #tn;
