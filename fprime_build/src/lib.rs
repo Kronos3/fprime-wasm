@@ -20,8 +20,12 @@ fn render_tokens(ts: TokenStream) -> String {
     }
 }
 
-pub(crate) fn generate_to_file<W: ?Sized + Write>(dict: &fprime_dictionary::Dictionary, writer: &mut BufWriter<W>) {
-    let Some(TypeDefinition::Enum(cmd_response)) = &dict.type_definitions.get("Fw.CmdResponse") else {
+pub(crate) fn generate_to_file<W: ?Sized + Write>(
+    dict: &fprime_dictionary::Dictionary,
+    writer: &mut BufWriter<W>,
+) {
+    let Some(TypeDefinition::Enum(cmd_response)) = &dict.type_definitions.get("Fw.CmdResponse")
+    else {
         panic!("Fw.CmdResponse not found in dictionary");
     };
 
@@ -73,8 +77,12 @@ pub fn generate(dictionary_json: &str) {
     println!("cargo::rerun-if-changed=build.rs");
     // println!("cargo::rustc-flags=--remap-path-prefix={}=/b", out_dir.to_str().unwrap());
 
-    let dictionary_path = fs::canonicalize(dictionary_json)
-        .unwrap_or_else(|err| panic!("failed to resolve dictionary '{}': {}", dictionary_json, err));
+    let dictionary_path = fs::canonicalize(dictionary_json).unwrap_or_else(|err| {
+        panic!(
+            "failed to resolve dictionary '{}': {}",
+            dictionary_json, err
+        )
+    });
 
     let dict = fprime_dictionary::parse(&dictionary_path);
 

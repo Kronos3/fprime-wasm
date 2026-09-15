@@ -3,12 +3,23 @@ use crate::abi;
 #[derive(Copy, Clone, Debug)]
 #[repr(i32)]
 pub enum PanicCode {
-    /// Telemetry value is invalid
-    TlmInvalid = 0,
-    /// A command failed
-    CmdFailed = 1,
     /// Code reserved for Rust global panic handler (abort)
-    RustPanic = 2,
+    RustPanic = 0,
+
+    /// A host function returned an invalid response
+    InvalidStatus = 1,
+
+    /// A command failed
+    CmdFailed = 2,
+
+    /// Telemetry value is invalid
+    TlmInvalid = 3,
+
+    /// Parameter value is not initialized
+    PrmUninit = 4,
+
+    /// Parameter value is not initialized
+    PrmInvalid = 5,
 }
 
 /// Exit the runtime due to a system/response failure

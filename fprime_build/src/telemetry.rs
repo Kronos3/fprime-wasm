@@ -27,8 +27,8 @@ pub fn telemetry_channel(tlm: &fprime_dictionary::TelemetryChannel) -> (Qualifie
             };
 
             (
-                <#ty as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf)
+                <#ty as Serializable>::deserialize(&value_buf),
+                super::Defs::Fw::TimeValue::deserialize(&time_buf)
             )
         }
     };

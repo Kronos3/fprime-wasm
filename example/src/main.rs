@@ -18,15 +18,21 @@ pub fn main() {
         .SET_EVENT_FILTER(FilterSeverity::ACTIVITY_HI, Enabled::DISABLED);
 
     Ref.wasmSeq.LOAD("helloworld");
-    Ref.dpDemo.Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");
-    Ref.dpDemo.Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");
-    Ref.dpDemo.Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");
-    Ref.dpDemo.Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");
-    Ref.dpDemo.Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");
-    Ref.dpDemo.Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
 }

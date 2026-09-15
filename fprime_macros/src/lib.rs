@@ -44,18 +44,25 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                 quote! { <#ty as Serializable>::SIZE }
             });
 
-            let serialize_to = s.fields.iter().enumerate().map(|(i, field)| match &field.ident {
-                None => {
-                    let name = Literal::usize_unsuffixed(i);
-                    quote! { self.#name.serialize_to(to, offset); }
-                }
-                Some(name) => quote! { self.#name.serialize_to(to, offset); },
-            });
+            let serialize_to = s
+                .fields
+                .iter()
+                .enumerate()
+                .map(|(i, field)| match &field.ident {
+                    None => {
+                        let name = Literal::usize_unsuffixed(i);
+                        quote! { self.#name.serialize_to(to, offset); }
+                    }
+                    Some(name) => quote! { self.#name.serialize_to(to, offset); },
+                });
 
             let deserialize_from = s.fields.iter().enumerate().map(|(i, field)| {
                 let ty = &field.ty;
                 let name = match &field.ident {
-                    None => &Ident::new(&format!("_{}", Literal::usize_unsuffixed(i)), Span::call_site()),
+                    None => &Ident::new(
+                        &format!("_{}", Literal::usize_unsuffixed(i)),
+                        Span::call_site(),
+                    ),
                     Some(name) => name,
                 };
 
@@ -67,7 +74,10 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                 .iter()
                 .enumerate()
                 .map(|(i, field)| match &field.ident {
-                    None => Ident::new(&format!("_{}", Literal::usize_unsuffixed(i)), Span::call_site()),
+                    None => Ident::new(
+                        &format!("_{}", Literal::usize_unsuffixed(i)),
+                        Span::call_site(),
+                    ),
                     Some(name) => name.clone(),
                 })
                 .collect();
@@ -142,11 +152,12 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
             }
             .into()
         }
-        Data::Union(_) => {
-            syn::Error::new_spanned(input.ident, "Serializable can only be derived for structs and enums")
-                .to_compile_error()
-                .into()
-        }
+        Data::Union(_) => syn::Error::new_spanned(
+            input.ident,
+            "Serializable can only be derived for structs and enums",
+        )
+        .to_compile_error()
+        .into(),
     }
 }
 

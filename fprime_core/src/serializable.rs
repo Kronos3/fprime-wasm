@@ -5,12 +5,7 @@ pub trait Serializable: Sized {
 
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize);
     fn deserialize_from(from: &[u8], offset: &mut usize) -> Self;
-
-    fn deserialize<const SIZE: usize>(from: [u8; SIZE]) -> Self {
-        // Rust doesn't support complex generic evaluation statically
-        // https://github.com/rust-lang/rust/issues/76560
-        assert_eq!(Self::SIZE, SIZE);
-
+    fn deserialize(from: &[u8]) -> Self {
         let mut offset: usize = 0;
         Self::deserialize_from(&from, &mut offset)
     }
@@ -28,7 +23,8 @@ macro_rules! primitive {
             }
 
             fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-                let out = Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+                let out =
+                    Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
                 *offset += Self::SIZE;
                 out
             }
@@ -60,7 +56,9 @@ impl<const N: usize> Serializable for String<N> {
 
     fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
         let n = u16::deserialize_from(from, offset) as usize;
-        let out = String::from_utf8(heapless::Vec::from_slice(&from[*offset..*offset + n]).unwrap()).unwrap();
+        let out =
+            String::from_utf8(heapless::Vec::from_slice(&from[*offset..*offset + n]).unwrap())
+                .unwrap();
         *offset += n;
         out
     }

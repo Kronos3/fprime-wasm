@@ -3,12 +3,13 @@ use quote::quote;
 
 pub fn str_to_ident(name: &str) -> Ident {
     match name {
-        name @ ("as" | "async" | "await" | "break" | "const" | "continue" | "crate" | "dyn" | "else" | "enum"
-        | "extern" | "false" | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod"
-        | "move" | "mut" | "pub" | "ref" | "return" | "self" | "Self" | "static" | "struct" | "super"
-        | "trait" | "true" | "type" | "unsafe" | "use" | "where" | "while" | "names" | "abstract"
-        | "become" | "box" | "do" | "final" | "gen" | "macro" | "override" | "priv" | "try" | "typeof"
-        | "unsized" | "virtual" | "yield") => {
+        name @ ("as" | "async" | "await" | "break" | "const" | "continue" | "crate" | "dyn"
+        | "else" | "enum" | "extern" | "false" | "fn" | "for" | "if" | "impl" | "in"
+        | "let" | "loop" | "match" | "mod" | "move" | "mut" | "pub" | "ref" | "return"
+        | "self" | "Self" | "static" | "struct" | "super" | "trait" | "true" | "type"
+        | "unsafe" | "use" | "where" | "while" | "names" | "abstract" | "become"
+        | "box" | "do" | "final" | "gen" | "macro" | "override" | "priv" | "try"
+        | "typeof" | "unsized" | "virtual" | "yield") => {
             // Protect against Rust keyword overlap
             Ident::new_raw(name, Span::call_site())
         }

@@ -126,8 +126,10 @@ impl CodeTree {
                 .iter()
                 .map(|member_name| {
                     let member_name = str_to_ident(&member_name);
-                    let ty_name =
-                        str_to_ident(&format!("{}_{}", scope.join("_"), member_name.to_string()).to_case(Case::Pascal));
+                    let ty_name = str_to_ident(
+                        &format!("{}_{}", scope.join("_"), member_name.to_string())
+                            .to_case(Case::Pascal),
+                    );
 
                     (member_name, ty_name)
                 })

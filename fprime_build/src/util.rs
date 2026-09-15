@@ -51,13 +51,15 @@ fn type_definition_size(dictionary: &Dictionary, ty: &TypeDefinition) -> usize {
 }
 
 fn cmd_size(dictionary: &Dictionary, cmd: &Command) -> usize {
-    let opcode_size = type_definition_size(&dictionary, dictionary.type_definitions.get("FwOpcodeType").unwrap());
+    let opcode_size = type_definition_size(
+        &dictionary,
+        dictionary.type_definitions.get("FwOpcodeType").unwrap(),
+    );
 
     opcode_size
-        + cmd
-            .formal_params
-            .iter()
-            .fold(0, |size, param| type_name_size(dictionary, &param.type_name) + size)
+        + cmd.formal_params.iter().fold(0, |size, param| {
+            type_name_size(dictionary, &param.type_name) + size
+        })
 }
 
 pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
@@ -87,7 +89,10 @@ pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
 pub(crate) fn split_identifier(qi: &str) -> (Qualifier, Ident) {
     let (qualifier, name) = split_qualified_name(qi);
 
-    (qualifier.iter().map(|s| s.to_string()).collect(), str_to_ident(name))
+    (
+        qualifier.iter().map(|s| s.to_string()).collect(),
+        str_to_ident(name),
+    )
 }
 
 pub(crate) fn annotate(inner: TokenStream, annotation: &Option<String>) -> TokenStream {

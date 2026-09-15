@@ -5,7 +5,10 @@ use fprime_dictionary::{EnumType, TypeName};
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
 
-pub fn command(cmd: &fprime_dictionary::Command, cmd_response: &EnumType) -> (Qualifier, TokenStream) {
+pub fn command(
+    cmd: &fprime_dictionary::Command,
+    cmd_response: &EnumType,
+) -> (Qualifier, TokenStream) {
     let (q, name) = split_identifier(&cmd.name);
     let args = cmd.formal_params.iter().map(|arg| {
         let name = str_to_ident(&arg.name);

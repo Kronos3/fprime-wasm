@@ -21,7 +21,8 @@ pub(crate) fn run_test(json_dictionary: &str, file_path: &str) {
     let dict = fprime_dictionary::parse(&json_file);
 
     generate_to_file(&dict, &mut buf);
-    let output = String::from_utf8(buf.into_inner().expect("failed to get bytes")).expect("failed to decode file");
+    let output = String::from_utf8(buf.into_inner().expect("failed to get bytes"))
+        .expect("failed to decode file");
 
     // Validate the diagnostic messages against the reference file
     match env::var("FPRIME_UPDATE_REF") {

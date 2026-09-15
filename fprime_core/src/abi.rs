@@ -8,7 +8,7 @@ unsafe extern "C" {
     /// * `code`: Exit code signaling status
     ///
     /// returns: ! Never returns
-    pub(crate) fn exit(code: i32) -> !;
+    pub(crate) unsafe fn exit(code: i32) -> !;
 
     /// Exit the current Wasm program with a failure.
     /// This function does not return.
@@ -16,7 +16,7 @@ unsafe extern "C" {
     /// # Arguments
     ///
     /// * `code`: Arbitrary code to indicate source of the panic
-    pub(crate) fn panic(code: i32) -> !;
+    pub(crate) unsafe fn panic(code: i32) -> !;
 
     /// Get the sequence arguments this sequence was invoked with
     /// This function will write the arguments provided from the invoke/run
@@ -30,7 +30,7 @@ unsafe extern "C" {
     ///   interpreter will trap
     ///
     /// returns: u32 (number of bytes written to `destination_ptr`)
-    pub(crate) fn args(destination_ptr: u32, destination_size: u32) -> u32;
+    pub(crate) unsafe fn args(destination_ptr: u32, destination_size: u32) -> u32;
 
     /// Read the current F´ system time into guest memory
     ///
@@ -40,7 +40,7 @@ unsafe extern "C" {
     ///
     /// * `time_ptr`: Guest memory address to write the serialized time
     /// * `time_size`: Size allocated for time_ptr, must equal Fw::Time::SERIALIZED_SIZE
-    pub(crate) fn time(time_ptr: u32, time_size: u32);
+    pub(crate) unsafe fn time(time_ptr: u32, time_size: u32);
 
     /// Read a telemetry channel value and write it to the specified memory addresses
     ///
@@ -53,7 +53,13 @@ unsafe extern "C" {
     /// * `value_size`: Size allocated for value_ptr
     ///
     /// returns: i32 (Fw::TlmValid)
-    pub(crate) fn tlm(id: i64, time_ptr: u32, time_size: u32, value_ptr: u32, value_size: u32) -> i32;
+    pub(crate) unsafe fn tlm(
+        id: i64,
+        time_ptr: u32,
+        time_size: u32,
+        value_ptr: u32,
+        value_size: u32,
+    ) -> i32;
 
     /// Read a parameter value and write it to the specified memory addresses
     ///
@@ -66,7 +72,7 @@ unsafe extern "C" {
     /// returns: i32 (Fw::ParamValid). Value bytes are written when the parameter is
     /// present. Unlike telemetry validity, this is a four-state encoding where a valid
     /// parameter is 1, not 0.
-    pub(crate) fn prm(id: i64, value_ptr: u32, value_size: u32) -> i32;
+    pub(crate) unsafe fn prm(id: i64, value_ptr: u32, value_size: u32) -> i32;
 
     /// Dispatch a command, blocking call.
     ///
@@ -79,7 +85,7 @@ unsafe extern "C" {
     /// * `buf_size`: Size allocated for value_ptr
     ///
     /// returns: i32 (Fw::CmdResponse)
-    pub(crate) fn cmd(buf_ptr: u32, buf_size: u32) -> i32;
+    pub(crate) unsafe fn cmd(buf_ptr: u32, buf_size: u32) -> i32;
 
     /// Emit an event from the current WasmSequencer component at a given severity level
     ///
@@ -88,21 +94,21 @@ unsafe extern "C" {
     /// * `severity`: Event severity level to emit
     /// * `msg_ptr`: Guest memory address to event message string
     /// * `msg_size`: Size allocated for value_ptr
-    pub(crate) fn event(severity: i32, msg_ptr: u32, msg_size: u32);
+    pub(crate) unsafe fn event(severity: i32, msg_ptr: u32, msg_size: u32);
 
     /// Pause the runtime for a specified time
     ///
     /// # Arguments
     ///
     /// * `us`: Microseconds to pause the runtime for
-    pub(crate) fn rsleep(us: u64);
+    pub(crate) unsafe fn rsleep(us: u64);
 
     /// Pause the runtime until a specified time
     ///
     /// # Arguments
     ///
     /// * `us`: Microseconds from system epoch to pause until
-    pub(crate) fn asleep(us: u64);
+    pub(crate) unsafe fn asleep(us: u64);
 
     /// Invoke a serial port
     /// If the port is not connected, the module will panic/trap
@@ -112,7 +118,7 @@ unsafe extern "C" {
     /// * `index`: Port index to emit on the serialOut on
     /// * `data_ptr`: Pointer to the data to send on the output port
     /// * `data_size`: Length of the data to send on the output port
-    pub(crate) fn serial_send(index: i32, data_ptr: u32, data_size: u32);
+    pub(crate) unsafe fn serial_send(index: i32, data_ptr: u32, data_size: u32);
 
     /// Receive a message from a serial input queue
     ///
@@ -130,5 +136,11 @@ unsafe extern "C" {
     /// returns: i32 (FprimeQueueStatus). Status on whether or not a message was received
     /// (blocking always returns OK = 0; EMPTY = 1 for a non-blocking call on an empty
     /// queue).
-    pub(crate) fn serial_recv(index: i32, data_ptr: u32, data_size: u32, actual_size_ptr: u32, block_type: i32) -> i32;
+    pub(crate) unsafe fn serial_recv(
+        index: i32,
+        data_ptr: u32,
+        data_size: u32,
+        actual_size_ptr: u32,
+        block_type: i32,
+    ) -> i32;
 }
