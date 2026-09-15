@@ -1,4 +1,4 @@
-use crate::abi;
+use crate::{EventSeverity, abi, message};
 
 #[derive(Copy, Clone, Debug)]
 #[repr(i32)]
@@ -42,4 +42,18 @@ pub fn panic(code: PanicCode) -> ! {
 /// returns: ! Never returns
 pub fn exit(code: i32) -> ! {
     unsafe { abi::exit(code) }
+}
+
+pub fn panic_handler(info: &core::panic::PanicInfo) -> ! {
+    // Only emit error messages in debug mode
+    // This keeps the release builds 600B smaller
+    if cfg!(debug_assertions) {
+        if let Some(msg) = info.message().as_str() {
+            message(EventSeverity::WarningHi, msg);
+        } else {
+            message(EventSeverity::WarningHi, "rust panic")
+        }
+    }
+
+    panic(PanicCode::RustPanic);
 }

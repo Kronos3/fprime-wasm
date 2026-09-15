@@ -1,25 +1,25 @@
 #![no_std]
 #![no_main]
 
+use crate::dictionary::{
+    Fw::DpCfg::ProcType,
+    Ref::DpDemo::DpReqType::{self, IMMEDIATE},
+};
 use fprime_core::*;
+
 mod dictionary;
 use dictionary::*;
-
-use crate::Defs::Fw::DpCfg::ProcType;
-use crate::Defs::Ref::DpDemo::DpReqType;
-use crate::Defs::Svc::EventManager::{Enabled, FilterSeverity};
 
 #[fprime_main]
 pub fn main() {
     CdhCore.cmdDisp.CMD_NO_OP();
     CdhCore.cmdDisp.CMD_NO_OP_STRING("STRINGS");
-    CdhCore
-        .events
-        .SET_EVENT_FILTER(FilterSeverity::ACTIVITY_HI, Enabled::DISABLED);
+    CdhCore.events.SET_EVENT_FILTER(
+        Svc::EventManager::FilterSeverity::ACTIVITY_HI,
+        Svc::EventManager::Enabled::DISABLED,
+    );
 
-    Ref.wasmSeq.LOAD("helloworld");
-    Ref.dpDemo
-        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.dpDemo.Dp(IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");
     Ref.dpDemo
         .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);

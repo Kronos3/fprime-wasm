@@ -163,25 +163,16 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 pub fn fprime_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    // 1. Parse the input function AST using syn
     let input_fn = parse_macro_input!(item as ItemFn);
 
-    // 2. Extract function parts
     let sig = &input_fn.sig;
     let block = &input_fn.block;
     let attrs = &input_fn.attrs;
 
-    // 3. Generate modified Rust code using quote!
     let expanded = quote! {
         #[panic_handler]
         fn __panic_handler(info: &core::panic::PanicInfo) -> ! {
-            if let Some(msg) = info.message().as_str() {
-                message(fprime_core::EventSeverity::WarningHi, msg);
-            } else {
-                message(fprime_core::EventSeverity::WarningHi, "rust panic")
-            }
-
-            panic(fprime_core::PanicCode::RustPanic);
+            fprime_core::panic_handler(info);
         }
 
         #[unsafe(no_mangle)]
@@ -191,6 +182,5 @@ pub fn fprime_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
-    // 4. Convert generated code back into TokenStream
     TokenStream::from(expanded)
 }

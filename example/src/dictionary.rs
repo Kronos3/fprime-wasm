@@ -5,9 +5,10 @@ mod inner {
 }
 
 use fprime_core::Serializable;
+pub use inner::Defs::*;
 pub use inner::*;
 
-impl Defs::Fw::CmdResponse {
+impl Fw::CmdResponse {
     #[allow(dead_code)]
     pub fn check(&self) {
         match self {
@@ -17,7 +18,7 @@ impl Defs::Fw::CmdResponse {
     }
 }
 
-impl Defs::Fw::TimeValue {
+impl Fw::TimeValue {
     #[allow(dead_code)]
     pub fn now() -> Defs::Fw::TimeValue {
         let mut buf: [u8; Defs::Fw::TimeValue::SIZE] = [0; Defs::Fw::TimeValue::SIZE];
