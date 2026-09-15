@@ -13,3 +13,4 @@ fprime_build = { path = "../fprime_build" }
 [[bin]]
 name = "example"
 test = false
+bench = false
