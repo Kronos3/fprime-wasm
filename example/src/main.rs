@@ -1,15 +1,51 @@
 #![no_std]
 #![no_main]
 
+#[allow(nonstandard_style)]
+#[allow(dead_code)]
 mod dictionary;
+
+use crate::Defs::Fw::DpCfg::ProcType;
+use crate::Defs::Ref::DpDemo::DpReqType;
+use crate::Defs::Svc::EventManager::{Enabled, FilterSeverity};
 pub use dictionary::*;
 
+use fprime_core::*;
+
+#[panic_handler]
+fn __panic_handler(info: &core::panic::PanicInfo) -> ! {
+    if let Some(msg) = info.message().as_str() {
+        message(EventSeverity::WarningHi, msg);
+    } else {
+        message(EventSeverity::WarningHi, "rust panic")
+    }
+
+    panic(PanicCode::RustPanic);
+}
+
 #[unsafe(no_mangle)]
-pub extern "C" fn main() {
-    cdh_core::cmd_disp::cmd_no_op_string("Hello");
+pub fn main() {
+    CdhCore.cmdDisp.CMD_NO_OP();
+    CdhCore
+        .events
+        .SET_EVENT_FILTER(FilterSeverity::ACTIVITY_HI, Enabled::DISABLED);
 
-    CdhCore.cmd_no_op();
-
-    10i32.pow(10);
-
+    Ref.wasmSeq.LOAD("helloworld");
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.wasmSeq.LOAD("helloworld");
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.wasmSeq.LOAD("helloworld");
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.wasmSeq.LOAD("helloworld");
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.wasmSeq.LOAD("helloworld");
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
+    Ref.wasmSeq.LOAD("helloworld");
+    Ref.dpDemo
+        .Dp(DpReqType::IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
 }

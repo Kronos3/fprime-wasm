@@ -1,10 +1,9 @@
+use crate::tree::{CodeTree, Definition};
 use fprime_dictionary::TypeDefinition;
 use proc_macro2::TokenStream;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::{env, fs};
-
-use crate::tree::{CodeTree, Definition};
 
 mod commands;
 mod telemetry;
@@ -33,11 +32,6 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     let mut definitions = vec![];
 
     // Generate all namespace nested definitions
-    definitions.push(Definition {
-        qualifier: Vec::with_capacity(0),
-        tokens: util::global_memory(dict),
-    });
-
     for (_, ty) in &dict.type_definitions {
         let (qualifier, tokens) = types::type_definition(ty);
         definitions.push(Definition { qualifier, tokens });
@@ -62,10 +56,10 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
 
     // Linearize the definition trees into a token stream nested in modules
     // Linearize the impl trees into a token stream of nested structs
-    let tokens = definitions
+    let tokens: TokenStream = definitions
         .module_nesting()
         .into_iter()
-        .chain(impls.struct_nesting())
+        .chain(impls.struct_nesting(dict))
         .collect();
 
     // Render the token stream into formatted Rust code and write it to a file

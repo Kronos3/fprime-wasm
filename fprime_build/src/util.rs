@@ -1,5 +1,4 @@
 use crate::tree::Qualifier;
-use convert_case::{Case, Casing};
 use fprime_dictionary::{Command, Dictionary, FloatKind, IntegerKind, TypeDefinition, TypeName};
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::quote;
@@ -80,7 +79,7 @@ pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
     quote! {
         const __SCRATCH_SIZE: usize = #max_size;
         static mut __SCRATCH: [u8; __SCRATCH_SIZE] = [0x0; __SCRATCH_SIZE];
-        static mut __TIME: [u8; fw::TimeValue::SIZE] = [0; fw::TimeValue::SIZE];
+        static mut __TIME: [u8; crate::Defs::Fw::TimeValue::SIZE] = [0; crate::Defs::Fw::TimeValue::SIZE];
     }
 }
 
@@ -147,20 +146,23 @@ pub enum NameKind {
     StructMember,
     FormalParameter,
     Function,
+    Constant,
 }
 
-pub(crate) fn format_name(kind: NameKind, name: &str) -> String {
+pub(crate) fn format_name(_kind: NameKind, name: &str) -> String {
     // TODO(tumbar) Add a compiler context to manage settings
-    let case = match kind {
-        NameKind::Definition => Case::Pascal,
-        NameKind::EnumConstant => Case::Pascal,
-        NameKind::StructMember => Case::Snake,
-        NameKind::Module => Case::Snake,
-        NameKind::FormalParameter => Case::Snake,
-        NameKind::Function => Case::Snake,
-    };
+    // let case = match kind {
+    //     NameKind::Definition => Case::Pascal,
+    //     NameKind::EnumConstant => Case::Pascal,
+    //     NameKind::StructMember => Case::Snake,
+    //     NameKind::Module => Case::Snake,
+    //     NameKind::FormalParameter => Case::Snake,
+    //     NameKind::Function => Case::Snake,
+    // };
+    //
+    // name.to_case(case)
 
-    name.to_case(case)
+    name.to_string()
 }
 
 pub(crate) fn str_to_ident(name: &str) -> Ident {

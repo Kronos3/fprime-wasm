@@ -32,7 +32,7 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
             let (qualifier, name) = split_identifier(name, NameKind::Definition);
             let qualifier_ident = qualifier.iter().map(|q| str_to_ident(q));
 
-            quote! { crate::#(#qualifier_ident::)*#name }
+            quote! { crate::Defs::#(#qualifier_ident::)*#name }
         }
     }
 }

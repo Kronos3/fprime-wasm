@@ -1,6 +1,6 @@
-use crate::types::type_name;
-use crate::util::{annotate, hex_literal, split_identifier, NameKind};
 use crate::tree::Qualifier;
+use crate::types::type_name;
+use crate::util::{NameKind, annotate, hex_literal, split_identifier};
 use proc_macro2::TokenStream;
 use quote::quote;
 
@@ -11,8 +11,8 @@ pub fn telemetry_channel(tlm: &fprime_dictionary::TelemetryChannel) -> (Qualifie
     let id = hex_literal(tlm.id);
 
     let def = quote! {
-        pub fn #name() -> FprimeResult<(#ty, crate::fw::TimeValue)> {
-            let mut time_buf: [u8; crate::fw::TimeValue::SIZE] = unsafe {
+        pub fn #name(&self) -> (#ty, super::Defs::Fw::TimeValue) {
+            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
                 #[allow(invalid_value)]
                 core::mem::MaybeUninit::uninit().assume_init()
             };
@@ -23,10 +23,13 @@ pub fn telemetry_channel(tlm: &fprime_dictionary::TelemetryChannel) -> (Qualifie
             };
 
             unsafe {
-                sys::telemetry(#id, &mut time_buf, &mut value_buf)
-            }?;
+                telemetry(#id, &mut time_buf, &mut value_buf)
+            };
 
-            Ok((<#ty as Serializable>::deserialize(value_buf), crate::fw::TimeValue::deserialize(time_buf)))
+            (
+                <#ty as Serializable>::deserialize(value_buf),
+                super::Defs::Fw::TimeValue::deserialize(time_buf)
+            )
         }
     };
 

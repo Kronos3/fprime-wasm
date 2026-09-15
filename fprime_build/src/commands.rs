@@ -1,6 +1,8 @@
 use crate::tree::Qualifier;
 use crate::types::type_name;
-use crate::util::{annotate_with_args, format_name, hex_literal, split_identifier, str_to_ident, NameKind};
+use crate::util::{
+    NameKind, annotate_with_args, format_name, hex_literal, split_identifier, str_to_ident,
+};
 use fprime_dictionary::{EnumType, TypeName};
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
@@ -45,24 +47,22 @@ pub fn command(
 
     let opcode = hex_literal(cmd.opcode);
     let response_repr_ty = type_name(&cmd_response.representation_type);
-    let scratch_ns1 = (0..q.len()).map(|_| quote!(super::));
-    let scratch_ns2 = (0..q.len()).map(|_| quote!(super::));
 
     let def = quote! {
-        pub fn #name(#(#args)*) -> crate::fw::CmdResponse {
+        pub fn #name(&self, #(#args)*) -> super::Defs::Fw::CmdResponse {
             let __encoded = unsafe {
-                let ptr = (&raw mut #(#scratch_ns1)* __SCRATCH) as *mut u8;
-                let len = #(#scratch_ns2)* __SCRATCH_SIZE;
+                let ptr = (&raw mut __SCRATCH) as *mut u8;
+                let len = __SCRATCH_SIZE;
 
                 core::slice::from_raw_parts_mut(ptr, len)
             };
 
             let mut __offset: usize = 0;
-            let __opcode: crate::FwOpcodeType = #opcode;
+            let __opcode: super::Defs::FwOpcodeType = #opcode;
             __opcode.serialize_to(__encoded, &mut __offset);
             #(#ser)*
 
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
+            let res = unsafe { command(&__encoded[0..__offset]) };
             unsafe {
                 core::mem::transmute(res as #response_repr_ty)
             }

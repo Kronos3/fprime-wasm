@@ -1,5 +1,7 @@
+use crate::util;
 use crate::util::{NameKind, format_name, str_to_ident};
 use convert_case::{Case, Casing};
+use fprime_dictionary::Dictionary;
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::collections::BTreeMap;
@@ -54,12 +56,12 @@ impl From<Vec<Definition>> for CodeTree {
 }
 
 impl CodeTree {
-    pub fn module_nesting(self) -> TokenStream {
+    fn module_nesting_impl(self) -> TokenStream {
         let modules: Vec<TokenStream> = self
             .modules
             .into_iter()
             .map(|(q, g)| {
-                let inner: TokenStream = g.module_nesting();
+                let inner: TokenStream = g.module_nesting_impl();
                 let mod_name = str_to_ident(&format_name(NameKind::Module, &q));
                 quote! {
                     pub mod #mod_name {
@@ -79,6 +81,16 @@ impl CodeTree {
 
             #(#leafs)*
             #(#modules)*
+        }
+    }
+
+    pub fn module_nesting(self) -> TokenStream {
+        let inner = self.module_nesting_impl();
+
+        quote! {
+            pub mod Defs {
+                #inner
+            }
         }
     }
 
@@ -110,33 +122,79 @@ impl CodeTree {
             // Build a private struct with `_` concatenated naming for holding the impls
             let name = str_to_ident(&scope.join("_").to_case(Case::Pascal));
 
-            let member_defs = members.into_iter().map(|member_name| {
-                let member_name = str_to_ident(&format_name(NameKind::StructMember, &member_name));
-                let ty_name = str_to_ident(
-                    &format!("{}_{}", scope.join("_"), member_name.to_string())
-                        .to_case(Case::Pascal),
-                );
+            let member_name_ty: Vec<_> = members
+                .iter()
+                .map(|member_name| {
+                    let member_name =
+                        str_to_ident(&format_name(NameKind::StructMember, &member_name));
+                    let ty_name = str_to_ident(
+                        &format!("{}_{}", scope.join("_"), member_name.to_string())
+                            .to_case(Case::Pascal),
+                    );
 
+                    (member_name, ty_name)
+                })
+                .collect();
+
+            let member_defs = member_name_ty.iter().map(|(name, ty)| {
                 quote! {
-                    #member_name: #ty_name,
+                    pub #name: #ty,
+                }
+            });
+
+            let default_const_members = member_name_ty.iter().map(|(name, ty)| {
+                quote! {
+                    #name: #ty::DEFAULT,
                 }
             });
 
             let leafs = self.leafs;
             quote! {
                 #(#inner)*
-                struct #name {
+
+                pub struct #name {
                     #(#member_defs)*
                 }
 
                 impl #name {
+                    pub const DEFAULT: Self = Self {
+                        #(#default_const_members)*
+                    };
+
                     #(#leafs)*
                 }
             }
         }
     }
 
-    pub fn struct_nesting(self) -> TokenStream {
-        self.struct_nesting_impl(vec![])
+    pub fn struct_nesting(self, dict: &Dictionary) -> TokenStream {
+        // Encode the top-level defs as ZST-consts
+        let consts: Vec<_> = self
+            .modules
+            .keys()
+            .map(|top_level_mod| {
+                let type_name = str_to_ident(&format_name(NameKind::Definition, top_level_mod));
+                let var_name = str_to_ident(&format_name(NameKind::Constant, top_level_mod));
+
+                quote! {
+                    pub const #var_name: Impl::#type_name = Impl::#type_name::DEFAULT;
+                }
+            })
+            .collect();
+
+        let global_impls = util::global_memory(dict);
+        let defs = self.struct_nesting_impl(vec![]);
+
+        quote! {
+            mod Impl {
+                #[allow(unused_imports)]
+                use fprime_core::*;
+
+                #global_impls
+                #defs
+            }
+
+            #(#consts)*
+        }
     }
 }
