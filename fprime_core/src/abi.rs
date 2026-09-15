@@ -30,6 +30,7 @@ unsafe extern "C" {
     ///   interpreter will trap
     ///
     /// returns: u32 (number of bytes written to `destination_ptr`)
+    #[allow(dead_code)]
     pub(crate) unsafe fn args(destination_ptr: u32, destination_size: u32) -> u32;
 
     /// Read the current F´ system time into guest memory

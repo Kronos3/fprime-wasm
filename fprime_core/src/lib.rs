@@ -8,6 +8,7 @@ mod prm;
 mod serial;
 mod serializable;
 mod sleep;
+pub mod time;
 mod tlm;
 
 pub use cmd::*;
@@ -19,8 +20,6 @@ pub use serializable::*;
 pub use sleep::*;
 pub use tlm::*;
 
+pub use core::fmt::Write;
 pub use fprime_macros::*;
 pub use heapless;
-
-pub struct FprimeEvents;
-pub use core::fmt::Write;
