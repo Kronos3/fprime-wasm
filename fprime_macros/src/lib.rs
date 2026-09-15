@@ -3,6 +3,13 @@ use proc_macro2::{Ident, Literal, Span};
 use quote::quote;
 use syn::{Data, DeriveInput, ItemFn, parse_macro_input};
 
+mod infer_path;
+
+#[cfg(test)]
+mod test {
+    mod test;
+}
+
 /// Returns the repr integer type as a string (e.g. "u8", "i32") if present.
 fn enum_repr_type_name(attrs: &[syn::Attribute]) -> Option<Ident> {
     let mut repr: Option<Ident> = None;
@@ -150,17 +157,63 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
     }
 }
 
+/// Enable the F Prime sequencing DSL in a function body.
+///
+/// Command arguments may name an enumerated constant on its own, and the
+/// expansion resolves it against the dictionary using the command's formal
+/// parameter types:
+///
+/// ```ignore
+/// #[fprime]
+/// fn take_a_data_product() {
+///     Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);
+/// }
+/// ```
+///
+/// The dictionary comes from the `fprime_build::generate` call in the crate's
+/// `build.rs`, which publishes it through the `FPRIME_DICTIONARY` environment
+/// variable.
 #[proc_macro_attribute]
-pub fn fprime_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    // 1. Parse the input function AST using syn
-    let input_fn = parse_macro_input!(item as ItemFn);
+pub fn fprime(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let original: proc_macro2::TokenStream = item.into();
 
-    // 2. Extract function parts
+    let Some(mut input_fn) = parse_while_editing(original.clone()) else {
+        // Nothing to resolve against. Hand the tokens back so that the syntax
+        // error is reported where it is, rather than as a missing function.
+        return original.into();
+    };
+
+    let error = expand_dsl(attr, &mut input_fn);
+
+    quote! {
+        #error
+        #input_fn
+    }
+    .into()
+}
+
+fn parse_while_editing(tokens: proc_macro2::TokenStream) -> Option<ItemFn> {
+    syn::parse2::<ItemFn>(tokens).ok()
+}
+
+fn expand_dsl(attr: TokenStream, input_fn: &mut ItemFn) -> Option<proc_macro2::TokenStream> {
+    let span = input_fn.sig.ident.span();
+
+    infer_path::rewrite(attr.into(), &mut input_fn.block, span)
+        .err()
+        .map(|err| err.to_compile_error())
+}
+
+#[proc_macro_attribute]
+pub fn entrypoint(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let original: proc_macro2::TokenStream = item.into();
+    let Some(input_fn) = parse_while_editing(original.clone()) else {
+        return original.into();
+    };
+
     let sig = &input_fn.sig;
     let block = &input_fn.block;
     let attrs = &input_fn.attrs;
-
-    // 3. Generate modified Rust code using quote!
     let expanded = quote! {
         #[panic_handler]
         fn __panic_handler(info: &core::panic::PanicInfo) -> ! {
@@ -180,6 +233,5 @@ pub fn fprime_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
-    // 4. Convert generated code back into TokenStream
     TokenStream::from(expanded)
 }

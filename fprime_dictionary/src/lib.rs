@@ -4,6 +4,11 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+pub mod naming;
+
+/// Environment variable that `fprime_build::generate` the dictionary.
+pub const DICTIONARY_ENV: &str = "FPRIME_DICTIONARY";
+
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Metadata {
@@ -292,16 +297,18 @@ pub struct Dictionary {
     // TODO(tumbar) Fully spec the dictionary loader
 }
 
+/// Load a dictionary
+pub fn try_parse(json_file: &Path) -> Result<Dictionary, String> {
+    let contents = fs::read_to_string(json_file).map_err(|err| format!("{}: {}", json_file.display(), err))?;
+
+    serde_json::from_str(&contents)
+        .map_err(|err| format!("{}:{}:{} {}", json_file.display(), err.line(), err.column(), err))
+}
+
 pub fn parse(json_file: &Path) -> Dictionary {
-    match serde_json::from_str(&fs::read_to_string(json_file).expect("failed to read json file")) {
+    match try_parse(json_file) {
         Ok(d) => d,
-        Err(err) => panic!(
-            "{}:{}:{} {}",
-            json_file.to_str().unwrap(),
-            err.line(),
-            err.column(),
-            err.to_string()
-        ),
+        Err(err) => panic!("{}", err),
     }
 }
 

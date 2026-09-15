@@ -33,12 +33,55 @@ Using the experimental Wasm F Prime deployment, run:
 R00:00:00 Ref.cmdSeq.RUN "example.wasm" NO_BLOCK
 ```
 
-## Project Layout
+## Writing sequences
 
-This project consists of Rust crates that are divided into two groups, code-generation and code support.
+A sequence is an ordinary Rust function. `#[entrypoint]` marks the function the
+runtime invokes, and `#[fprime]` enables a passthrough DSL that lets a command
+argument name an enumerated constant on its own. They are independent, so the
+entry point carries both and a helper carries only `#[fprime]`:
 
-- `fprime_dictionary`: Code generation. support code to load the F Prime JSON dictionary
-- `fprime_build`: Code generation. Responsible for compiling the F Prime JSON dictionary into Rust code for interfacing with the sequencing runtime
-- `fprime_core`: The F Prime core library that defines framework primitive traits and types as well as interfaces directly with the sequencing runtime
-- `fprime_macros`: Procedural macros for traits defined in `fprime_core`. Does not need to be explicitly imported since `fprime_core` will expose these `#[derive()]` macros
-- `example` An example crate showing the minimal project needed to get set up and write sequences
+```rust
+#[entrypoint]
+#[fprime]
+pub fn main() {
+    CdhCore.events.SET_EVENT_FILTER(ACTIVITY_HI, DISABLED);
+    Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);
+}
+```
+
+The receiver chain names the command in the dictionary, the command's formal
+parameters give the expected type of every argument, and the expansion prefixes
+each constant with the path of the enum that declares it:
+
+```rust
+Ref.dpDemo.Dp(
+    crate::Defs::Ref::DpDemo::DpReqType::IMMEDIATE,
+    0,
+    crate::Defs::Fw::DpCfg::ProcType::PROC_TYPE_NONE,
+);
+```
+
+Because the expected type selects the enum, a constant name shared by several
+enums is never ambiguous. `DISABLED` belongs to four enums in the `Ref`
+dictionary and `IMMEDIATE` to two, and neither needs a `use` or a hint at the
+call site. Struct literals and array literals are resolved the same way, one
+level at a time:
+
+```rust
+Ref.typeDemo.CHOICE_PAIR(ChoicePair { firstChoice: RED, secondChoice: TWO });
+Ref.typeDemo.CHOICES([RED, BLUE]);
+```
+
+Everything the dictionary does not describe is left exactly as written, so
+locals, constants of your own and explicitly qualified paths keep working. Two
+consequences are worth knowing:
+
+- The DSL only applies to command arguments, where a parameter type is known.
+  Elsewhere -- a `let` binding, say -- write the path out.
+- Where it does apply, the parameter type wins. A constant brought into scope
+  with `use` is still replaced by the dictionary's path for that parameter.
+
+The dictionary comes from the `fprime_build::generate` call in the crate's
+`build.rs`, which publishes it to the macros through the `FPRIME_DICTIONARY`
+environment variable. `#[fprime]` takes no arguments; passing one is an error rather than
+being ignored.
