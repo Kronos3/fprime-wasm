@@ -4,6 +4,11 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+pub mod naming;
+
+/// Environment variable that `fprime_build::generate` the dictionary.
+pub const DICTIONARY_ENV: &str = "FPRIME_DICTIONARY";
+
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Metadata {
