@@ -10,7 +10,7 @@ pub enum FailMode {
     Checked,
 }
 
-static mut CMD_MODE_CHECKED: FailMode = FailMode::Permissive;
+static mut CMD_MODE_CHECKED: FailMode = FailMode::Checked;
 
 pub fn set_fail_mode(mode: FailMode) {
     unsafe {
