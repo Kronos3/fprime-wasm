@@ -1,5 +1,4 @@
 use crate::{PanicCode, abi, panic};
-use core::sync::atomic::AtomicBool;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FailMode {
@@ -11,10 +10,12 @@ pub enum FailMode {
     Checked,
 }
 
-static CMD_MODE_CHECKED: AtomicBool = AtomicBool::new(false);
+static mut CMD_MODE_CHECKED: FailMode = FailMode::Permissive;
 
 pub fn set_fail_mode(mode: FailMode) {
-    CMD_MODE_CHECKED.store(mode == FailMode::Permissive, core::sync::atomic::Ordering::SeqCst);
+    unsafe {
+        CMD_MODE_CHECKED = mode;
+    }
 }
 
 /// Dispatch a command given a Fw::ComBuffer
@@ -38,7 +39,7 @@ pub fn set_fail_mode(mode: FailMode) {
 /// returns: i32 (Fw::CmdResponse)
 pub unsafe fn command(com_buffer: &[u8]) -> i32 {
     let status = unsafe { abi::cmd(com_buffer.as_ptr() as u32, com_buffer.len() as u32) };
-    if status != 0 && CMD_MODE_CHECKED.load(core::sync::atomic::Ordering::SeqCst) {
+    if status != 0 && unsafe { CMD_MODE_CHECKED == FailMode::Checked } {
         panic(PanicCode::CmdFailed)
     } else {
         status
