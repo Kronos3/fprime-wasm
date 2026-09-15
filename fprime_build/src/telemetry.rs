@@ -1,11 +1,11 @@
 use crate::types::type_name;
-use crate::util::{annotate, hex_literal, qualified_identifier, NameKind};
+use crate::util::{annotate, hex_literal, split_identifier, NameKind};
 use crate::tree::Qualifier;
 use proc_macro2::TokenStream;
 use quote::quote;
 
 pub fn telemetry_channel(tlm: &fprime_dictionary::TelemetryChannel) -> (Qualifier, TokenStream) {
-    let (q, name) = qualified_identifier(&tlm.name, NameKind::Function);
+    let (q, name) = split_identifier(&tlm.name, NameKind::Function);
     let ty = type_name(&tlm.type_name);
 
     let id = hex_literal(tlm.id);

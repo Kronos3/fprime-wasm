@@ -25,7 +25,8 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     dict: &fprime_dictionary::Dictionary,
     writer: &mut BufWriter<W>,
 ) {
-    let Some(TypeDefinition::Enum(cmd_response)) = &dict.type_definitions.get("Fw.CmdResponse") else {
+    let Some(TypeDefinition::Enum(cmd_response)) = &dict.type_definitions.get("Fw.CmdResponse")
+    else {
         panic!("Fw.CmdResponse not found in dictionary");
     };
 
@@ -39,7 +40,6 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
 
     for (_, ty) in &dict.type_definitions {
         let (qualifier, tokens) = types::type_definition(ty);
-
         definitions.push(Definition { qualifier, tokens });
     }
 
@@ -60,11 +60,12 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     let definitions: CodeTree = definitions.into();
     let impls: CodeTree = impls.into();
 
-    // Linearize the trees into a token stream
+    // Linearize the definition trees into a token stream nested in modules
+    // Linearize the impl trees into a token stream of nested structs
     let tokens = definitions
         .module_nesting()
         .into_iter()
-        .chain(impls.module_nesting())
+        .chain(impls.struct_nesting())
         .collect();
 
     // Render the token stream into formatted Rust code and write it to a file

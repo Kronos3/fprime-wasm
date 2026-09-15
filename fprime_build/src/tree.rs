@@ -1,8 +1,10 @@
-use proc_macro2::{Ident, TokenStream};
+use crate::util::{NameKind, format_name, str_to_ident};
+use convert_case::{Case, Casing};
+use proc_macro2::TokenStream;
 use quote::quote;
 use std::collections::BTreeMap;
 
-pub type Qualifier = Vec<Ident>;
+pub type Qualifier = Vec<String>;
 
 pub struct Definition {
     pub qualifier: Qualifier,
@@ -11,19 +13,14 @@ pub struct Definition {
 
 pub struct CodeTree {
     leafs: Vec<TokenStream>,
-    modules: BTreeMap<Ident, CodeTree>,
+    modules: BTreeMap<String, CodeTree>,
 }
 
 /// Consolidate definitions under the same module qualifier into a tree structure
 impl From<Vec<Definition>> for CodeTree {
     fn from(value: Vec<Definition>) -> Self {
-        let core_use = quote! {
-            #[allow(unused_imports)]
-            use fprime_core::*;
-        };
-
         let mut root = CodeTree {
-            leafs: vec![core_use.clone()],
+            leafs: vec![],
             modules: Default::default(),
         };
 
@@ -38,7 +35,7 @@ impl From<Vec<Definition>> for CodeTree {
                         current_node.modules.insert(
                             q.clone(),
                             CodeTree {
-                                leafs: vec![core_use.clone()],
+                                leafs: vec![],
                                 modules: Default::default(),
                             },
                         );
@@ -63,8 +60,12 @@ impl CodeTree {
             .into_iter()
             .map(|(q, g)| {
                 let inner: TokenStream = g.module_nesting();
+                let mod_name = str_to_ident(&format_name(NameKind::Module, &q));
                 quote! {
-                    pub mod #q {
+                    pub mod #mod_name {
+                        #[allow(unused_imports)]
+                        use fprime_core::*;
+
                         #inner
                     }
                 }
@@ -73,12 +74,69 @@ impl CodeTree {
 
         let leafs = self.leafs;
         quote! {
+            #[allow(unused_imports)]
+            use fprime_core::*;
+
             #(#leafs)*
             #(#modules)*
         }
     }
 
-    pub fn struct_nesting(self) -> TokenStream {
+    fn struct_nesting_impl(self, scope: Qualifier) -> TokenStream {
+        let members = self.modules.keys().cloned().collect::<Vec<_>>();
 
+        let inner: Vec<_> = self
+            .modules
+            .into_iter()
+            .map(|(next_ident, next_tree)| {
+                let mut next_scope = scope.clone();
+                next_scope.push(next_ident);
+
+                next_tree.struct_nesting_impl(next_scope)
+            })
+            .collect();
+
+        if scope.is_empty() {
+            if !self.leafs.is_empty() {
+                let leafs = self.leafs;
+                let leafs = quote! { #(#leafs)* };
+                assert!(false, "{}", leafs.to_string());
+            }
+
+            quote! {
+                #(#inner)*
+            }
+        } else {
+            // Build a private struct with `_` concatenated naming for holding the impls
+            let name = str_to_ident(&scope.join("_").to_case(Case::Pascal));
+
+            let member_defs = members.into_iter().map(|member_name| {
+                let member_name = str_to_ident(&format_name(NameKind::StructMember, &member_name));
+                let ty_name = str_to_ident(
+                    &format!("{}_{}", scope.join("_"), member_name.to_string())
+                        .to_case(Case::Pascal),
+                );
+
+                quote! {
+                    #member_name: #ty_name,
+                }
+            });
+
+            let leafs = self.leafs;
+            quote! {
+                #(#inner)*
+                struct #name {
+                    #(#member_defs)*
+                }
+
+                impl #name {
+                    #(#leafs)*
+                }
+            }
+        }
+    }
+
+    pub fn struct_nesting(self) -> TokenStream {
+        self.struct_nesting_impl(vec![])
     }
 }

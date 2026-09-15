@@ -84,7 +84,7 @@ pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
     }
 }
 
-pub(crate) fn qualified_identifier(qi: &str, name_kind: NameKind) -> (Qualifier, Ident) {
+pub(crate) fn split_identifier(qi: &str, name_kind: NameKind) -> (Qualifier, Ident) {
     let mut qn: Vec<&str> = qi.split('.').collect();
 
     let name = qn
@@ -92,10 +92,8 @@ pub(crate) fn qualified_identifier(qi: &str, name_kind: NameKind) -> (Qualifier,
         .expect(&format!("invalid qualified identifier: '{}'", qi));
 
     (
-        qn.into_iter()
-            .map(|q| format_name(NameKind::Module, q))
-            .collect(),
-        format_name(name_kind, name),
+        qn.iter().map(|s| s.to_string()).collect(),
+        str_to_ident(&format_name(name_kind, name)),
     )
 }
 
@@ -151,7 +149,7 @@ pub enum NameKind {
     Function,
 }
 
-pub(crate) fn format_name(kind: NameKind, name: &str) -> Ident {
+pub(crate) fn format_name(kind: NameKind, name: &str) -> String {
     // TODO(tumbar) Add a compiler context to manage settings
     let case = match kind {
         NameKind::Definition => Case::Pascal,
@@ -162,7 +160,11 @@ pub(crate) fn format_name(kind: NameKind, name: &str) -> Ident {
         NameKind::Function => Case::Snake,
     };
 
-    match name.to_case(case).as_str() {
+    name.to_case(case)
+}
+
+pub(crate) fn str_to_ident(name: &str) -> Ident {
+    match name {
         // Keywords
         name @ ("as" | "async" | "await" | "break" | "const" | "continue" | "crate" | "dyn" | "else" | "enum" | "extern" | "false" | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod" | "move" | "mut" | "pub" | "ref" | "return" | "self" | "Self" | "static" | "struct" | "super" | "trait" | "true" | "type" | "unsafe" | "use" | "where" | "while" |
         // Restricted
