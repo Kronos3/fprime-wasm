@@ -9,16 +9,17 @@ pub mod naming;
 /// Environment variable that `fprime_build::generate` the dictionary.
 pub const DICTIONARY_ENV: &str = "FPRIME_DICTIONARY";
 
-#[derive(Deserialize, Debug)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Metadata {
     pub deployment_name: String,
+    pub framework_version: String,
     pub project_version: String,
     pub library_versions: Vec<String>,
     pub dictionary_spec_version: String,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum IntegerKind {
     U8,
     I8,
@@ -30,7 +31,7 @@ pub enum IntegerKind {
     I64,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum FloatKind {
     F32,
     F64,
@@ -71,7 +72,6 @@ struct StructMemberRaw {
 #[serde(rename_all = "camelCase")]
 pub struct StructMember {
     pub name: String,
-    #[serde(rename = "type")]
     pub type_name: TypeName,
     pub index: u32,
     pub size: Option<u32>,
@@ -86,8 +86,7 @@ pub struct ArrayType {
     pub qualified_name: String,
     pub size: u32,
     pub element_type: TypeName,
-    pub format: Option<String>,
-    pub default: serde_json::Value,
+    pub default: Vec<serde_json::Value>,
 
     pub annotation: Option<String>,
 }
@@ -98,7 +97,7 @@ pub struct EnumType {
     pub qualified_name: String,
     pub representation_type: TypeName,
     pub enumerated_constants: Vec<EnumConstant>,
-    pub default: serde_json::Value,
+    pub default: String,
 
     pub annotation: Option<String>,
 }
@@ -201,14 +200,15 @@ where
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Constant {
-    pub annotation: Option<String>,
     pub qualified_name: String,
     #[serde(rename = "type")]
     pub type_name: TypeName,
     pub value: serde_json::Value,
+
+    pub annotation: Option<String>,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum CommandKind {
     Async,
@@ -218,7 +218,7 @@ pub enum CommandKind {
     Save,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum QueueFull {
     Assert,
@@ -253,53 +253,39 @@ pub struct Command {
     pub annotation: Option<String>,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
-#[serde(rename_all = "lowercase")]
-pub enum TelemetryUpdate {
-    Always,
-    #[serde(rename = "on change")]
-    OnChange,
-}
-
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TelemetryChannelLimit {
-    pub red: Option<serde_json::Value>,
-    pub orange: Option<serde_json::Value>,
-    pub yellow: Option<serde_json::Value>,
-}
+pub struct Parameter {
+    pub name: String,
+    #[serde(rename = "type")]
+    pub type_name: TypeName,
+    pub id: u64,
+    pub default: Option<serde_json::Value>,
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TelemetryChannelLimits {
-    pub low: Option<TelemetryChannelLimit>,
-    pub high: Option<TelemetryChannelLimit>,
+    pub annotation: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TelemetryChannel {
     pub name: String,
-    pub id: u64,
     #[serde(rename = "type")]
     pub type_name: TypeName,
-    pub telemetry_update: TelemetryUpdate,
-    pub format: Option<String>,
-    pub limits: Option<TelemetryChannelLimits>,
+    pub id: u64,
 
     pub annotation: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(tag = "kind", rename_all = "camelCase")]
+#[serde(rename_all = "camelCase")]
 pub struct Dictionary {
     pub metadata: Metadata,
     #[serde(deserialize_with = "deserialize_type_definitions")]
     pub type_definitions: HashMap<String, TypeDefinition>,
     pub constants: Vec<Constant>,
     pub commands: Vec<Command>,
+    pub parameters: Vec<Parameter>,
     pub telemetry_channels: Vec<TelemetryChannel>,
-    // TODO(tumbar) Fully spec the dictionary loader
 }
 
 pub fn parse(json_file: &Path) -> Dictionary {

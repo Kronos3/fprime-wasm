@@ -6,6 +6,7 @@ use std::path::Path;
 use std::{env, fs};
 
 mod commands;
+mod parameters;
 mod telemetry;
 mod tree;
 mod types;
@@ -47,6 +48,11 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
 
     for tlm in &dict.telemetry_channels {
         let (qualifier, tokens) = telemetry::telemetry_channel(tlm);
+        impls.push(Definition { qualifier, tokens });
+    }
+
+    for prm in &dict.parameters {
+        let (qualifier, tokens) = parameters::parameter(prm);
         impls.push(Definition { qualifier, tokens });
     }
 
