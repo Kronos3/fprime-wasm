@@ -2,8 +2,10 @@
 rustflags = [
     "-Ctarget-cpu=mvp",
     "-Ctarget-feature=+mutable-globals",
+    # TODO(tumbar) We do not support this in spacewasm yet
+    # "-Ctarget-feature=+bulk-memory",
     "-Clink-args=-zstack-size=512",
-    "-C", "link-arg=--page-size=1"
+    "-Clink-arg=--page-size=1",
 ]
 
 [build]
