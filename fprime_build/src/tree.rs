@@ -65,9 +65,6 @@ impl CodeTree {
                 let mod_name = str_to_ident(&q);
                 quote! {
                     pub mod #mod_name {
-                        #[allow(unused_imports)]
-                        use fprime_core::*;
-
                         #inner
                     }
                 }
