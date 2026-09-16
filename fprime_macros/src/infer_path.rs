@@ -1,37 +1,34 @@
 //! A passthrough DSL for writing F Prime command sequences.
 //!
-//! Inside a function marked `#[fprime]` (or `#[fprime_main]`), a command
-//! argument may name an enumerated constant on its own:
+//! Inside a function marked `#[fprime]`, a command argument may name an
+//! enumerated constant on its own:
 //!
 //! ```ignore
 //! Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);
 //! ```
 //!
-//! The receiver chain identifies the command in the dictionary, the command's
-//! formal parameters give the expected type of every argument, and the
-//! expansion replaces each bare constant with the full path of the enum that
-//! declares it:
+//! This gets expanded into:
 //!
 //! ```ignore
 //! Ref.dpDemo
 //!     .Dp(crate::Defs::Ref::DpDemo::DpReqType::IMMEDIATE, 0, crate::Defs::Fw::DpCfg::ProcType::PROC_TYPE_NONE);
 //! ```
 
-use fprime_dictionary::naming::{definition_path, definition_path_with_name, split_qualified_name, str_to_ident};
+use fprime_dictionary::naming::{
+    definition_path, definition_path_with_name, split_qualified_name, str_to_ident,
+};
 use fprime_dictionary::{Command, Dictionary, TypeDefinition, TypeName};
-use proc_macro2::{Group, Ident, Span, TokenStream, TokenTree};
-use quote::quote;
+use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream, TokenTree};
+use quote::{ToTokens, quote};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
-use syn::visit_mut::{self, VisitMut};
-use syn::{Block, Expr, ExprPath, ExprStruct, Member, Path as SynPath};
+use syn::{Expr, ExprPath, ExprStruct, Member, Path as SynPath};
 
 /// Aliases followed before concluding the dictionary is cyclic.
 const MAX_ALIAS_HOPS: usize = 32;
 
-/// Nesting depth qualified inside a single command argument. Structs and arrays
-/// in a dictionary cannot recurse, so this only bounds pathological input.
+/// Nesting depth qualified inside a single command argument
 const MAX_DEPTH: usize = 32;
 const COMPLETION_MARKER: &str = "raCompletionMarker";
 const MISSING_DICTIONARY: &str = concat!(
@@ -41,20 +38,41 @@ const MISSING_DICTIONARY: &str = concat!(
     "Call `fprime_build::generate(\"<topology>Dictionary.json\")` from this crate's `build.rs`."
 );
 
-/// Rewrite the bare enumerated constants in `block` into fully qualified paths.
-pub(crate) fn rewrite(attr: TokenStream, block: &mut Block, span: Span) -> syn::Result<()> {
+/// Rewrite the bare enumerated constants in `item` into fully qualified paths.
+pub(crate) fn rewrite(attr: TokenStream, item: TokenStream) -> syn::Result<TokenStream> {
     if !attr.is_empty() {
-        return Err(syn::Error::new_spanned(attr, "this attribute takes no arguments"));
+        return Err(syn::Error::new_spanned(
+            attr,
+            "this attribute takes no arguments",
+        ));
     }
+
+    let span = signature_span(&item);
 
     let Ok(dictionary) = std::env::var(fprime_dictionary::DICTIONARY_ENV) else {
         return Err(syn::Error::new(span, MISSING_DICTIONARY));
     };
 
     let resolver = resolver(Path::new(&dictionary)).map_err(|err| syn::Error::new(span, err))?;
-    Dsl { resolver }.visit_block_mut(block);
 
-    Ok(())
+    Ok(resolver.qualify_calls(item))
+}
+
+fn signature_span(item: &TokenStream) -> Span {
+    let mut first = None;
+    let mut after_fn = false;
+
+    for tree in item.clone() {
+        first = first.or(Some(tree.span()));
+
+        match &tree {
+            TokenTree::Ident(name) if after_fn => return name.span(),
+            TokenTree::Ident(keyword) if keyword == "fn" => after_fn = true,
+            _ => {}
+        }
+    }
+
+    first.unwrap_or_else(Span::call_site)
 }
 
 /// Dictionaries are parsed once per compilation and shared by every expansion.
@@ -77,7 +95,6 @@ fn resolver(dictionary: &Path) -> Result<&'static Resolver, String> {
 
 struct Resolver {
     dictionary: Dictionary,
-    /// Command name (`Ref.dpDemo.Dp`) to its index in `dictionary.commands`.
     commands: HashMap<String, usize>,
 }
 
@@ -90,11 +107,16 @@ impl Resolver {
             .map(|(index, command)| (command.name.clone(), index))
             .collect();
 
-        Self { dictionary, commands }
+        Self {
+            dictionary,
+            commands,
+        }
     }
 
     fn command(&self, name: &str) -> Option<&Command> {
-        self.commands.get(name).map(|index| &self.dictionary.commands[*index])
+        self.commands
+            .get(name)
+            .map(|index| &self.dictionary.commands[*index])
     }
 
     /// Follow aliases down to the definition that carries the constants or members.
@@ -119,6 +141,102 @@ impl Resolver {
         None
     }
 
+    fn qualify_calls(&self, tokens: TokenStream) -> TokenStream {
+        let trees: Vec<TokenTree> = tokens.into_iter().collect();
+        let mut qualified = TokenStream::new();
+        let mut index = 0;
+
+        while index < trees.len() {
+            let begins_a_chain = match index.checked_sub(1).map(|previous| &trees[previous]) {
+                Some(TokenTree::Punct(punct)) => !matches!(punct.as_char(), '.' | ':'),
+                _ => true,
+            };
+
+            if begins_a_chain
+                && let Some(call) = self.command_call(&trees, index)
+                && let Some(TokenTree::Group(args)) = trees.get(call.args)
+            {
+                qualified.extend(trees[index..call.args].iter().cloned());
+                qualified.extend([TokenTree::Group(self.qualify_args(args, call.command))]);
+                index = call.args + 1;
+                continue;
+            }
+
+            match &trees[index] {
+                // A command in a block, a closure or an argument is still a command.
+                TokenTree::Group(group) => {
+                    let mut descended =
+                        Group::new(group.delimiter(), self.qualify_calls(group.stream()));
+                    descended.set_span(group.span());
+                    qualified.extend([TokenTree::Group(descended)]);
+                }
+                tree => qualified.extend([tree.clone()]),
+            }
+
+            index += 1;
+        }
+
+        qualified
+    }
+
+    fn command_call(&self, trees: &[TokenTree], start: usize) -> Option<CommandCall<'_>> {
+        let mut index = start;
+        let mut root = ident_at(trees, index)?;
+
+        index += 1;
+        while let Some(segment) = path_separator_at(trees, index) {
+            root = ident_at(trees, segment)?;
+            index = segment + 1;
+        }
+
+        let mut parts = vec![unraw(root)];
+        while let Some(field) = field_separator_at(trees, index) {
+            parts.push(unraw(ident_at(trees, field)?));
+            index = field + 1;
+        }
+
+        let TokenTree::Group(args) = trees.get(index)? else {
+            return None;
+        };
+
+        if args.delimiter() != Delimiter::Parenthesis {
+            return None;
+        }
+
+        Some(CommandCall {
+            command: self.command(&parts.join("."))?,
+            args: index,
+        })
+    }
+
+    fn qualify_args(&self, args: &Group, command: &Command) -> Group {
+        let mut rewritten = TokenStream::new();
+
+        for (position, argument) in arguments(args.stream()).into_iter().enumerate() {
+            let written = self.qualify_calls(argument.tokens);
+
+            let expected = command.formal_params.get(position).and_then(|param| {
+                syn::parse2::<Expr>(written.clone())
+                    .ok()
+                    .map(|expr| (param, expr))
+            });
+
+            match expected {
+                Some((param, mut expr)) => {
+                    self.qualify(&mut expr, &param.type_name, 0);
+                    rewritten.extend(expr.into_token_stream());
+                }
+                None => rewritten.extend(written),
+            }
+
+            rewritten.extend(argument.separator);
+        }
+
+        let mut qualified = Group::new(args.delimiter(), rewritten);
+        qualified.set_span(args.span());
+        qualified
+    }
+
     /// Qualify `expr` against the type the dictionary expects there. An
     /// expression the dictionary has nothing to say about is left untouched.
     fn qualify(&self, expr: &mut Expr, expected: &TypeName, depth: usize) {
@@ -136,21 +254,19 @@ impl Resolver {
                     return;
                 };
 
-                // Only a constant this enum declares is qualified. Any other
-                // bare name belongs to the author -- a local, or a constant of
-                // their own -- and is left alone.
-                let Some(constant) = ty.enumerated_constants.iter().find(|c| c.name == name.lookup) else {
+                let Some(constant) = ty
+                    .enumerated_constants
+                    .iter()
+                    .find(|c| c.name == name.lookup)
+                else {
                     return;
                 };
 
-                let span = name.span;
                 let constant = name.emit(&constant.name);
                 let enum_path = definition_path(&ty.qualified_name);
 
-                // Carry the argument's own attributes across, so that something
-                // like `#[cfg(...)] IMMEDIATE` stays gated.
                 let attrs = std::mem::take(&mut original.attrs);
-                let mut qualified: ExprPath = parse(quote! { #enum_path::#constant }, span);
+                let mut qualified: ExprPath = parse(quote! { #enum_path::#constant });
                 qualified.attrs = attrs;
 
                 *expr = Expr::Path(qualified);
@@ -184,9 +300,6 @@ impl Resolver {
     }
 
     /// Qualify every element of an array literal, or the repeated element of `[x; n]`.
-    ///
-    /// `depth` is spent by `qualify` alone, so that one unit is one level of
-    /// nesting however the level is reached.
     fn qualify_elements(&self, expr: &mut Expr, element: &TypeName, depth: usize) {
         match expr {
             Expr::Array(array) => {
@@ -200,27 +313,70 @@ impl Resolver {
     }
 }
 
-struct Dsl<'a> {
-    resolver: &'a Resolver,
+struct CommandCall<'a> {
+    command: &'a Command,
+    args: usize,
 }
 
-impl VisitMut for Dsl<'_> {
-    fn visit_expr_mut(&mut self, expr: &mut Expr) {
-        if let Expr::MethodCall(call) = expr
-            && let Some(command) =
-                command_name(&call.receiver, &call.method).and_then(|name| self.resolver.command(&name))
-        {
-            // Pairing stops at the shorter side, so a call with the wrong number
-            // of arguments still gets the ones it does have qualified.
-            for (arg, param) in call.args.iter_mut().zip(&command.formal_params) {
-                self.resolver.qualify(arg, &param.type_name, 0);
-            }
-        }
+struct Argument {
+    tokens: TokenStream,
+    separator: Option<TokenTree>,
+}
 
-        // Keep descending so that commands nested in arguments, closures and
-        // blocks are qualified too.
-        visit_mut::visit_expr_mut(self, expr);
+/// Split an argument list on its commas, keeping them.
+fn arguments(tokens: TokenStream) -> Vec<Argument> {
+    let mut arguments = Vec::new();
+    let mut current = TokenStream::new();
+
+    for tree in tokens {
+        match &tree {
+            TokenTree::Punct(punct) if punct.as_char() == ',' => {
+                arguments.push(Argument {
+                    tokens: std::mem::take(&mut current),
+                    separator: Some(tree),
+                });
+            }
+            _ => current.extend([tree]),
+        }
     }
+
+    // An argument list that ends in a comma has no argument after it, and an
+    // empty one has no arguments at all.
+    if !current.is_empty() {
+        arguments.push(Argument {
+            tokens: current,
+            separator: None,
+        });
+    }
+
+    arguments
+}
+
+fn ident_at(trees: &[TokenTree], index: usize) -> Option<&Ident> {
+    match trees.get(index) {
+        Some(TokenTree::Ident(ident)) => Some(ident),
+        _ => None,
+    }
+}
+
+/// Where the name after a `::` at `index` would be.
+fn path_separator_at(trees: &[TokenTree], index: usize) -> Option<usize> {
+    let (TokenTree::Punct(first), TokenTree::Punct(second)) =
+        (trees.get(index)?, trees.get(index + 1)?)
+    else {
+        return None;
+    };
+
+    (first.as_char() == ':' && second.as_char() == ':').then_some(index + 2)
+}
+
+/// Where the name after a `.` at `index` would be.
+fn field_separator_at(trees: &[TokenTree], index: usize) -> Option<usize> {
+    let TokenTree::Punct(punct) = trees.get(index)? else {
+        return None;
+    };
+
+    (punct.as_char() == '.').then_some(index + 1)
 }
 
 /// Replace an unqualified struct literal path with the path of the dictionary
@@ -235,42 +391,10 @@ fn qualify_struct_path(literal: &mut ExprStruct, qualified_name: &str) {
         return;
     }
 
-    let span = name.span;
-    literal.path = parse(definition_path_with_name(qualified_name, name.emit(short_name)), span);
-}
-
-/// The dictionary name of the command `receiver.method` invokes, e.g. `Ref.dpDemo.Dp`.
-fn command_name(receiver: &Expr, method: &Ident) -> Option<String> {
-    let mut parts = vec![unraw(method)];
-    let mut current = receiver;
-
-    loop {
-        match current {
-            Expr::Field(field) => {
-                let Member::Named(ident) = &field.member else {
-                    return None;
-                };
-
-                parts.push(unraw(ident));
-                current = &field.base;
-            }
-            Expr::Path(path) => {
-                // The instance root may be written qualified (`crate::Ref`);
-                // the dictionary only knows its final segment.
-                let segment = path.path.segments.last()?;
-                if !segment.arguments.is_none() {
-                    return None;
-                }
-
-                parts.push(unraw(&segment.ident));
-                break;
-            }
-            _ => return None,
-        }
-    }
-
-    parts.reverse();
-    Some(parts.join("."))
+    literal.path = parse(definition_path_with_name(
+        qualified_name,
+        name.emit(short_name),
+    ));
 }
 
 /// A path that is nothing but a bare identifier, which may be one an editor is
@@ -289,16 +413,15 @@ struct BareName {
 
 impl BareName {
     /// The identifier to emit for a dictionary name this resolved to.
-    ///
-    /// While an editor is mid-name the written form is kept, so that its marker
-    /// reaches the expansion; otherwise the dictionary's own spelling is used,
-    /// which is what makes a name that collides with a keyword come out raw.
     fn emit(&self, dictionary_name: &str) -> Ident {
         if self.in_progress {
-            self.written.clone()
-        } else {
-            str_to_ident(dictionary_name)
+            return self.written.clone();
         }
+
+        let mut ident = str_to_ident(dictionary_name);
+        ident.set_span(self.span);
+
+        ident
     }
 }
 
@@ -316,8 +439,6 @@ fn bare_name(qself: Option<&syn::QSelf>, path: &SynPath) -> Option<BareName> {
     let in_progress = written.contains(COMPLETION_MARKER);
 
     Some(BareName {
-        // Resolving the name without the marker is what keeps the expansion an
-        // editor sees the same length as the real one up to the cursor.
         lookup: if in_progress {
             written.replace(COMPLETION_MARKER, "")
         } else {
@@ -336,32 +457,13 @@ fn unraw(ident: &Ident) -> String {
     name.strip_prefix("r#").map(str::to_string).unwrap_or(name)
 }
 
-/// Parse generated tokens, blaming the user's identifier for any later error.
-fn parse<T: syn::parse::Parse>(tokens: TokenStream, span: Span) -> T {
-    syn::parse2(respan(tokens, span)).expect("generated dictionary path should parse")
-}
-
-fn respan(tokens: TokenStream, span: Span) -> TokenStream {
-    tokens
-        .into_iter()
-        .map(|token| match token {
-            TokenTree::Group(group) => {
-                let mut respanned = Group::new(group.delimiter(), respan(group.stream(), span));
-                respanned.set_span(span);
-                TokenTree::Group(respanned)
-            }
-            mut token => {
-                token.set_span(span);
-                token
-            }
-        })
-        .collect()
+fn parse<T: syn::parse::Parse>(tokens: TokenStream) -> T {
+    syn::parse2(tokens).expect("generated dictionary path should parse")
 }
 
 #[cfg(test)]
 pub(crate) mod test_support {
     use super::*;
-    use quote::ToTokens;
 
     /// The dictionary the workspace tests share.
     const DICTIONARY: &str = concat!(
@@ -371,21 +473,15 @@ pub(crate) mod test_support {
 
     /// Apply the DSL to a sequence body and render the result as tokens.
     pub(crate) fn rewrite_block(body: &str) -> syn::Result<String> {
-        let mut block = parse_block(body)?;
+        let resolver = resolver(Path::new(DICTIONARY))
+            .map_err(|err| syn::Error::new(Span::call_site(), err))?;
 
-        let resolver = resolver(Path::new(DICTIONARY)).map_err(|err| syn::Error::new(Span::call_site(), err))?;
-        Dsl { resolver }.visit_block_mut(&mut block);
-
-        Ok(block.to_token_stream().to_string())
+        Ok(resolver.qualify_calls(syn::parse_str(body)?).to_string())
     }
 
     /// Render a body without rewriting it, so expectations can be written as
     /// ordinary Rust rather than as pre-spaced token strings.
     pub(crate) fn render_block(body: &str) -> syn::Result<String> {
-        Ok(parse_block(body)?.to_token_stream().to_string())
-    }
-
-    fn parse_block(body: &str) -> syn::Result<Block> {
-        syn::parse_str(&format!("{{ {} }}", body))
+        Ok(syn::parse_str::<TokenStream>(body)?.to_string())
     }
 }

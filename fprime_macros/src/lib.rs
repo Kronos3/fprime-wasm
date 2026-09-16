@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
+use proc_macro2::{Ident, TokenTree};
 use quote::quote;
-use syn::{DeriveInput, ItemFn, parse_macro_input};
+use syn::{DeriveInput, parse_macro_input};
 
 mod command;
 mod infer_path;
@@ -88,65 +89,65 @@ pub fn fprime_parameter(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// variable.
 #[proc_macro_attribute]
 pub fn fprime(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let original: proc_macro2::TokenStream = item.into();
-
-    let Some(mut input_fn) = parse_while_editing(original.clone()) else {
-        // Nothing to resolve against. Hand the tokens back so that the syntax
-        // error is reported where it is, rather than as a missing function.
-        return original.into();
-    };
-
-    let error = expand_dsl(attr, &mut input_fn);
-
-    quote! {
-        #error
-        #input_fn
-    }
-    .into()
-}
-
-fn parse_while_editing(tokens: proc_macro2::TokenStream) -> Option<ItemFn> {
-    syn::parse2::<ItemFn>(tokens).ok()
-}
-
-fn expand_dsl(attr: TokenStream, input_fn: &mut ItemFn) -> Option<proc_macro2::TokenStream> {
-    let span = input_fn.sig.ident.span();
-
-    infer_path::rewrite(attr.into(), &mut input_fn.block, span)
-        .err()
-        .map(|err| err.to_compile_error())
+    infer_enum_paths(attr.into(), item.into()).into()
 }
 
 /// Wire up the WASM entry point, and also enable the sequencing DSL (see
 /// [`fprime`]) in the function body.
 #[proc_macro_attribute]
 pub fn fprime_main(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let original: proc_macro2::TokenStream = item.into();
-    let Some(mut input_fn) = parse_while_editing(original.clone()) else {
-        return original.into();
-    };
+    let entry = export(infer_enum_paths(attr.into(), item.into()));
 
-    let error = expand_dsl(attr, &mut input_fn);
-
-    let sig = &input_fn.sig;
-    let block = &input_fn.block;
-    let attrs = &input_fn.attrs;
-    let expanded = quote! {
-        #error
-
+    quote! {
         #[panic_handler]
         fn __panic_handler(info: &core::panic::PanicInfo) -> ! {
             fprime_core::panic_handler(info);
         }
 
         #[unsafe(no_mangle)]
-        #(#attrs)*
-        pub #sig {
-            #block
-        }
-    };
+        #entry
+    }
+    .into()
+}
 
-    TokenStream::from(expanded)
+/// Resolve the sequencing DSL in `item`, keeping the item whatever happens.
+fn infer_enum_paths(
+    attr: proc_macro2::TokenStream,
+    item: proc_macro2::TokenStream,
+) -> proc_macro2::TokenStream {
+    match infer_path::rewrite(attr, item.clone()) {
+        Ok(qualified) => qualified,
+        Err(err) => {
+            let error = err.to_compile_error();
+            quote! {
+                #error
+                #item
+            }
+        }
+    }
+}
+
+fn export(item: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
+    let trees: Vec<TokenTree> = item.into_iter().collect();
+    let mut index = 0;
+
+    while matches!(trees.get(index), Some(TokenTree::Punct(punct)) if punct.as_char() == '#') {
+        index += 2;
+    }
+
+    match trees.get(index) {
+        Some(TokenTree::Ident(ident)) if ident != "pub" => {
+            let visibility = TokenTree::Ident(Ident::new("pub", ident.span()));
+
+            trees[..index]
+                .iter()
+                .cloned()
+                .chain([visibility])
+                .chain(trees[index..].iter().cloned())
+                .collect()
+        }
+        _ => trees.into_iter().collect(),
+    }
 }
 
 #[cfg(test)]

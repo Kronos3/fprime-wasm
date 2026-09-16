@@ -26,6 +26,7 @@ pub fn main() {
     Ref.dpDemo.Dp(ASYNC, 2, PROC_TYPE_ONE);
 
     Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);
+    Ref.dpDemo.SelectColor(BLUE);
     Ref.dpDemo.Dp(IMMEDIATE, 2, PROC_TYPE_TWO);
 
     Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);

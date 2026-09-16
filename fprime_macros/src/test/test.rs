@@ -416,6 +416,135 @@ fn qualifies_what_it_can_of_a_short_call() {
 }
 
 /// Everything the dictionary does not describe survives untouched.
+/// The reason the DSL reads tokens instead of a parsed function: a body is
+/// half written most of the time it is looked at, and giving up on one that does
+/// not parse costs every finished statement in it its resolution. Here a `;` is
+/// missing, which is what the compiler hands the macro verbatim.
+#[test]
+fn qualifies_across_a_syntax_error() {
+    assert_eq!(
+        rewrite(
+            "CdhCore.events.SET_EVENT_FILTER(ACTIVITY_HI, DISABLED)
+             Ref.dpDemo.SelectColor(GREEN);"
+        ),
+        expect(
+            "CdhCore.events.SET_EVENT_FILTER(
+                 crate::Defs::Svc::EventManager::FilterSeverity::ACTIVITY_HI,
+                 crate::Defs::Svc::EventManager::Enabled::DISABLED
+             )
+             Ref.dpDemo.SelectColor(crate::Defs::Ref::DpDemo::ColorEnum::GREEN);"
+        )
+    )
+}
+
+/// An argument deleted out of the middle of a call leaves the slot it was in
+/// empty, rather than shifting every later argument onto the parameter before
+/// it -- which is what splitting on the commas as written buys over parsing the
+/// argument list.
+#[test]
+fn keeps_arguments_on_their_own_parameters_across_a_gap() {
+    assert_eq!(
+        rewrite("Ref.dpDemo.Dp(, 0, PROC_TYPE_NONE);"),
+        expect("Ref.dpDemo.Dp(, 0, crate::Defs::Fw::DpCfg::ProcType::PROC_TYPE_NONE);")
+    )
+}
+
+/// The limitation of that, stated: an argument only resolves if what is written
+/// in its slot is an expression. Delete a comma and the two names it separated
+/// read as one argument, which is not, so both keep their own spelling -- and
+/// the rest of the body is qualified regardless.
+#[test]
+fn leaves_an_argument_that_is_not_yet_an_expression() {
+    assert_eq!(
+        rewrite(
+            "Ref.dpDemo.Dp(IMMEDIATE 0, PROC_TYPE_NONE);
+             Ref.dpDemo.SelectColor(GREEN);"
+        ),
+        expect(
+            "Ref.dpDemo.Dp(IMMEDIATE 0, PROC_TYPE_NONE);
+             Ref.dpDemo.SelectColor(crate::Defs::Ref::DpDemo::ColorEnum::GREEN);"
+        )
+    )
+}
+
+/// A command is qualified wherever it sits, including inside an argument of
+/// something that is not a command at all.
+#[test]
+fn qualifies_a_command_nested_in_an_argument() {
+    assert_eq!(
+        rewrite("record(Ref.dpDemo.SelectColor(BLUE));"),
+        expect("record(Ref.dpDemo.SelectColor(crate::Defs::Ref::DpDemo::ColorEnum::BLUE));")
+    )
+}
+
+/// A chain that merely *ends* in a command's name is not that command. This is
+/// the shape a trailing `.` leaves behind: `Ref.` and the statement under it read
+/// as one field chain, and qualifying its argument would be resolving against a
+/// call nobody wrote.
+#[test]
+fn does_not_qualify_a_chain_that_only_ends_in_a_command() {
+    let absorbed = "Ref.Ref.dpDemo.SelectColor(GREEN);";
+    assert_eq!(rewrite(absorbed), expect(absorbed));
+
+    // Nor one that is a command's name with something in front of it.
+    let extended = "topology.Ref.dpDemo.SelectColor(GREEN);";
+    assert_eq!(rewrite(extended), expect(extended));
+}
+
+/// The instance may be written as a qualified path, of which the dictionary knows
+/// only the final segment.
+#[test]
+fn qualifies_through_a_qualified_instance() {
+    assert_eq!(
+        rewrite("crate::Ref.dpDemo.SelectColor(BLUE);"),
+        expect("crate::Ref.dpDemo.SelectColor(crate::Defs::Ref::DpDemo::ColorEnum::BLUE);")
+    )
+}
+
+/// The DSL is applied to the whole item, so everything that is not a command
+/// argument -- attributes, visibility, the signature, a parameter list that
+/// looks like a call -- has to come out as it went in.
+#[test]
+fn leaves_everything_but_the_arguments_alone() {
+    assert_eq!(
+        rewrite(
+            "#[inline]
+             pub fn sequence(retries: u32) -> u32 {
+                 Ref.dpDemo.SelectColor(BLUE);
+                 retries
+             }"
+        ),
+        expect(
+            "#[inline]
+             pub fn sequence(retries: u32) -> u32 {
+                 Ref.dpDemo.SelectColor(crate::Defs::Ref::DpDemo::ColorEnum::BLUE);
+                 retries
+             }"
+        )
+    )
+}
+
+/// An editor asks about a name by expanding a copy of the body with a marker
+/// spliced in, and most of the time it asks the body does not parse. The marker
+/// has to survive that path too.
+#[test]
+fn resolves_a_name_an_editor_is_asking_about_in_a_broken_body() {
+    assert_eq!(
+        rewrite(
+            "Ref.dpDemo.SelectColor(BLraCompletionMarkerUE)
+             Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);"
+        ),
+        expect(
+            "Ref.dpDemo.SelectColor(crate::Defs::Ref::DpDemo::ColorEnum::BLraCompletionMarkerUE)
+             Ref.dpDemo.Dp(
+                 crate::Defs::Ref::DpDemo::DpReqType::IMMEDIATE,
+                 0,
+                 crate::Defs::Fw::DpCfg::ProcType::PROC_TYPE_NONE
+             );"
+        )
+    )
+}
+
 #[test]
 fn passes_through_unknown_names() {
     // A constant of the user's own in an enum slot, a local in a numeric slot
