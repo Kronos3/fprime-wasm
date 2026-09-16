@@ -7,6 +7,3 @@ rustflags = [
     "-Clink-args=-zstack-size=512",
     "-Clink-arg=--page-size=1",
 ]
-
-[build]
-target = "wasm32v1-none"

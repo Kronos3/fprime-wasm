@@ -1,9 +1,6 @@
-#[allow(nonstandard_style)]
-#[allow(dead_code)]
-mod inner {
-    include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
-}
+#![allow(nonstandard_style)]
+#![allow(dead_code)]
+#![allow(unused_imports)]
 
-#[allow(unused_imports)]
-pub use inner::Defs::*;
-pub use inner::*;
+include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
+pub use Defs::*;
