@@ -61,7 +61,7 @@ pub(crate) fn command(attr: TokenStream, item: TokenStream) -> syn::Result<Token
             __opcode.serialize_to(__encoded, &mut __offset);
             #(#serialize)*
 
-            unsafe { command(&__encoded[0..__offset]) }
+            unsafe { command(__encoded.get_unchecked(0..__offset)) }
         }
     };
 

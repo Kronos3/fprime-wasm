@@ -10,7 +10,16 @@ fprime_core = { path = "../fprime_core" }
 [build-dependencies]
 fprime_build = { path = "../fprime_build" }
 
+[lib]
+test = false
+bench = false
+
 [[bin]]
 name = "example"
+test = false
+bench = false
+
+[[bin]]
+name = "no_op"
 test = false
 bench = false

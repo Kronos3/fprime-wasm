@@ -96,7 +96,6 @@ pub fn generate(dictionary_json: &str) {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("dictionary.rs");
     println!("cargo::rerun-if-changed=build.rs");
-    // println!("cargo::rustc-flags=--remap-path-prefix={}=/b", out_dir.to_str().unwrap());
 
     let dictionary_path = fs::canonicalize(dictionary_json).unwrap_or_else(|err| {
         panic!(

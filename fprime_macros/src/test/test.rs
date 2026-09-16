@@ -39,10 +39,7 @@ fn command_without_arguments() {
                 let __opcode: FwOpcodeType = 0x1000000;
                 __opcode.serialize_to(__encoded, &mut __offset);
 
-                let __response = unsafe { command(&__encoded[0..__offset]) };
-                unsafe {
-                    <super::Defs::Fw::CmdResponse as ReprEnum>::from_raw_unchecked(__response)
-                }
+                unsafe { command(__encoded.get_unchecked(0..__offset)) }
             }
         },
     )
@@ -80,10 +77,7 @@ fn command_serializes_arguments_in_order() {
                 arg1.serialize_to(__encoded, &mut __offset);
                 arg2.serialize_to(__encoded, &mut __offset);
 
-                let __response = unsafe { command(&__encoded[0..__offset]) };
-                unsafe {
-                    <super::Defs::Fw::CmdResponse as ReprEnum>::from_raw_unchecked(__response)
-                }
+                unsafe { command(__encoded.get_unchecked(0..__offset)) }
             }
         },
     )
@@ -114,10 +108,7 @@ fn command_truncates_string_arguments() {
                 <String<40> as StrTruncate<40>>::truncate(arg1)
                     .serialize_to(__encoded, &mut __offset);
 
-                let __response = unsafe { command(&__encoded[0..__offset]) };
-                unsafe {
-                    <super::Defs::Fw::CmdResponse as ReprEnum>::from_raw_unchecked(__response)
-                }
+                unsafe { command(__encoded.get_unchecked(0..__offset)) }
             }
         },
     )
@@ -148,10 +139,7 @@ fn command_passes_modeled_string_types_by_value() {
                 __opcode.serialize_to(__encoded, &mut __offset);
                 arg1.serialize_to(__encoded, &mut __offset);
 
-                let __response = unsafe { command(&__encoded[0..__offset]) };
-                unsafe {
-                    <super::Defs::Fw::CmdResponse as ReprEnum>::from_raw_unchecked(__response)
-                }
+                unsafe { command(__encoded.get_unchecked(0..__offset)) }
             }
         },
     )
