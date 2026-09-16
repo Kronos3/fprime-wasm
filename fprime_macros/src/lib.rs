@@ -3,6 +3,7 @@ use quote::quote;
 use syn::{DeriveInput, ItemFn, parse_macro_input};
 
 mod command;
+mod infer_path;
 mod parameter;
 mod serializable;
 mod signature;
@@ -69,15 +70,70 @@ pub fn fprime_parameter(attr: TokenStream, item: TokenStream) -> TokenStream {
     expand(parameter::parameter(attr.into(), item.into()))
 }
 
+/// Enable the F Prime sequencing DSL in a function body.
+///
+/// Command arguments may name an enumerated constant on its own, and the
+/// expansion resolves it against the dictionary using the command's formal
+/// parameter types:
+///
+/// ```ignore
+/// #[fprime]
+/// fn take_a_data_product() {
+///     Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);
+/// }
+/// ```
+///
+/// The dictionary comes from the `fprime_build::generate` call in the crate's
+/// `build.rs`, which publishes it through the `FPRIME_DICTIONARY` environment
+/// variable.
 #[proc_macro_attribute]
-pub fn fprime_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let input_fn = parse_macro_input!(item as ItemFn);
+pub fn fprime(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let original: proc_macro2::TokenStream = item.into();
+
+    let Some(mut input_fn) = parse_while_editing(original.clone()) else {
+        // Nothing to resolve against. Hand the tokens back so that the syntax
+        // error is reported where it is, rather than as a missing function.
+        return original.into();
+    };
+
+    let error = expand_dsl(attr, &mut input_fn);
+
+    quote! {
+        #error
+        #input_fn
+    }
+    .into()
+}
+
+fn parse_while_editing(tokens: proc_macro2::TokenStream) -> Option<ItemFn> {
+    syn::parse2::<ItemFn>(tokens).ok()
+}
+
+fn expand_dsl(attr: TokenStream, input_fn: &mut ItemFn) -> Option<proc_macro2::TokenStream> {
+    let span = input_fn.sig.ident.span();
+
+    infer_path::rewrite(attr.into(), &mut input_fn.block, span)
+        .err()
+        .map(|err| err.to_compile_error())
+}
+
+/// Wire up the WASM entry point, and also enable the sequencing DSL (see
+/// [`fprime`]) in the function body.
+#[proc_macro_attribute]
+pub fn fprime_main(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let original: proc_macro2::TokenStream = item.into();
+    let Some(mut input_fn) = parse_while_editing(original.clone()) else {
+        return original.into();
+    };
+
+    let error = expand_dsl(attr, &mut input_fn);
 
     let sig = &input_fn.sig;
     let block = &input_fn.block;
     let attrs = &input_fn.attrs;
-
     let expanded = quote! {
+        #error
+
         #[panic_handler]
         fn __panic_handler(info: &core::panic::PanicInfo) -> ! {
             fprime_core::panic_handler(info);

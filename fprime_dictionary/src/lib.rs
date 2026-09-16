@@ -311,16 +311,18 @@ impl Dictionary {
     }
 }
 
+/// Load a dictionary
+pub fn try_parse(json_file: &Path) -> Result<Dictionary, String> {
+    let contents = fs::read_to_string(json_file).map_err(|err| format!("{}: {}", json_file.display(), err))?;
+
+    serde_json::from_str(&contents)
+        .map_err(|err| format!("{}:{}:{} {}", json_file.display(), err.line(), err.column(), err))
+}
+
 pub fn parse(json_file: &Path) -> Dictionary {
-    match serde_json::from_str(&fs::read_to_string(json_file).expect("failed to read json file")) {
+    match try_parse(json_file) {
         Ok(d) => d,
-        Err(err) => panic!(
-            "{}:{}:{} {}",
-            json_file.to_str().unwrap(),
-            err.line(),
-            err.column(),
-            err.to_string()
-        ),
+        Err(err) => panic!("{}", err),
     }
 }
 
