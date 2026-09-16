@@ -34,23 +34,30 @@ pub(crate) fn telemetry(attr: TokenStream, item: TokenStream) -> syn::Result<Tok
     // Span the body onto the stub's own braces, see `command`
     let body = quote_spanned! { stub.block.span() =>
         {
-            let mut __time: [u8; <#time as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)]
-                core::mem::MaybeUninit::uninit().assume_init()
+            const { assert!(<#value as Serializable>::SIZE <= __SCRATCH_SIZE) };
+            const { assert!(<#time as Serializable>::SIZE <= __TIME_SIZE) };
+
+            let __time = unsafe {
+                let ptr = (&raw mut __TIME) as *mut u8;
+                let len = <#time as Serializable>::SIZE;
+
+                core::slice::from_raw_parts_mut(ptr, len)
             };
 
-            let mut __value: [u8; <#value as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)]
-                core::mem::MaybeUninit::uninit().assume_init()
+            let __value = unsafe {
+                let ptr = (&raw mut __SCRATCH) as *mut u8;
+                let len = <#value as Serializable>::SIZE;
+
+                core::slice::from_raw_parts_mut(ptr, len)
             };
 
             unsafe {
-                telemetry(#id, &mut __time, &mut __value)
+                telemetry(#id, __time, __value)
             };
 
             (
-                <#value as Serializable>::deserialize(&__value),
-                <#time as Serializable>::deserialize(&__time)
+                <#value as Serializable>::deserialize(__value),
+                <#time as Serializable>::deserialize(__time)
             )
         }
     };

@@ -14,10 +14,10 @@ pub fn main() {
 
     CdhCore.health.HLTH_PING_ENABLE("asd", ENABLED);
 
-    // let (ev_dropped, _) = CdhCore.events.EventsDropped();
-    // if ev_dropped > 2 {
-    //     CdhCore.cmdDisp.CMD_NO_OP_STRING("DROPPED 2");
-    // }
+    let (ev_dropped, _) = CdhCore.events.EventsDropped();
+    if ev_dropped > 2 {
+        CdhCore.cmdDisp.CMD_NO_OP_STRING("DROPPED 2");
+    }
 
     Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");

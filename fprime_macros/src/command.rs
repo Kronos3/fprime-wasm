@@ -15,6 +15,7 @@ pub(crate) fn command(attr: TokenStream, item: TokenStream) -> syn::Result<Token
     // Serialize each formal parameter in declaration order, rewriting the
     // signature where the wire type is not the type we want callers to pass.
     let mut serialize = vec![];
+    let mut has_str_arg = false;
     for arg in sig.inputs.iter_mut() {
         let FnArg::Typed(arg) = arg else {
             continue;
@@ -26,10 +27,10 @@ pub(crate) fn command(attr: TokenStream, item: TokenStream) -> syn::Result<Token
             // TODO(tumbar) Make string commanding configurable
             // Currently we accept &str and truncate size to fit
             Some(size) => {
-                let (name, ty) = (&arg.pat, &arg.ty);
+                has_str_arg = true;
+                let name = &arg.pat;
                 serialize.push(quote_spanned! { span =>
-                    <#ty as StrTruncate<#size>>::truncate(#name)
-                        .serialize_to(__encoded, &mut __offset);
+                    serialize_str::<#size>(#name, __encoded, &mut __offset);
                 });
 
                 let ty_span = arg.ty.span();
@@ -65,8 +66,11 @@ pub(crate) fn command(attr: TokenStream, item: TokenStream) -> syn::Result<Token
         }
     };
 
+    let inline = has_str_arg.then(|| quote! { #[inline(always)] });
+
     Ok(quote! {
         #(#attrs)*
+        #inline
         #vis #sig #body
     })
 }

@@ -82,7 +82,9 @@ pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
     quote! {
         const __SCRATCH_SIZE: usize = #max_size;
         static mut __SCRATCH: [u8; __SCRATCH_SIZE] = [0x0; __SCRATCH_SIZE];
-        static mut __TIME: [u8; crate::Defs::Fw::TimeValue::SIZE] = [0; crate::Defs::Fw::TimeValue::SIZE];
+
+        const __TIME_SIZE: usize = crate::Defs::Fw::TimeValue::SIZE;
+        static mut __TIME: [u8; __TIME_SIZE] = [0; __TIME_SIZE];
     }
 }
 

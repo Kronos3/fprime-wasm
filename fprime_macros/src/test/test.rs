@@ -94,6 +94,7 @@ fn command_truncates_string_arguments() {
             },
         ),
         quote! {
+            #[inline(always)]
             pub fn CMD_NO_OP_STRING(&self, arg1: &str) -> super::Defs::Fw::CmdResponse {
                 let __encoded = unsafe {
                     let ptr = (&raw mut __SCRATCH) as *mut u8;
@@ -105,8 +106,7 @@ fn command_truncates_string_arguments() {
                 let mut __offset: usize = 0;
                 let __opcode: FwOpcodeType = 0x1000001;
                 __opcode.serialize_to(__encoded, &mut __offset);
-                <String<40> as StrTruncate<40>>::truncate(arg1)
-                    .serialize_to(__encoded, &mut __offset);
+                serialize_str::<40>(arg1, __encoded, &mut __offset);
 
                 unsafe { command(__encoded.get_unchecked(0..__offset)) }
             }
@@ -158,23 +158,32 @@ fn telemetry_channel() {
         quote! {
             /// Number of commands dispatched
             pub fn CommandsDispatched(&self) -> (u32, super::Defs::Fw::TimeValue) {
-                let mut __time: [u8; <super::Defs::Fw::TimeValue as Serializable>::SIZE] = unsafe {
-                    #[allow(invalid_value)]
-                    core::mem::MaybeUninit::uninit().assume_init()
+                const { assert!(<u32 as Serializable>::SIZE <= __SCRATCH_SIZE) };
+                const {
+                    assert!(<super::Defs::Fw::TimeValue as Serializable>::SIZE <= __TIME_SIZE)
                 };
 
-                let mut __value: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                    #[allow(invalid_value)]
-                    core::mem::MaybeUninit::uninit().assume_init()
+                let __time = unsafe {
+                    let ptr = (&raw mut __TIME) as *mut u8;
+                    let len = <super::Defs::Fw::TimeValue as Serializable>::SIZE;
+
+                    core::slice::from_raw_parts_mut(ptr, len)
+                };
+
+                let __value = unsafe {
+                    let ptr = (&raw mut __SCRATCH) as *mut u8;
+                    let len = <u32 as Serializable>::SIZE;
+
+                    core::slice::from_raw_parts_mut(ptr, len)
                 };
 
                 unsafe {
-                    telemetry(0x1000000, &mut __time, &mut __value)
+                    telemetry(0x1000000, __time, __value)
                 };
 
                 (
-                    <u32 as Serializable>::deserialize(&__value),
-                    <super::Defs::Fw::TimeValue as Serializable>::deserialize(&__time)
+                    <u32 as Serializable>::deserialize(__value),
+                    <super::Defs::Fw::TimeValue as Serializable>::deserialize(__time)
                 )
             }
         },

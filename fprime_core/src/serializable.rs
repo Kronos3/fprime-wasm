@@ -55,6 +55,7 @@ primitive!(f64);
 impl<const N: usize> Serializable for String<N> {
     const SIZE: usize = 2 + N;
 
+    #[inline(always)]
     fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
         let bytes = self.as_bytes();
         let n = bytes.len();
@@ -95,6 +96,22 @@ impl<const N: usize> Serializable for String<N> {
 
         unsafe { String::from_utf8_unchecked(out) }
     }
+}
+
+/// Serialize a `&str` into a `String<N>` wire field, truncated to `N` bytes.
+#[inline(always)]
+pub fn serialize_str<const N: usize>(s: &str, to: &mut [u8], offset: &mut usize) {
+    let bytes = s.as_bytes();
+    let n = core::cmp::min(bytes.len(), N);
+
+    (n as u16).serialize_to(to, offset);
+
+    let Some(dst) = to.get_mut(*offset..*offset + n) else {
+        crate::panic(crate::PanicCode::Truncated)
+    };
+
+    dst.copy_from_slice(&bytes[..n]);
+    *offset += n;
 }
 
 impl<T: Serializable, const N: usize> Serializable for [T; N] {
