@@ -145,7 +145,7 @@ pub fn derive_serializable(input: TokenStream) -> TokenStream {
                         let raw: #repr = Serializable::deserialize_from(from, offset);
                         match raw {
                             #(#match_branches)*
-                            _ => panic!("invalid value: {}", raw),
+                            _ => fprime_core::panic(fprime_core::PanicCode::InvalidEnum),
                         }
                     }
                 }

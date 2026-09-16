@@ -18,15 +18,24 @@ macro_rules! primitive {
 
             fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
                 let bytes = self.to_be_bytes();
-                to[*offset..*offset + Self::SIZE].copy_from_slice(&bytes);
+                let Some(dst) = to.get_mut(*offset..*offset + Self::SIZE) else {
+                    crate::panic(crate::PanicCode::Truncated)
+                };
+
+                dst.copy_from_slice(&bytes);
                 *offset += Self::SIZE;
             }
 
             fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-                let out =
-                    Self::from_be_bytes(from[*offset..*offset + Self::SIZE].try_into().unwrap());
+                let Some(bytes) = from.get(*offset..*offset + Self::SIZE) else {
+                    crate::panic(crate::PanicCode::Truncated)
+                };
+
+                let Ok(bytes) = <[u8; size_of::<$primitive>()]>::try_from(bytes) else {
+                    crate::panic(crate::PanicCode::Truncated)
+                };
                 *offset += Self::SIZE;
-                out
+                Self::from_be_bytes(bytes)
             }
         }
     };
@@ -50,17 +59,41 @@ impl<const N: usize> Serializable for String<N> {
         let bytes = self.as_bytes();
         let n = bytes.len();
         (n as u16).serialize_to(to, offset);
-        to[*offset..*offset + n].copy_from_slice(bytes);
+        let Some(dst) = to.get_mut(*offset..*offset + n) else {
+            crate::panic(crate::PanicCode::Truncated)
+        };
+
+        dst.copy_from_slice(bytes);
         *offset += n;
     }
 
     fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
         let n = u16::deserialize_from(from, offset) as usize;
-        let out =
-            String::from_utf8(heapless::Vec::from_slice(&from[*offset..*offset + n]).unwrap())
-                .unwrap();
+
+        if n > N {
+            crate::panic(crate::PanicCode::Truncated);
+        }
+
+        let Some(src) = from.get(*offset..*offset + n) else {
+            crate::panic(crate::PanicCode::Truncated)
+        };
+
+        let mut out: heapless::Vec<u8, N, u16> = heapless::Vec::new();
+        unsafe {
+            core::ptr::copy_nonoverlapping(src.as_ptr(), out.as_mut_ptr(), n);
+            out.set_len(n);
+        }
+
         *offset += n;
-        out
+
+        // The host serializes an Fw::String, so these bytes are already valid UTF-8.
+        // Validating pulls in `core::str` validation machinery, so only pay for it
+        // in debug builds.
+        if cfg!(debug_assertions) && core::str::from_utf8(&out).is_err() {
+            crate::panic(crate::PanicCode::InvalidStatus);
+        }
+
+        unsafe { String::from_utf8_unchecked(out) }
     }
 }
 

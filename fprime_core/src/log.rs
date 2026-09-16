@@ -24,7 +24,7 @@ impl<const N: usize> StrTruncate<N> for String<N> {
 }
 
 #[macro_export]
-macro_rules! print_event {
+macro_rules! print_message {
     ($sev:expr, $($arg:tt)+) => {
         fprime_core::messagef($sev, format_args!($($arg)+));
     };

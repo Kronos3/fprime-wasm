@@ -1,4 +1,4 @@
-use crate::{EventSeverity, abi, message};
+use crate::{EventSeverity, abi, message, messagef};
 
 #[derive(Copy, Clone, Debug)]
 #[repr(i32)]
@@ -20,6 +20,12 @@ pub enum PanicCode {
 
     /// Parameter value is not initialized
     PrmInvalid = 5,
+
+    /// A serialized enum held a value with no corresponding variant
+    InvalidEnum = 6,
+
+    /// A serialized value did not fit its destination buffer
+    Truncated = 7,
 }
 
 /// Exit the runtime due to a system/response failure
@@ -52,6 +58,10 @@ pub fn panic_handler(info: &core::panic::PanicInfo) -> ! {
             message(EventSeverity::WarningHi, msg);
         } else {
             message(EventSeverity::WarningHi, "rust panic")
+        }
+
+        if let Some(loc) = info.location() {
+            messagef(EventSeverity::ActivityLo, format_args!("{}", loc));
         }
     }
 

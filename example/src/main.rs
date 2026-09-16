@@ -19,6 +19,11 @@ pub fn main() {
         Svc::EventManager::Enabled::DISABLED,
     );
 
+    let (ev_dropped, _) = CdhCore.events.EventsDropped();
+    if ev_dropped > 2 {
+        CdhCore.cmdDisp.CMD_NO_OP_STRING("DROPPED 2");
+    }
+
     Ref.dpDemo.Dp(IMMEDIATE, 0, ProcType::PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");
     Ref.dpDemo
