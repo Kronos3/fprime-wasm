@@ -27,16 +27,24 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     dict: &fprime_dictionary::Dictionary,
     writer: &mut BufWriter<W>,
 ) {
-    let Some(TypeDefinition::Enum(cmd_response)) = &dict.type_definitions.get("Fw.CmdResponse")
-    else {
-        panic!("Fw.CmdResponse not found in dictionary");
-    };
+    // Every command reports an `Fw::CmdResponse`
+    if !matches!(
+        dict.type_definitions.get("Fw.CmdResponse"),
+        Some(TypeDefinition::Enum(_))
+    ) {
+        panic!("Fw.CmdResponse enum not found in dictionary");
+    }
 
     let mut definitions = vec![];
 
     // Generate all namespace nested definitions
-    for (_, ty) in &dict.type_definitions {
-        let (qualifier, tokens) = types::type_definition(ty);
+    // Definitions are keyed by an unordered map, so walk them by name to keep
+    // the generated file stable across runs
+    let mut type_names: Vec<&String> = dict.type_definitions.keys().collect();
+    type_names.sort();
+
+    for name in type_names {
+        let (qualifier, tokens) = types::type_definition(&dict.type_definitions[name]);
         definitions.push(Definition { qualifier, tokens });
     }
 
@@ -49,7 +57,7 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     let mut impls = vec![];
 
     for cmd in &dict.commands {
-        let (qualifier, tokens) = commands::command(cmd, cmd_response);
+        let (qualifier, tokens) = commands::command(cmd);
         impls.push(Definition { qualifier, tokens });
     }
 

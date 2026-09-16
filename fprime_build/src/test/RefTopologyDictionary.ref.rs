@@ -1,11 +1,45 @@
 pub mod Defs {
     #[allow(unused_imports)]
     use fprime_core::*;
+    /// The type of a telemetry channel identifier
+    pub type FwChanIdType = crate::Defs::FwIdType;
+    /// The type of a data product identifier
+    pub type FwDpIdType = crate::Defs::FwIdType;
+    /// The type of a data product priority
+    pub type FwDpPriorityType = u32;
+    /// The type of an event identifier
+    pub type FwEventIdType = crate::Defs::FwIdType;
+    /// The id type.
+    pub type FwIdType = u32;
+    /// The type of smaller indices internal to the software, used
+    /// for array indices, e.g., port indices. Must be signed.
+    pub type FwIndexType = crate::Defs::PlatformIndexType;
+    /// The type of a command opcode
+    pub type FwOpcodeType = crate::Defs::FwIdType;
+    /// The width of packet descriptors when they are serialized by the framework
+    pub type FwPacketDescriptorType = u16;
+    /// The type of a parameter identifier
+    pub type FwPrmIdType = crate::Defs::FwIdType;
+    /// The type used to serialize a size value
+    pub type FwSizeStoreType = u16;
+    /// The unsigned type of larger sizes internal to the software,
+    /// e.g., memory buffer sizes, file sizes. Must be unsigned.
+    pub type FwSizeType = crate::Defs::PlatformSizeType;
+    /// The type used to serialize a time base value
+    pub type FwTimeBaseStoreType = u16;
+    /// The type used to serialize a time context value
+    pub type FwTimeContextStoreType = u8;
+    /// The type of a telemetry packet identifier
+    pub type FwTlmPacketizeIdType = u16;
     /// The type of smaller indices internal to the software, used
     /// for array indices, e.g., port indices. Must be signed.
     pub type PlatformIndexType = i16;
+    /// The unsigned type of larger sizes internal to the software,
+    /// e.g., memory buffer sizes, file sizes. Must be unsigned.
+    /// Supplied by platform, overridable by project.
+    pub type PlatformSizeType = u64;
     /// Define enumeration for Time base types
-    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+    #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
     #[repr(u16)]
     pub enum TimeBase {
         /// No time base has been established (Required)
@@ -19,58 +53,33 @@ pub mod Defs {
         /// Don't care value for sequences. If FwTimeBaseStoreType is changed, value should be changed (Required)
         TB_DONT_CARE = 65535,
     }
-    /// The unsigned type of larger sizes internal to the software,
-    /// e.g., memory buffer sizes, file sizes. Must be unsigned.
-    pub type FwSizeType = crate::Defs::PlatformSizeType;
-    /// The type of a data product priority
-    pub type FwDpPriorityType = u32;
-    /// The type of a command opcode
-    pub type FwOpcodeType = crate::Defs::FwIdType;
-    /// The type of a telemetry packet identifier
-    pub type FwTlmPacketizeIdType = u16;
-    /// The type used to serialize a time base value
-    pub type FwTimeBaseStoreType = u16;
-    /// The type of smaller indices internal to the software, used
-    /// for array indices, e.g., port indices. Must be signed.
-    pub type FwIndexType = crate::Defs::PlatformIndexType;
-    /// The type used to serialize a size value
-    pub type FwSizeStoreType = u16;
-    /// The width of packet descriptors when they are serialized by the framework
-    pub type FwPacketDescriptorType = u16;
-    /// The unsigned type of larger sizes internal to the software,
-    /// e.g., memory buffer sizes, file sizes. Must be unsigned.
-    /// Supplied by platform, overridable by project.
-    pub type PlatformSizeType = u64;
-    /// The type used to serialize a time context value
-    pub type FwTimeContextStoreType = u8;
-    /// The type of a data product identifier
-    pub type FwDpIdType = crate::Defs::FwIdType;
-    /// The id type.
-    pub type FwIdType = u32;
-    /// The type of an event identifier
-    pub type FwEventIdType = crate::Defs::FwIdType;
-    /// The type of a telemetry channel identifier
-    pub type FwChanIdType = crate::Defs::FwIdType;
-    /// The type of a parameter identifier
-    pub type FwPrmIdType = crate::Defs::FwIdType;
+    /// Used for number of Fw::Buffer type ports supported by Svc::ComQueue
+    const ComQueueBufferPorts: u64 = 1;
+    /// Used for number of Fw::Com type ports supported by Svc::ComQueue
+    const ComQueueComPorts: u64 = 2;
+    /// Configuration for Fw::String
+    /// Note: FPrimeBasicTypes.hpp needs to be updated to sync enum
+    const FW_FIXED_LENGTH_STRING_SIZE: u64 = 256;
+    /// Value encoded during serialization for boolean false
+    const FW_SERIALIZE_FALSE_VALUE: u64 = 0;
+    /// Specifies the size of the buffer that contains a communications packet
+    const FW_COM_BUFFER_MAX_SIZE: u64 = 512;
+    /// The size of a file name in an AssertFatalAdapter event (leading-truncation)
+    /// Note: File names in assertion failures are also truncated by
+    /// the constants FwAssertTextSize (in this file) and FW_LOG_STRING_MAX_SIZE (set
+    /// in FW_LOG_STRING_MAX_SIZE)
+    /// Set much smaller than FwAssertTextSize so there's space for time stamp/assert
+    /// arguments in log message
+    const AssertFatalAdapterEventFileSize: u64 = 240;
+    /// The size of a file name string
+    const FileNameStringSize: u64 = 240;
+    /// Value encoded during serialization for boolean true
+    const FW_SERIALIZE_TRUE_VALUE: u64 = 255;
     pub mod ComCfg {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[allow(unused_imports)]
-        use fprime_core::*;
-        /// Packet Version Numbers are 3 bits with only 2 currently valid values
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum Pvn {
-            /// Fully Featured CCSDS Space Packet Protocol
-            SPACE_PACKET_PROTOCOL = 0,
-            /// Bare-bones CCSDS Encapsulation Packet Protocol
-            ENCAPSULATION_PACKET_PROTOCOL = 7,
-            /// Anything equal or higher value is invalid and should not be used
-            INVALID_UNINITIALIZED = 8,
-        }
         /// APIDs are 11 bits in the Space Packet protocol, so we use U16. Max value 7FF
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u16)]
         pub enum Apid {
             /// Command packet type - incoming
@@ -96,14 +105,27 @@ pub mod Defs {
             /// Anything equal or higher value is invalid and should not be used
             INVALID_UNINITIALIZED = 2048,
         }
+        /// Packet Version Numbers are 3 bits with only 2 currently valid values
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum Pvn {
+            /// Fully Featured CCSDS Space Packet Protocol
+            SPACE_PACKET_PROTOCOL = 0,
+            /// Bare-bones CCSDS Encapsulation Packet Protocol
+            ENCAPSULATION_PACKET_PROTOCOL = 7,
+            /// Anything equal or higher value is invalid and should not be used
+            INVALID_UNINITIALIZED = 8,
+        }
+        /// Fixed size of CCSDS TM frames
+        const TmFrameFixedSize: u64 = 1024;
+        /// Spacecraft ID (10 bits) for CCSDS Data Link layer
+        const SpacecraftId: u64 = 68;
     }
     pub mod Fw {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[allow(unused_imports)]
-        use fprime_core::*;
         /// Enum representing a command response
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum CmdResponse {
             /// Command successfully executed
@@ -119,90 +141,8 @@ pub mod Defs {
             /// Component busy
             BUSY = 5,
         }
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(i32)]
-        pub enum TimeComparison {
-            LT = -1,
-            EQ = 0,
-            GT = 1,
-            INCOMPARABLE = 2,
-        }
-        /// Data structure for Time Interval
-        #[derive(Clone, Debug, Serializable)]
-        pub struct TimeIntervalValue {
-            /// seconds portion of TimeInterval
-            pub seconds: u32,
-            /// microseconds portion of TimeInterval
-            pub useconds: u32,
-        }
-        /// Enum representing parameter validity
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum ParamValid {
-            UNINIT = 0,
-            VALID = 1,
-            INVALID = 2,
-            DEFAULT = 3,
-        }
-        /// Wait or don't wait for something
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum Wait {
-            /// Wait for something
-            WAIT = 0,
-            /// Don't wait for something
-            NO_WAIT = 1,
-        }
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum DpState {
-            /// The untransmitted state
-            UNTRANSMITTED = 0,
-            /// The partially transmitted state
-            /// A data product is in this state from the start of transmission
-            /// until transmission is complete.
-            PARTIAL = 1,
-            /// The transmitted state
-            TRANSMITTED = 2,
-        }
-        /// FPP shadow-enum representing Fw::FormatStatus
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum StringFormatStatus {
-            /// Format worked
-            SUCCESS = 0,
-            /// Format overflowed
-            OVERFLOWED = 1,
-            /// Format provided invalid format string
-            INVALID_FORMAT_STRING = 2,
-            /// FwSizeType overflowed the range of size_t
-            SIZE_OVERFLOW = 3,
-            /// An error was returned from an underlying call
-            OTHER_ERROR = 4,
-        }
-        /// Data structure for Time
-        #[derive(Clone, Debug, Serializable)]
-        pub struct TimeValue {
-            /// basis of time (defined by system)
-            pub timeBase: crate::Defs::TimeBase,
-            /// user settable value. Could be reboot count, node, etc
-            pub timeContext: crate::Defs::FwTimeContextStoreType,
-            /// seconds portion of Time
-            pub seconds: u32,
-            /// microseconds portion of Time
-            pub useconds: u32,
-        }
-        /// Enabled and disabled states
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum Enabled {
-            /// Disabled state
-            DISABLED = 0,
-            /// Enabled state
-            ENABLED = 1,
-        }
         /// Deserialization status
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum DeserialStatus {
             OK = 0,
@@ -215,8 +155,29 @@ pub mod Defs {
             /// Deserialized type ID didn't match
             TYPE_MISMATCH = 6,
         }
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum DpState {
+            /// The untransmitted state
+            UNTRANSMITTED = 0,
+            /// The partially transmitted state
+            /// A data product is in this state from the start of transmission
+            /// until transmission is complete.
+            PARTIAL = 1,
+            /// The transmitted state
+            TRANSMITTED = 2,
+        }
+        /// Enabled and disabled states
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum Enabled {
+            /// Disabled state
+            DISABLED = 0,
+            /// Enabled state
+            ENABLED = 1,
+        }
         /// Enum representing event severity
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum LogSeverity {
             /// A fatal non-recoverable event
@@ -234,14 +195,73 @@ pub mod Defs {
             /// Software diagnostic events
             DIAGNOSTIC = 7,
         }
+        /// Enum representing parameter validity
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum ParamValid {
+            UNINIT = 0,
+            VALID = 1,
+            INVALID = 2,
+            DEFAULT = 3,
+        }
+        /// FPP shadow-enum representing Fw::FormatStatus
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum StringFormatStatus {
+            /// Format worked
+            SUCCESS = 0,
+            /// Format overflowed
+            OVERFLOWED = 1,
+            /// Format provided invalid format string
+            INVALID_FORMAT_STRING = 2,
+            /// FwSizeType overflowed the range of size_t
+            SIZE_OVERFLOW = 3,
+            /// An error was returned from an underlying call
+            OTHER_ERROR = 4,
+        }
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(i32)]
+        pub enum TimeComparison {
+            LT = -1,
+            EQ = 0,
+            GT = 1,
+            INCOMPARABLE = 2,
+        }
+        /// Data structure for Time Interval
+        #[derive(Clone, Debug, Serializable)]
+        pub struct TimeIntervalValue {
+            /// seconds portion of TimeInterval
+            pub seconds: u32,
+            /// microseconds portion of TimeInterval
+            pub useconds: u32,
+        }
+        /// Data structure for Time
+        #[derive(Clone, Debug, Serializable)]
+        pub struct TimeValue {
+            /// basis of time (defined by system)
+            pub timeBase: crate::Defs::TimeBase,
+            /// user settable value. Could be reboot count, node, etc
+            pub timeContext: crate::Defs::FwTimeContextStoreType,
+            /// seconds portion of Time
+            pub seconds: u32,
+            /// microseconds portion of Time
+            pub useconds: u32,
+        }
+        /// Wait or don't wait for something
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum Wait {
+            /// Wait for something
+            WAIT = 0,
+            /// Don't wait for something
+            NO_WAIT = 1,
+        }
         pub mod DpCfg {
-            #[allow(unused_imports)]
-            use fprime_core::*;
             #[allow(unused_imports)]
             use fprime_core::*;
             /// A bit mask for selecting the type of processing to perform on
             /// a container before writing it to disk.
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum ProcType {
                 /// No Processing
@@ -253,15 +273,16 @@ pub mod Defs {
                 /// Processing type 2
                 PROC_TYPE_TWO = 4,
             }
+            /// The size in bytes of the user-configurable data in the container
+            /// packet header
+            const CONTAINER_USER_DATA_SIZE: u64 = 32;
         }
     }
     pub mod Os {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[allow(unused_imports)]
-        use fprime_core::*;
         /// FPP shadow-enum representing Os::RawTime::Status
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum RawTimeStatus {
             /// Operation was successful
@@ -279,11 +300,8 @@ pub mod Defs {
     pub mod Ref {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[allow(unused_imports)]
-        use fprime_core::*;
-        pub type SignalPairSet = [crate::Defs::Ref::SignalPair; 4];
         /// Enumeration type for use later
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(i32)]
         pub enum Choice {
             ONE = 0,
@@ -291,27 +309,39 @@ pub mod Defs {
             RED = 2,
             BLUE = 3,
         }
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(i32)]
-        pub enum SignalType {
-            TRIANGLE = 0,
-            SQUARE = 1,
-            SINE = 2,
-            NOISE = 3,
-        }
+        /// Structure of enums
         #[derive(Clone, Debug, Serializable)]
-        pub struct SignalInfo {
-            pub r#type: crate::Defs::Ref::SignalType,
-            pub history: crate::Defs::Ref::SignalSet,
-            pub pairHistory: crate::Defs::Ref::SignalPairSet,
+        pub struct ChoicePair {
+            /// The first choice to make
+            pub firstChoice: crate::Defs::Ref::Choice,
+            /// The second choice to make
+            pub secondChoice: crate::Defs::Ref::Choice,
         }
+        /// Structure of enums (with an multi-dimensional array and structure)
         #[derive(Clone, Debug, Serializable)]
-        pub struct SignalPair {
-            pub time: f32,
-            pub value: f32,
+        pub struct ChoiceSlurry {
+            /// A large set of disorganized choices
+            pub tooManyChoices: crate::Defs::Ref::TooManyChoices,
+            /// A singular choice
+            pub separateChoice: crate::Defs::Ref::Choice,
+            /// A pair of choices
+            pub choicePair: crate::Defs::Ref::ChoicePair,
+            /// An array of choices defined as member array
+            pub choiceAsMemberArray: [u8; 2],
         }
         /// Set of floating points to emit
         pub type FloatSet = [f32; 3];
+        /// Enumeration array
+        pub type ManyChoices = [crate::Defs::Ref::Choice; 2];
+        /// Packet receive status
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(i32)]
+        pub enum PacketRecvStatus {
+            PACKET_STATE_NO_PACKETS = 0,
+            PACKET_STATE_OK = 1,
+            /// Receiver has seen errors
+            PACKET_STATE_ERRORS = 3,
+        }
         /// Some Packet Statistics
         #[derive(Clone, Debug, Serializable)]
         pub struct PacketStat {
@@ -336,71 +366,65 @@ pub mod Defs {
             pub f32: f32,
             pub f64: f64,
         }
-        /// Structure of enums
         #[derive(Clone, Debug, Serializable)]
-        pub struct ChoicePair {
-            /// The first choice to make
-            pub firstChoice: crate::Defs::Ref::Choice,
-            /// The second choice to make
-            pub secondChoice: crate::Defs::Ref::Choice,
+        pub struct SignalInfo {
+            pub r#type: crate::Defs::Ref::SignalType,
+            pub history: crate::Defs::Ref::SignalSet,
+            pub pairHistory: crate::Defs::Ref::SignalPairSet,
         }
-        /// Structure of enums (with an multi-dimensional array and structure)
         #[derive(Clone, Debug, Serializable)]
-        pub struct ChoiceSlurry {
-            /// A large set of disorganized choices
-            pub tooManyChoices: crate::Defs::Ref::TooManyChoices,
-            /// A singular choice
-            pub separateChoice: crate::Defs::Ref::Choice,
-            /// A pair of choices
-            pub choicePair: crate::Defs::Ref::ChoicePair,
-            /// An array of choices defined as member array
-            pub choiceAsMemberArray: [u8; 2],
+        pub struct SignalPair {
+            pub time: f32,
+            pub value: f32,
         }
-        /// Packet receive status
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        pub type SignalPairSet = [crate::Defs::Ref::SignalPair; 4];
+        pub type SignalSet = [f32; 4];
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(i32)]
-        pub enum PacketRecvStatus {
-            PACKET_STATE_NO_PACKETS = 0,
-            PACKET_STATE_OK = 1,
-            /// Receiver has seen errors
-            PACKET_STATE_ERRORS = 3,
+        pub enum SignalType {
+            TRIANGLE = 0,
+            SQUARE = 1,
+            SINE = 2,
+            NOISE = 3,
         }
-        /// Enumeration array
-        pub type ManyChoices = [crate::Defs::Ref::Choice; 2];
         /// Array of array
         pub type TooManyChoices = [crate::Defs::Ref::ManyChoices; 2];
-        pub type SignalSet = [f32; 4];
+        const dimension: u64 = 2;
         pub mod DpDemo {
-            #[allow(unused_imports)]
-            use fprime_core::*;
             #[allow(unused_imports)]
             use fprime_core::*;
             /// Array of array of strings
             pub type ArrayOfStringArray = [crate::Defs::Ref::DpDemo::StringArray; 3];
-            pub type BoolAlias = bool;
-            /// Array of integers
-            pub type U32Array = [u32; 5];
             pub type ArrayOfStructs = [crate::Defs::Ref::DpDemo::StructWithStringMembers; 3];
-            /// Array of enumerations
-            pub type EnumArray = [crate::Defs::Ref::DpDemo::ColorEnum; 3];
+            pub type BoolAlias = bool;
             /// Array of booleans
             pub type BooleanArray = [bool; 2];
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(i32)]
-            pub enum DpReqType {
-                IMMEDIATE = 0,
-                ASYNC = 1,
-            }
-            pub type I32Alias = i32;
-            #[derive(Clone, Debug, Serializable)]
-            pub struct StructWithStringMembers {
-                pub stringMember: String<80>,
-                pub stringArrayMember: crate::Defs::Ref::DpDemo::StringArray,
+            pub enum ColorEnum {
+                RED = 0,
+                GREEN = 1,
+                BLUE = 2,
             }
             #[derive(Clone, Debug, Serializable)]
             pub struct ColorInfoStruct {
                 pub Color: crate::Defs::Ref::DpDemo::ColorEnum,
             }
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+            #[repr(i32)]
+            pub enum DpReqType {
+                IMMEDIATE = 0,
+                ASYNC = 1,
+            }
+            /// Array of enumerations
+            pub type EnumArray = [crate::Defs::Ref::DpDemo::ColorEnum; 3];
+            /// Array of floats
+            pub type F32Array = [f32; 3];
+            pub type F64Alias = f64;
+            pub type I32Alias = i32;
+            pub type StringAlias = String<80>;
+            /// Array of strings
+            pub type StringArray = [String<80>; 2];
             #[derive(Clone, Debug, Serializable)]
             pub struct StructWithEverything {
                 pub integerMember: crate::Defs::Ref::DpDemo::I32Alias,
@@ -417,27 +441,20 @@ pub mod Defs {
                 pub structWithStrings: crate::Defs::Ref::DpDemo::StructWithStringMembers,
                 pub nestedArrays: crate::Defs::Ref::DpDemo::ArrayOfStringArray,
             }
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-            #[repr(i32)]
-            pub enum ColorEnum {
-                RED = 0,
-                GREEN = 1,
-                BLUE = 2,
+            #[derive(Clone, Debug, Serializable)]
+            pub struct StructWithStringMembers {
+                pub stringMember: String<80>,
+                pub stringArrayMember: crate::Defs::Ref::DpDemo::StringArray,
             }
-            pub type StringAlias = String<80>;
-            /// Array of strings
-            pub type StringArray = [String<80>; 2];
-            pub type F64Alias = f64;
-            /// Array of floats
-            pub type F32Array = [f32; 3];
+            /// Array of integers
+            pub type U32Array = [u32; 5];
+            const stringSize: u64 = 80;
         }
         pub mod SendBuff {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
             /// Active state
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(i32)]
             pub enum ActiveState {
                 SEND_IDLE = 0,
@@ -447,9 +464,7 @@ pub mod Defs {
         pub mod SignalGen {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(i32)]
             pub enum DpReqType {
                 IMMEDIATE = 0,
@@ -460,31 +475,26 @@ pub mod Defs {
     pub mod Svc {
         #[allow(unused_imports)]
         use fprime_core::*;
-        #[allow(unused_imports)]
-        use fprime_core::*;
-        /// Send file status enum
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        /// Sequencer blocking state
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u8)]
-        pub enum SendFileStatus {
-            STATUS_OK = 0,
-            STATUS_ERROR = 1,
-            STATUS_INVALID = 2,
-            STATUS_BUSY = 3,
+        pub enum BlockState {
+            BLOCK = 0,
+            NO_BLOCK = 1,
         }
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        /// Array of queue depths for Fw::Buffer types
+        pub type BuffQueueDepth = [u32; 1];
+        /// Array of queue depths for Fw::Com types
+        pub type ComQueueDepth = [u32; 2];
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u8)]
-        pub enum SystemResourceEnabled {
-            DISABLED = 0,
-            ENABLED = 1,
+        pub enum CompressionAlgorithm {
+            UNCOMPRESSED = 0,
+            ZLIB_DEFLATE = 1,
         }
-        /// Header validation error
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum DpHdrField {
-            DESCRIPTOR = 0,
-            ID = 1,
-            PRIORITY = 2,
-            CRC = 3,
+        #[derive(Clone, Debug, Serializable)]
+        pub struct CompressionMetadata {
+            pub algorithm: crate::Defs::Svc::CompressionAlgorithm,
         }
         /// Data Structure for custom version Tlm
         #[derive(Clone, Debug, Serializable)]
@@ -496,11 +506,14 @@ pub mod Defs {
             /// status of the custom version
             pub version_status: crate::Defs::Svc::VersionStatus,
         }
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        /// Header validation error
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u8)]
-        pub enum CompressionAlgorithm {
-            UNCOMPRESSED = 0,
-            ZLIB_DEFLATE = 1,
+        pub enum DpHdrField {
+            DESCRIPTOR = 0,
+            ID = 1,
+            PRIORITY = 2,
+            CRC = 3,
         }
         /// Data structure representing a data product.
         #[derive(Clone, Debug, Serializable)]
@@ -513,8 +526,48 @@ pub mod Defs {
             pub blocks: u32,
             pub state: crate::Defs::Fw::DpState,
         }
+        /// An enumeration of queue data types
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum QueueType {
+            COM_QUEUE = 0,
+            BUFFER_QUEUE = 1,
+        }
+        /// Send file status enum
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum SendFileStatus {
+            STATUS_OK = 0,
+            STATUS_ERROR = 1,
+            STATUS_INVALID = 2,
+            STATUS_BUSY = 3,
+        }
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum SystemResourceEnabled {
+            DISABLED = 0,
+            ENABLED = 1,
+        }
+        /// Tracks versions for project, framework and user defined versions etc
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum VersionEnabled {
+            /// verbosity disabled
+            DISABLED = 0,
+            /// verbosity enabled
+            ENABLED = 1,
+        }
+        /// An enumeration for version status
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+        #[repr(u8)]
+        pub enum VersionStatus {
+            /// Version was good
+            OK = 0,
+            /// Failure to get version
+            FAILURE = 1,
+        }
         /// An enumeration for Version Type
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
         #[repr(u8)]
         pub enum VersionType {
             /// project version
@@ -528,58 +581,16 @@ pub mod Defs {
             /// all above versions
             ALL = 4,
         }
-        /// Array of queue depths for Fw::Buffer types
-        pub type BuffQueueDepth = [u32; 1];
-        /// An enumeration for version status
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum VersionStatus {
-            /// Version was good
-            OK = 0,
-            /// Failure to get version
-            FAILURE = 1,
-        }
-        /// Tracks versions for project, framework and user defined versions etc
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum VersionEnabled {
-            /// verbosity disabled
-            DISABLED = 0,
-            /// verbosity enabled
-            ENABLED = 1,
-        }
-        /// Array of queue depths for Fw::Com types
-        pub type ComQueueDepth = [u32; 2];
-        /// An enumeration of queue data types
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum QueueType {
-            COM_QUEUE = 0,
-            BUFFER_QUEUE = 1,
-        }
-        /// Sequencer blocking state
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-        #[repr(u8)]
-        pub enum BlockState {
-            BLOCK = 0,
-            NO_BLOCK = 1,
-        }
-        #[derive(Clone, Debug, Serializable)]
-        pub struct CompressionMetadata {
-            pub algorithm: crate::Defs::Svc::CompressionAlgorithm,
-        }
         pub mod BufferAccumulator {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum BlockMode {
                 NOBLOCK = 0,
                 BLOCK = 1,
             }
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum OpState {
                 ACCUMULATE = 0,
@@ -589,9 +600,7 @@ pub mod Defs {
         pub mod Ccsds {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum EppLengthOfLength {
                 /// 0b00 - Single Byte Idle Packet
@@ -604,7 +613,7 @@ pub mod Defs {
                 Four = 3,
             }
             /// Protocol IDs for EPP encapsulation packets per CCSDS 133.1-B-3 Section 4.1.2.3.3
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum EppProtocolId {
                 /// 0b000 - Encapsulation Idle Packet
@@ -623,7 +632,7 @@ pub mod Defs {
             /// section 4.1.2.2.2 of AOS (CCSDS 732.0-B-5),
             /// section 4.3.2 of Space Data Link Protocol Summary (CCSDS 130.2-G-3),
             /// & table 3-1 in Overview of Space Comms Protocols (CCSDS 130.0-G-4)
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum Tfvn {
                 /// Telemetry and Telecommand SDLs
@@ -641,10 +650,8 @@ pub mod Defs {
         pub mod CmdSequencer {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
             /// The stage of the file read operation
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum FileReadStage {
                 READ_HEADER = 0,
@@ -658,7 +665,7 @@ pub mod Defs {
                 READ_SEQ_DATA_SIZE = 8,
             }
             /// The sequencer mode
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum SeqMode {
                 STEP = 0,
@@ -668,11 +675,18 @@ pub mod Defs {
         pub mod EventManager {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
+            /// Enabled and disabled state
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+            #[repr(u8)]
+            pub enum Enabled {
+                /// Enabled state
+                ENABLED = 0,
+                /// Disabled state
+                DISABLED = 1,
+            }
             /// Severity level for event filtering
             /// Similar to Fw::LogSeverity, but no FATAL event
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum FilterSeverity {
                 /// Filter WARNING_HI events
@@ -688,24 +702,13 @@ pub mod Defs {
                 /// Filter DIAGNOSTIC events
                 DIAGNOSTIC = 5,
             }
-            /// Enabled and disabled state
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-            #[repr(u8)]
-            pub enum Enabled {
-                /// Enabled state
-                ENABLED = 0,
-                /// Disabled state
-                DISABLED = 1,
-            }
         }
         pub mod Fpy {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
             /// Serial port indices for FpySequencer serialOut port array.
             /// MAX_SERIAL_PORTS must be defined with this exact name for Fpy compiler bounds checking.
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum SerialPortIndex {
                 /// Example serial port 0 - rename to application-specific name (e.g., TIME_SYNC_PORT)
@@ -721,13 +724,37 @@ pub mod Defs {
                 /// REQUIRED: Maximum number of serial ports. This sentinel value MUST be named
                 MAX_SERIAL_PORTS = 5,
             }
+            /// the maximum number of bytes in a stack
+            const MAX_STACK_SIZE: u64 = 65535;
+            /// the default value of the SEQ_BASE_DIR parameter. suffixed to
+            /// the input sequence file path before resolution occurs following
+            /// the rules of Os::File::open. trailing slash optional
+            const DEFAULT_SEQ_BASE_DIR: &'static str = "";
+            /// The maximum number of statements a sequence can have
+            const MAX_SEQUENCE_STATEMENT_COUNT: u64 = 2048;
+            /// the maximum number of bytes in a directive
+            const MAX_DIRECTIVE_SIZE: u64 = 2048;
+            /// The maximum number of arguments a sequence can have
+            const MAX_SEQUENCE_ARG_COUNT: u64 = 16;
         }
         pub mod PrmDb {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+            #[repr(u8)]
+            pub enum Merge {
+                MERGE = 0,
+                RESET = 1,
+            }
+            /// State of parameter DB file load operations
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+            #[repr(u8)]
+            pub enum PrmDbFileLoadState {
+                IDLE = 0,
+                LOADING_FILE_UPDATES = 1,
+                FILE_UPDATES_STAGED = 2,
+            }
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum PrmLoadAction {
                 SET_PARAMETER = 0,
@@ -735,35 +762,8 @@ pub mod Defs {
                 LOAD_FILE_COMMAND = 2,
                 COMMIT_STAGED_COMMAND = 3,
             }
-            /// State of parameter DB file load operations
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-            #[repr(u8)]
-            pub enum PrmDbFileLoadState {
-                IDLE = 0,
-                LOADING_FILE_UPDATES = 1,
-                FILE_UPDATES_STAGED = 2,
-            }
-            /// Parameter write error
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-            #[repr(u8)]
-            pub enum PrmWriteError {
-                OPEN = 0,
-                DELIMITER = 1,
-                DELIMITER_SIZE = 2,
-                RECORD_SIZE = 3,
-                RECORD_SIZE_SIZE = 4,
-                PARAMETER_ID = 5,
-                PARAMETER_ID_SIZE = 6,
-                PARAMETER_VALUE = 7,
-                PARAMETER_VALUE_SIZE = 8,
-                CRC_PLACE = 9,
-                CRC_REAL = 10,
-                CURR_POSITION = 11,
-                SEEK_ZERO = 12,
-                SEEK_POSITION = 13,
-            }
             /// Parameter read error
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum PrmReadError {
                 OPEN = 0,
@@ -782,21 +782,32 @@ pub mod Defs {
                 CRC_BUFFER = 13,
                 SEEK_ZERO = 14,
             }
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            /// Parameter write error
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
-            pub enum Merge {
-                MERGE = 0,
-                RESET = 1,
+            pub enum PrmWriteError {
+                OPEN = 0,
+                DELIMITER = 1,
+                DELIMITER_SIZE = 2,
+                RECORD_SIZE = 3,
+                RECORD_SIZE_SIZE = 4,
+                PARAMETER_ID = 5,
+                PARAMETER_ID_SIZE = 6,
+                PARAMETER_VALUE = 7,
+                PARAMETER_VALUE_SIZE = 8,
+                CRC_PLACE = 9,
+                CRC_REAL = 10,
+                CURR_POSITION = 11,
+                SEEK_ZERO = 12,
+                SEEK_POSITION = 13,
             }
         }
         pub mod VersionCfg {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
             /// Define a set of Version entries on a project-specific
             /// basis.
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u32)]
             pub enum VersionEnum {
                 /// Entry 0
@@ -824,9 +835,7 @@ pub mod Defs {
         pub mod WasmSequencer {
             #[allow(unused_imports)]
             use fprime_core::*;
-            #[allow(unused_imports)]
-            use fprime_core::*;
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(u8)]
             pub enum AllocError {
                 /// Not enough pages could be allocated to accommodate this allocation
@@ -836,47 +845,13 @@ pub mod Defs {
                 /// A generic allocation failure
                 AllocationFailed = 2,
             }
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
-            #[repr(i32)]
-            pub enum TrapReason {
-                /// Triggered by unreachable instruction
-                Unreachable = 0,
-                /// A host function has noted an unrecoverable failure
-                Host = 1,
-                /// Integer or floating point division by zero
-                DivideByZero = 2,
-                /// An indirect call tried to map to a table function out of range
-                InvalidTableIndex = 3,
-                /// The function type in an indirect call does not match the function pointer's type
-                InvalidTableFunctionType = 4,
-                /// An indirect call tried to map to a table function out of range
-                UninitializedTableElement = 5,
-                /// An imported global could not be read
-                GlobalGetFailed = 6,
-                /// An imported global could not be set
-                GlobalSetFailed = 7,
-                /// A memory operation is out of bounds
-                OutOfMemory = 8,
-                /// memory.grow failed because a host function has taken ownership of a memory
-                MemoryRefNotUnique = 9,
-                /// A memory operation is out of bounds
-                MemoryOutOfBounds = 10,
-                /// Ran out of stack space
-                StackOverflow = 11,
-                /// Attempting to convert Inf to integer
-                UnrepresentableResult = 12,
-                /// Signed division causes integer overflow
-                IntegerOverflow = 13,
-                /// Attempting to convert NaN to integer
-                BadConversionToInteger = 14,
-            }
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(i32)]
             pub enum HostFunction {
                 COMMAND = 0,
                 EVENT = 1,
             }
-            #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
             #[repr(i32)]
             pub enum Status {
                 OK = 0,
@@ -982,12 +957,44 @@ pub mod Defs {
                 ERR_PAGE_FAULT = 193,
                 ERR_READER_ERROR = 194,
             }
+            #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
+            #[repr(i32)]
+            pub enum TrapReason {
+                /// Triggered by unreachable instruction
+                Unreachable = 0,
+                /// A host function has noted an unrecoverable failure
+                Host = 1,
+                /// Integer or floating point division by zero
+                DivideByZero = 2,
+                /// An indirect call tried to map to a table function out of range
+                InvalidTableIndex = 3,
+                /// The function type in an indirect call does not match the function pointer's type
+                InvalidTableFunctionType = 4,
+                /// An indirect call tried to map to a table function out of range
+                UninitializedTableElement = 5,
+                /// An imported global could not be read
+                GlobalGetFailed = 6,
+                /// An imported global could not be set
+                GlobalSetFailed = 7,
+                /// A memory operation is out of bounds
+                OutOfMemory = 8,
+                /// memory.grow failed because a host function has taken ownership of a memory
+                MemoryRefNotUnique = 9,
+                /// A memory operation is out of bounds
+                MemoryOutOfBounds = 10,
+                /// Ran out of stack space
+                StackOverflow = 11,
+                /// Attempting to convert Inf to integer
+                UnrepresentableResult = 12,
+                /// Signed division causes integer overflow
+                IntegerOverflow = 13,
+                /// Attempting to convert NaN to integer
+                BadConversionToInteger = 14,
+            }
             pub mod SequencerStateMachine {
                 #[allow(unused_imports)]
                 use fprime_core::*;
-                #[allow(unused_imports)]
-                use fprime_core::*;
-                #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serializable)]
+                #[derive(Clone, Copy, Debug, Eq, PartialEq, Serializable)]
                 #[repr(u8)]
                 pub enum State {
                     /// The uninitialized state
@@ -1014,6 +1021,8 @@ pub mod Defs {
 mod Impl {
     #[allow(unused_imports)]
     use fprime_core::*;
+    #[allow(unused_imports)]
+    use super::Defs::FwOpcodeType;
     const __SCRATCH_SIZE: usize = 500usize;
     static mut __SCRATCH: [u8; __SCRATCH_SIZE] = [0x0; __SCRATCH_SIZE];
     static mut __TIME: [u8; crate::Defs::Fw::TimeValue::SIZE] = [0; crate::Defs::Fw::TimeValue::SIZE];
@@ -1021,115 +1030,37 @@ mod Impl {
     impl CdhCoreCmdDisp {
         pub const DEFAULT: Self = Self {};
         /// No-op command
-        pub fn CMD_NO_OP(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1000000)]
+        pub fn CMD_NO_OP(&self) -> fprime_core::CmdResponse {}
         /// No-op string command
         ///
         ///  * `arg1` - The String command argument
-        pub fn CMD_NO_OP_STRING(&self, arg1: &str) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<40> as StrTruncate<40>>::truncate(arg1)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1000001)]
+        pub fn CMD_NO_OP_STRING(&self, arg1: String<40>) -> fprime_core::CmdResponse {}
         /// No-op command
         ///
         ///  * `arg1` - The I32 command argument
         ///  * `arg2` - The F32 command argument
         ///  * `arg3` - The U8 command argument
+        #[fprime_command(opcode = 0x1000002)]
         pub fn CMD_TEST_CMD_1(
             &self,
             arg1: i32,
             arg2: f32,
             arg3: u8,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            arg1.serialize_to(__encoded, &mut __offset);
-            arg2.serialize_to(__encoded, &mut __offset);
-            arg3.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Clear command tracking info to recover from components not returning status
-        pub fn CMD_CLEAR_TRACKING(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1000003)]
+        pub fn CMD_CLEAR_TRACKING(&self) -> fprime_core::CmdResponse {}
         /// Number of commands dispatched
-        pub fn CommandsDispatched(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000000)]
+        pub fn CommandsDispatched(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Number of command errors
-        pub fn CommandErrors(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000001)]
+        pub fn CommandErrors(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Number of commands drooped due to buffer overflow
-        pub fn CommandsDropped(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000002, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000002)]
+        pub fn CommandsDropped(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct CdhCoreEvents {}
     impl CdhCoreEvents {
@@ -1138,75 +1069,30 @@ mod Impl {
         ///
         ///  * `filterLevel` - Filter level
         ///  * `filterEnabled` - Filter state
+        #[fprime_command(opcode = 0x1001000)]
         pub fn SET_EVENT_FILTER(
             &self,
             filterLevel: crate::Defs::Svc::EventManager::FilterSeverity,
             filterEnabled: crate::Defs::Svc::EventManager::Enabled,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1001000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            filterLevel.serialize_to(__encoded, &mut __offset);
-            filterEnabled.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Filter a particular ID
         ///
         ///  * `ID`
         ///  * `idFilterEnabled` - ID filter state
+        #[fprime_command(opcode = 0x1001002)]
         pub fn SET_ID_FILTER(
             &self,
             ID: crate::Defs::FwEventIdType,
             idFilterEnabled: crate::Defs::Svc::EventManager::Enabled,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1001002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            ID.serialize_to(__encoded, &mut __offset);
-            idFilterEnabled.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Dump the filter states via events
-        pub fn DUMP_FILTER_STATE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1001003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1001003)]
+        pub fn DUMP_FILTER_STATE(&self) -> fprime_core::CmdResponse {}
         /// Number of events dropped due to queue full
+        #[fprime_telemetry(id = 0x1001000)]
         pub fn EventsDropped(
             &self,
-        ) -> (crate::Defs::FwSizeType, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::FwSizeType as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1001000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::FwSizeType as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::FwSizeType, super::Defs::Fw::TimeValue) {}
     }
     pub struct CdhCoreHealth {}
     impl CdhCoreHealth {
@@ -1214,85 +1100,36 @@ mod Impl {
         /// A command to enable or disable health checks
         ///
         ///  * `enable` - whether or not health checks are enabled
+        #[fprime_command(opcode = 0x1002000)]
         pub fn HLTH_ENABLE(
             &self,
             enable: crate::Defs::Fw::Enabled,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1002000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            enable.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Ignore a particular ping entry
         ///
         ///  * `entry` - The entry to enable/disable
         ///  * `enable` - whether or not a port is pinged
+        #[fprime_command(opcode = 0x1002001)]
         pub fn HLTH_PING_ENABLE(
             &self,
-            entry: &str,
+            entry: String<40>,
             enable: crate::Defs::Fw::Enabled,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1002001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<40> as StrTruncate<40>>::truncate(entry)
-                .serialize_to(__encoded, &mut __offset);
-            enable.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Change ping value
         ///
         ///  * `entry` - The entry to modify
         ///  * `warningValue` - Ping warning threshold
         ///  * `fatalValue` - Ping fatal threshold
+        #[fprime_command(opcode = 0x1002002)]
         pub fn HLTH_CHNG_PING(
             &self,
-            entry: &str,
+            entry: String<40>,
             warningValue: u32,
             fatalValue: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1002002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<40> as StrTruncate<40>>::truncate(entry)
-                .serialize_to(__encoded, &mut __offset);
-            warningValue.serialize_to(__encoded, &mut __offset);
-            fatalValue.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Number of overrun warnings
-        pub fn PingLateWarnings(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1002000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1002000)]
+        pub fn PingLateWarnings(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct CdhCoreVersion {}
     impl CdhCoreVersion {
@@ -1300,371 +1137,87 @@ mod Impl {
         /// A command to enable or disable Event verbosity and Telemetry
         ///
         ///  * `enable` - whether or not Version telemetry is enabled
+        #[fprime_command(opcode = 0x1003000)]
         pub fn ENABLE(
             &self,
             enable: crate::Defs::Svc::VersionEnabled,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1003000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            enable.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Report version as Event
         ///
         ///  * `version_type` - which version type Event is requested
+        #[fprime_command(opcode = 0x1003001)]
         pub fn VERSION(
             &self,
             version_type: crate::Defs::Svc::VersionType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1003001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            version_type.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Software framework version
-        pub fn FrameworkVersion(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1003000)]
+        pub fn FrameworkVersion(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
         /// Software project version
-        pub fn ProjectVersion(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1003001)]
+        pub fn ProjectVersion(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
         /// Custom Versions
+        #[fprime_telemetry(id = 0x1003002)]
         pub fn CustomVersion01(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003002, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003003)]
         pub fn CustomVersion02(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003003, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003004)]
         pub fn CustomVersion03(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003004, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003005)]
         pub fn CustomVersion04(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003005, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003006)]
         pub fn CustomVersion05(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003006, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003007)]
         pub fn CustomVersion06(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003007, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003008)]
         pub fn CustomVersion07(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003008, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003009)]
         pub fn CustomVersion08(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003009, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x100300A)]
         pub fn CustomVersion09(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x100300A, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x100300B)]
         pub fn CustomVersion10(
             &self,
-        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::CustomVersionDb as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x100300B, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::CustomVersionDb as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::CustomVersionDb, super::Defs::Fw::TimeValue) {}
         /// Library Versions
-        pub fn LibraryVersion01(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x100300C, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion02(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x100300D, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion03(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x100300E, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion04(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x100300F, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion05(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003010, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion06(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003011, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion07(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003012, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion08(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003013, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion09(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003014, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
-        pub fn LibraryVersion10(&self) -> (String<40>, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <String<40> as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1003015, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <String<40> as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x100300C)]
+        pub fn LibraryVersion01(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x100300D)]
+        pub fn LibraryVersion02(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x100300E)]
+        pub fn LibraryVersion03(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x100300F)]
+        pub fn LibraryVersion04(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003010)]
+        pub fn LibraryVersion05(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003011)]
+        pub fn LibraryVersion06(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003012)]
+        pub fn LibraryVersion07(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003013)]
+        pub fn LibraryVersion08(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003014)]
+        pub fn LibraryVersion09(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
+        #[fprime_telemetry(id = 0x1003015)]
+        pub fn LibraryVersion10(&self) -> (String<40>, super::Defs::Fw::TimeValue) {}
     }
     pub struct CdhCore {
         pub cmdDisp: CdhCoreCmdDisp,
@@ -1688,173 +1241,57 @@ mod Impl {
         ///
         ///  * `queueType` - The Queue data type
         ///  * `indexType` - The index of the queue (within the supplied type) to flush
+        #[fprime_command(opcode = 0x2000000)]
         pub fn FLUSH_QUEUE(
             &self,
             queueType: crate::Defs::Svc::QueueType,
             indexType: crate::Defs::FwIndexType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x2000000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            queueType.serialize_to(__encoded, &mut __offset);
-            indexType.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Flush all queues. This will discard all queued data removing it from eventual downlink. Buffers requiring
         /// ownership return will be returned via the bufferReturnOut port.
-        pub fn FLUSH_ALL_QUEUES(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x2000001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x2000001)]
+        pub fn FLUSH_ALL_QUEUES(&self) -> fprime_core::CmdResponse {}
         /// Set the priority of a specific queue at runtime
         ///
         ///  * `queueType` - The Queue data type
         ///  * `indexType` - The index of the queue (within the supplied type) to modify
         ///  * `newPriority` - New priority value for the queue
+        #[fprime_command(opcode = 0x2000002)]
         pub fn SET_QUEUE_PRIORITY(
             &self,
             queueType: crate::Defs::Svc::QueueType,
             indexType: crate::Defs::FwIndexType,
             newPriority: crate::Defs::FwIndexType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x2000002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            queueType.serialize_to(__encoded, &mut __offset);
-            indexType.serialize_to(__encoded, &mut __offset);
-            newPriority.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Depth of queues of Fw::ComBuffer type
+        #[fprime_telemetry(id = 0x2000000)]
         pub fn comQueueDepth(
             &self,
-        ) -> (crate::Defs::Svc::ComQueueDepth, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::ComQueueDepth as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x2000000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::ComQueueDepth as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::ComQueueDepth, super::Defs::Fw::TimeValue) {}
         /// Depth of queues of Fw::Buffer type
+        #[fprime_telemetry(id = 0x2000001)]
         pub fn buffQueueDepth(
             &self,
-        ) -> (crate::Defs::Svc::BuffQueueDepth, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Svc::BuffQueueDepth as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x2000001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <crate::Defs::Svc::BuffQueueDepth as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Svc::BuffQueueDepth, super::Defs::Fw::TimeValue) {}
     }
     pub struct ComCcsdsCommsBufferManager {}
     impl ComCcsdsCommsBufferManager {
         pub const DEFAULT: Self = Self {};
         /// The total buffers allocated
-        pub fn TotalBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x2002000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x2002000)]
+        pub fn TotalBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The current number of allocated buffers
-        pub fn CurrBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x2002001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x2002001)]
+        pub fn CurrBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The high water mark of allocated buffers
-        pub fn HiBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x2002002, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x2002002)]
+        pub fn HiBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of requests that couldn't return a buffer
-        pub fn NoBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x2002003, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x2002003)]
+        pub fn NoBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of empty buffers returned
-        pub fn EmptyBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x2002004, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x2002004)]
+        pub fn EmptyBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct ComCcsds {
         pub comQueue: ComCcsdsComQueue,
@@ -1872,385 +1309,113 @@ mod Impl {
         /// Set the mode
         ///
         ///  * `mode`
+        #[fprime_command(opcode = 0x4004000)]
         pub fn BA_SetMode(
             &self,
             mode: crate::Defs::Svc::BufferAccumulator::OpState,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x4004000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            mode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Drain the commanded number of buffers
         ///
         ///  * `numToDrain`
         ///  * `blockMode`
+        #[fprime_command(opcode = 0x4004001)]
         pub fn BA_DrainBuffers(
             &self,
             numToDrain: u32,
             blockMode: crate::Defs::Svc::BufferAccumulator::BlockMode,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x4004001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            numToDrain.serialize_to(__encoded, &mut __offset);
-            blockMode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// The number of buffers queued
-        pub fn BA_NumQueuedBuffers(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4004000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4004000)]
+        pub fn BA_NumQueuedBuffers(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct DataProductsDpBufferManager {}
     impl DataProductsDpBufferManager {
         pub const DEFAULT: Self = Self {};
         /// The total buffers allocated
-        pub fn TotalBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4003000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4003000)]
+        pub fn TotalBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The current number of allocated buffers
-        pub fn CurrBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4003001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4003001)]
+        pub fn CurrBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The high water mark of allocated buffers
-        pub fn HiBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4003002, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4003002)]
+        pub fn HiBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of requests that couldn't return a buffer
-        pub fn NoBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4003003, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4003003)]
+        pub fn NoBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of empty buffers returned
-        pub fn EmptyBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4003004, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4003004)]
+        pub fn EmptyBuffs(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct DataProductsDpCat {}
     impl DataProductsDpCat {
         pub const DEFAULT: Self = Self {};
         /// Build catalog from data product directory. Will block until complete
-        pub fn BUILD_CATALOG(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x4000000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x4000000)]
+        pub fn BUILD_CATALOG(&self) -> fprime_core::CmdResponse {}
         /// Start transmitting catalog
         ///
         ///  * `wait` - have START_XMIT command complete wait for catalog to complete transmitting
         ///  * `remainActive` - should the catalog resume transmission when Dps are added at runtime
+        #[fprime_command(opcode = 0x4000001)]
         pub fn START_XMIT_CATALOG(
             &self,
             wait: crate::Defs::Fw::Wait,
             remainActive: bool,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x4000001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            wait.serialize_to(__encoded, &mut __offset);
-            remainActive.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Stop transmitting catalog
-        pub fn STOP_XMIT_CATALOG(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x4000002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x4000002)]
+        pub fn STOP_XMIT_CATALOG(&self) -> fprime_core::CmdResponse {}
         /// clear existing catalog
-        pub fn CLEAR_CATALOG(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x4000003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x4000003)]
+        pub fn CLEAR_CATALOG(&self) -> fprime_core::CmdResponse {}
         /// Number of data products in catalog
-        pub fn CatalogDps(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4000000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4000000)]
+        pub fn CatalogDps(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Number of data products sent
-        pub fn DpsSent(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4000001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4000001)]
+        pub fn DpsSent(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct DataProductsDpMgr {}
     impl DataProductsDpMgr {
         pub const DEFAULT: Self = Self {};
         /// Clear event throttling
-        pub fn CLEAR_EVENT_THROTTLE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x4001000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x4001000)]
+        pub fn CLEAR_EVENT_THROTTLE(&self) -> fprime_core::CmdResponse {}
         /// The number of successful buffer allocations
-        pub fn NumSuccessfulAllocations(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4001000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4001000)]
+        pub fn NumSuccessfulAllocations(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of failed buffer allocations
-        pub fn NumFailedAllocations(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4001001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4001001)]
+        pub fn NumFailedAllocations(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Number of data products handled
-        pub fn NumDataProducts(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4001002, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4001002)]
+        pub fn NumDataProducts(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Number of bytes handled
-        pub fn NumBytes(&self) -> (u64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4001003, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4001003)]
+        pub fn NumBytes(&self) -> (u64, super::Defs::Fw::TimeValue) {}
     }
     pub struct DataProductsDpWriter {}
     impl DataProductsDpWriter {
         pub const DEFAULT: Self = Self {};
         /// Clear event throttling
-        pub fn CLEAR_EVENT_THROTTLE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x4002000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x4002000)]
+        pub fn CLEAR_EVENT_THROTTLE(&self) -> fprime_core::CmdResponse {}
         /// The number of buffers received
-        pub fn NumBuffersReceived(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4002000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4002000)]
+        pub fn NumBuffersReceived(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of bytes written
-        pub fn NumBytesWritten(&self) -> (u64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4002001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4002001)]
+        pub fn NumBytesWritten(&self) -> (u64, super::Defs::Fw::TimeValue) {}
         /// The number of successful writes
-        pub fn NumSuccessfulWrites(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4002002, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4002002)]
+        pub fn NumSuccessfulWrites(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of failed writes
-        pub fn NumFailedWrites(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4002003, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4002003)]
+        pub fn NumFailedWrites(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of errors
-        pub fn NumErrors(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x4002004, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x4002004)]
+        pub fn NumErrors(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct DataProducts {
         pub dpBufferAccumulator: DataProductsDpBufferAccumulator,
@@ -2275,111 +1440,38 @@ mod Impl {
         ///
         ///  * `sourceFileName` - The name of the on-board file to send
         ///  * `destFileName` - The name of the destination file on the ground
+        #[fprime_command(opcode = 0x5001000)]
         pub fn SendFile(
             &self,
-            sourceFileName: &str,
-            destFileName: &str,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5001000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<100> as StrTruncate<100>>::truncate(sourceFileName)
-                .serialize_to(__encoded, &mut __offset);
-            <String<100> as StrTruncate<100>>::truncate(destFileName)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+            sourceFileName: String<100>,
+            destFileName: String<100>,
+        ) -> fprime_core::CmdResponse {}
         /// Cancel the downlink in progress, if any
-        pub fn Cancel(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5001001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x5001001)]
+        pub fn Cancel(&self) -> fprime_core::CmdResponse {}
         /// Read a named file off the disk from a starting position. Divide it into packets and send the packets for transmission to the ground.
         ///
         ///  * `sourceFileName` - The name of the on-board file to send
         ///  * `destFileName` - The name of the destination file on the ground
         ///  * `startOffset` - Starting offset of the source file
         ///  * `length` - Number of bytes to send from starting offset. Length of 0 implies until the end of the file
+        #[fprime_command(opcode = 0x5001002)]
         pub fn SendPartial(
             &self,
-            sourceFileName: &str,
-            destFileName: &str,
+            sourceFileName: String<100>,
+            destFileName: String<100>,
             startOffset: u32,
             length: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5001002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<100> as StrTruncate<100>>::truncate(sourceFileName)
-                .serialize_to(__encoded, &mut __offset);
-            <String<100> as StrTruncate<100>>::truncate(destFileName)
-                .serialize_to(__encoded, &mut __offset);
-            startOffset.serialize_to(__encoded, &mut __offset);
-            length.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// The total number of files sent
-        pub fn FilesSent(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x5001000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x5001000)]
+        pub fn FilesSent(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The total number of packets sent
-        pub fn PacketsSent(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x5001001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x5001001)]
+        pub fn PacketsSent(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The total number of warnings
-        pub fn Warnings(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x5001002, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x5001002)]
+        pub fn Warnings(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct FileHandlingFileManager {}
     impl FileHandlingFileManager {
@@ -2387,286 +1479,97 @@ mod Impl {
         /// Create a directory
         ///
         ///  * `dirName` - The directory to create
-        pub fn CreateDirectory(&self, dirName: &str) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5002000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(dirName)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x5002000)]
+        pub fn CreateDirectory(&self, dirName: String<240>) -> fprime_core::CmdResponse {}
         /// Move a file
         ///
         ///  * `sourceFileName` - The source file name
         ///  * `destFileName` - The destination file name
+        #[fprime_command(opcode = 0x5002001)]
         pub fn MoveFile(
             &self,
-            sourceFileName: &str,
-            destFileName: &str,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5002001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(sourceFileName)
-                .serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(destFileName)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+            sourceFileName: String<240>,
+            destFileName: String<240>,
+        ) -> fprime_core::CmdResponse {}
         /// Remove a directory, which must be empty
         ///
         ///  * `dirName` - The directory to remove
-        pub fn RemoveDirectory(&self, dirName: &str) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5002002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(dirName)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x5002002)]
+        pub fn RemoveDirectory(&self, dirName: String<240>) -> fprime_core::CmdResponse {}
         /// Remove a file
         ///
         ///  * `fileName` - The file to remove
         ///  * `ignoreErrors` - Ignore nonexistent files
+        #[fprime_command(opcode = 0x5002003)]
         pub fn RemoveFile(
             &self,
-            fileName: &str,
+            fileName: String<240>,
             ignoreErrors: bool,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5002003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(fileName)
-                .serialize_to(__encoded, &mut __offset);
-            ignoreErrors.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Append 1 file's contents to the end of another.
         ///
         ///  * `source` - The name of the file to take content from
         ///  * `target` - The name of the file to append to
+        #[fprime_command(opcode = 0x5002005)]
         pub fn AppendFile(
             &self,
-            source: &str,
-            target: &str,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5002005;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(source)
-                .serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(target)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+            source: String<240>,
+            target: String<240>,
+        ) -> fprime_core::CmdResponse {}
         /// Get the size of a file
         ///
         ///  * `fileName` - The file to get the size of
-        pub fn FileSize(&self, fileName: &str) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5002006;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(fileName)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x5002006)]
+        pub fn FileSize(&self, fileName: String<240>) -> fprime_core::CmdResponse {}
         /// List the contents of a directory
         ///
         ///  * `dirName` - The directory to list
-        pub fn ListDirectory(&self, dirName: &str) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5002007;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(dirName)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x5002007)]
+        pub fn ListDirectory(&self, dirName: String<240>) -> fprime_core::CmdResponse {}
         /// Calculate the CRC of a file
         ///
         ///  * `filename` - The file to CRC
-        pub fn CalculateCrc(&self, filename: &str) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5002008;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(filename)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x5002008)]
+        pub fn CalculateCrc(&self, filename: String<240>) -> fprime_core::CmdResponse {}
         /// The total number of commands successfully executed
-        pub fn CommandsExecuted(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x5002000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x5002000)]
+        pub fn CommandsExecuted(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The total number of errors
-        pub fn Errors(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x5002001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x5002001)]
+        pub fn Errors(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct FileHandlingFileUplink {}
     impl FileHandlingFileUplink {
         pub const DEFAULT: Self = Self {};
         /// The total number of complete files received
-        pub fn FilesReceived(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x5000000, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x5000000)]
+        pub fn FilesReceived(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The total number of packets received
-        pub fn PacketsReceived(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x5000001, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x5000001)]
+        pub fn PacketsReceived(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The total number of warnings issued
-        pub fn Warnings(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x5000002, &mut time_buf, &mut value_buf) }.unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x5000002)]
+        pub fn Warnings(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct FileHandlingPrmDb {}
     impl FileHandlingPrmDb {
         pub const DEFAULT: Self = Self {};
         /// Command to save parameter image to file. Uses file name passed to constructor
-        pub fn PRM_SAVE_FILE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5003000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x5003000)]
+        pub fn PRM_SAVE_FILE(&self) -> fprime_core::CmdResponse {}
         /// Loads a file from storage into the staging database. The file could have selective IDs and not the whole set.
         ///
         ///  * `fileName` - The name of the on-board file to set parameters from
         ///  * `merge` - Whether to merge or fully reset the parameter database from the file contents
+        #[fprime_command(opcode = 0x5003001)]
         pub fn PRM_LOAD_FILE(
             &self,
-            fileName: &str,
+            fileName: String<240>,
             merge: crate::Defs::Svc::PrmDb::Merge,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5003001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(fileName)
-                .serialize_to(__encoded, &mut __offset);
-            merge.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Commits the backup database to become the prime (active) database
-        pub fn PRM_COMMIT_STAGED(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x5003002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x5003002)]
+        pub fn PRM_COMMIT_STAGED(&self) -> fprime_core::CmdResponse {}
     }
     pub struct FileHandling {
         pub fileDownlink: FileHandlingFileDownlink,
@@ -2691,211 +1594,66 @@ mod Impl {
         ///  * `Amplitude`
         ///  * `Phase`
         ///  * `SigType`
+        #[fprime_command(opcode = 0x10011000)]
         pub fn Settings(
             &self,
             Frequency: u32,
             Amplitude: f32,
             Phase: f32,
             SigType: crate::Defs::Ref::SignalType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10011000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            Frequency.serialize_to(__encoded, &mut __offset);
-            Amplitude.serialize_to(__encoded, &mut __offset);
-            Phase.serialize_to(__encoded, &mut __offset);
-            SigType.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10011001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10011001)]
+        pub fn Toggle(&self) -> fprime_core::CmdResponse {}
         /// Skip next sample
-        pub fn Skip(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10011002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10011002)]
+        pub fn Skip(&self) -> fprime_core::CmdResponse {}
         /// Signal Generator Settings
         ///
         ///  * `reqType`
         ///  * `records`
         ///  * `priority`
+        #[fprime_command(opcode = 0x10011003)]
         pub fn Dp(
             &self,
             reqType: crate::Defs::Ref::SignalGen::DpReqType,
             records: u32,
             priority: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10011003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            reqType.serialize_to(__encoded, &mut __offset);
-            records.serialize_to(__encoded, &mut __offset);
-            priority.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Type of the output signal: SINE, TRIANGLE, etc.
+        #[fprime_telemetry(id = 0x10011000)]
         pub fn Type(
             &self,
-        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalType as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10011000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalType as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {}
         /// Single Y value of the output
-        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10011001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10011001)]
+        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Single (time, value) pair of the signal
+        #[fprime_telemetry(id = 0x10011002)]
         pub fn PairOutput(
             &self,
-        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPair as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10011002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPair as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {}
         /// Last 10 Y values of the signal
+        #[fprime_telemetry(id = 0x10011003)]
         pub fn History(
             &self,
-        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10011003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalSet as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {}
         /// Last 10 (time, value) pairs of the signal
+        #[fprime_telemetry(id = 0x10011004)]
         pub fn PairHistory(
             &self,
-        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPairSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10011004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPairSet as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {}
         /// Composite field of signal information, containing histories, pairs etc
+        #[fprime_telemetry(id = 0x10011005)]
         pub fn Info(
             &self,
-        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalInfo as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10011005, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalInfo as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {}
         /// DP bytes written
-        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10011006, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10011006)]
+        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// DP records written
-        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10011007, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10011007)]
+        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefSg2 {}
     impl RefSg2 {
@@ -2906,211 +1664,66 @@ mod Impl {
         ///  * `Amplitude`
         ///  * `Phase`
         ///  * `SigType`
+        #[fprime_command(opcode = 0x10012000)]
         pub fn Settings(
             &self,
             Frequency: u32,
             Amplitude: f32,
             Phase: f32,
             SigType: crate::Defs::Ref::SignalType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10012000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            Frequency.serialize_to(__encoded, &mut __offset);
-            Amplitude.serialize_to(__encoded, &mut __offset);
-            Phase.serialize_to(__encoded, &mut __offset);
-            SigType.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10012001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10012001)]
+        pub fn Toggle(&self) -> fprime_core::CmdResponse {}
         /// Skip next sample
-        pub fn Skip(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10012002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10012002)]
+        pub fn Skip(&self) -> fprime_core::CmdResponse {}
         /// Signal Generator Settings
         ///
         ///  * `reqType`
         ///  * `records`
         ///  * `priority`
+        #[fprime_command(opcode = 0x10012003)]
         pub fn Dp(
             &self,
             reqType: crate::Defs::Ref::SignalGen::DpReqType,
             records: u32,
             priority: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10012003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            reqType.serialize_to(__encoded, &mut __offset);
-            records.serialize_to(__encoded, &mut __offset);
-            priority.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Type of the output signal: SINE, TRIANGLE, etc.
+        #[fprime_telemetry(id = 0x10012000)]
         pub fn Type(
             &self,
-        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalType as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10012000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalType as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {}
         /// Single Y value of the output
-        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10012001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10012001)]
+        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Single (time, value) pair of the signal
+        #[fprime_telemetry(id = 0x10012002)]
         pub fn PairOutput(
             &self,
-        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPair as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10012002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPair as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {}
         /// Last 10 Y values of the signal
+        #[fprime_telemetry(id = 0x10012003)]
         pub fn History(
             &self,
-        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10012003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalSet as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {}
         /// Last 10 (time, value) pairs of the signal
+        #[fprime_telemetry(id = 0x10012004)]
         pub fn PairHistory(
             &self,
-        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPairSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10012004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPairSet as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {}
         /// Composite field of signal information, containing histories, pairs etc
+        #[fprime_telemetry(id = 0x10012005)]
         pub fn Info(
             &self,
-        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalInfo as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10012005, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalInfo as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {}
         /// DP bytes written
-        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10012006, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10012006)]
+        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// DP records written
-        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10012007, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10012007)]
+        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefSg3 {}
     impl RefSg3 {
@@ -3121,211 +1734,66 @@ mod Impl {
         ///  * `Amplitude`
         ///  * `Phase`
         ///  * `SigType`
+        #[fprime_command(opcode = 0x10013000)]
         pub fn Settings(
             &self,
             Frequency: u32,
             Amplitude: f32,
             Phase: f32,
             SigType: crate::Defs::Ref::SignalType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10013000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            Frequency.serialize_to(__encoded, &mut __offset);
-            Amplitude.serialize_to(__encoded, &mut __offset);
-            Phase.serialize_to(__encoded, &mut __offset);
-            SigType.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10013001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10013001)]
+        pub fn Toggle(&self) -> fprime_core::CmdResponse {}
         /// Skip next sample
-        pub fn Skip(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10013002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10013002)]
+        pub fn Skip(&self) -> fprime_core::CmdResponse {}
         /// Signal Generator Settings
         ///
         ///  * `reqType`
         ///  * `records`
         ///  * `priority`
+        #[fprime_command(opcode = 0x10013003)]
         pub fn Dp(
             &self,
             reqType: crate::Defs::Ref::SignalGen::DpReqType,
             records: u32,
             priority: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10013003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            reqType.serialize_to(__encoded, &mut __offset);
-            records.serialize_to(__encoded, &mut __offset);
-            priority.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Type of the output signal: SINE, TRIANGLE, etc.
+        #[fprime_telemetry(id = 0x10013000)]
         pub fn Type(
             &self,
-        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalType as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10013000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalType as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {}
         /// Single Y value of the output
-        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10013001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10013001)]
+        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Single (time, value) pair of the signal
+        #[fprime_telemetry(id = 0x10013002)]
         pub fn PairOutput(
             &self,
-        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPair as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10013002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPair as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {}
         /// Last 10 Y values of the signal
+        #[fprime_telemetry(id = 0x10013003)]
         pub fn History(
             &self,
-        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10013003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalSet as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {}
         /// Last 10 (time, value) pairs of the signal
+        #[fprime_telemetry(id = 0x10013004)]
         pub fn PairHistory(
             &self,
-        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPairSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10013004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPairSet as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {}
         /// Composite field of signal information, containing histories, pairs etc
+        #[fprime_telemetry(id = 0x10013005)]
         pub fn Info(
             &self,
-        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalInfo as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10013005, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalInfo as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {}
         /// DP bytes written
-        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10013006, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10013006)]
+        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// DP records written
-        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10013007, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10013007)]
+        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefSg4 {}
     impl RefSg4 {
@@ -3336,211 +1804,66 @@ mod Impl {
         ///  * `Amplitude`
         ///  * `Phase`
         ///  * `SigType`
+        #[fprime_command(opcode = 0x10014000)]
         pub fn Settings(
             &self,
             Frequency: u32,
             Amplitude: f32,
             Phase: f32,
             SigType: crate::Defs::Ref::SignalType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10014000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            Frequency.serialize_to(__encoded, &mut __offset);
-            Amplitude.serialize_to(__encoded, &mut __offset);
-            Phase.serialize_to(__encoded, &mut __offset);
-            SigType.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10014001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10014001)]
+        pub fn Toggle(&self) -> fprime_core::CmdResponse {}
         /// Skip next sample
-        pub fn Skip(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10014002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10014002)]
+        pub fn Skip(&self) -> fprime_core::CmdResponse {}
         /// Signal Generator Settings
         ///
         ///  * `reqType`
         ///  * `records`
         ///  * `priority`
+        #[fprime_command(opcode = 0x10014003)]
         pub fn Dp(
             &self,
             reqType: crate::Defs::Ref::SignalGen::DpReqType,
             records: u32,
             priority: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10014003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            reqType.serialize_to(__encoded, &mut __offset);
-            records.serialize_to(__encoded, &mut __offset);
-            priority.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Type of the output signal: SINE, TRIANGLE, etc.
+        #[fprime_telemetry(id = 0x10014000)]
         pub fn Type(
             &self,
-        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalType as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10014000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalType as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {}
         /// Single Y value of the output
-        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10014001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10014001)]
+        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Single (time, value) pair of the signal
+        #[fprime_telemetry(id = 0x10014002)]
         pub fn PairOutput(
             &self,
-        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPair as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10014002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPair as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {}
         /// Last 10 Y values of the signal
+        #[fprime_telemetry(id = 0x10014003)]
         pub fn History(
             &self,
-        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10014003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalSet as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {}
         /// Last 10 (time, value) pairs of the signal
+        #[fprime_telemetry(id = 0x10014004)]
         pub fn PairHistory(
             &self,
-        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPairSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10014004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPairSet as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {}
         /// Composite field of signal information, containing histories, pairs etc
+        #[fprime_telemetry(id = 0x10014005)]
         pub fn Info(
             &self,
-        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalInfo as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10014005, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalInfo as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {}
         /// DP bytes written
-        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10014006, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10014006)]
+        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// DP records written
-        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10014007, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10014007)]
+        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefSg5 {}
     impl RefSg5 {
@@ -3551,230 +1874,73 @@ mod Impl {
         ///  * `Amplitude`
         ///  * `Phase`
         ///  * `SigType`
+        #[fprime_command(opcode = 0x10015000)]
         pub fn Settings(
             &self,
             Frequency: u32,
             Amplitude: f32,
             Phase: f32,
             SigType: crate::Defs::Ref::SignalType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10015000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            Frequency.serialize_to(__encoded, &mut __offset);
-            Amplitude.serialize_to(__encoded, &mut __offset);
-            Phase.serialize_to(__encoded, &mut __offset);
-            SigType.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Toggle Signal Generator On/Off.
-        pub fn Toggle(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10015001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10015001)]
+        pub fn Toggle(&self) -> fprime_core::CmdResponse {}
         /// Skip next sample
-        pub fn Skip(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10015002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10015002)]
+        pub fn Skip(&self) -> fprime_core::CmdResponse {}
         /// Signal Generator Settings
         ///
         ///  * `reqType`
         ///  * `records`
         ///  * `priority`
+        #[fprime_command(opcode = 0x10015003)]
         pub fn Dp(
             &self,
             reqType: crate::Defs::Ref::SignalGen::DpReqType,
             records: u32,
             priority: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10015003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            reqType.serialize_to(__encoded, &mut __offset);
-            records.serialize_to(__encoded, &mut __offset);
-            priority.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Type of the output signal: SINE, TRIANGLE, etc.
+        #[fprime_telemetry(id = 0x10015000)]
         pub fn Type(
             &self,
-        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalType as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10015000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalType as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalType, super::Defs::Fw::TimeValue) {}
         /// Single Y value of the output
-        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10015001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10015001)]
+        pub fn Output(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Single (time, value) pair of the signal
+        #[fprime_telemetry(id = 0x10015002)]
         pub fn PairOutput(
             &self,
-        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPair as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10015002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPair as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPair, super::Defs::Fw::TimeValue) {}
         /// Last 10 Y values of the signal
+        #[fprime_telemetry(id = 0x10015003)]
         pub fn History(
             &self,
-        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10015003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalSet as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalSet, super::Defs::Fw::TimeValue) {}
         /// Last 10 (time, value) pairs of the signal
+        #[fprime_telemetry(id = 0x10015004)]
         pub fn PairHistory(
             &self,
-        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalPairSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10015004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalPairSet as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalPairSet, super::Defs::Fw::TimeValue) {}
         /// Composite field of signal information, containing histories, pairs etc
+        #[fprime_telemetry(id = 0x10015005)]
         pub fn Info(
             &self,
-        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SignalInfo as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10015005, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SignalInfo as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SignalInfo, super::Defs::Fw::TimeValue) {}
         /// DP bytes written
-        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10015006, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10015006)]
+        pub fn DpBytes(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// DP records written
-        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10015007, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10015007)]
+        pub fn DpRecords(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefBlockDrv {}
     impl RefBlockDrv {
         pub const DEFAULT: Self = Self {};
         /// Driver cycle count
-        pub fn BD_Cycles(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10000000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10000000)]
+        pub fn BD_Cycles(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefCmdSeq {}
     impl RefCmdSeq {
@@ -3783,195 +1949,50 @@ mod Impl {
         ///
         ///  * `fileName` - The name of the sequence file
         ///  * `block` - Return command status when complete or not
+        #[fprime_command(opcode = 0x10006000)]
         pub fn CS_RUN(
             &self,
-            fileName: &str,
+            fileName: String<240>,
             block: crate::Defs::Svc::BlockState,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10006000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(fileName)
-                .serialize_to(__encoded, &mut __offset);
-            block.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Validate a command sequence file
         ///
         ///  * `fileName` - The name of the sequence file
-        pub fn CS_VALIDATE(&self, fileName: &str) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10006001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(fileName)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10006001)]
+        pub fn CS_VALIDATE(&self, fileName: String<240>) -> fprime_core::CmdResponse {}
         /// Cancel a command sequence
-        pub fn CS_CANCEL(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10006002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10006002)]
+        pub fn CS_CANCEL(&self) -> fprime_core::CmdResponse {}
         /// Start running a command sequence
-        pub fn CS_START(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10006003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10006003)]
+        pub fn CS_START(&self) -> fprime_core::CmdResponse {}
         /// Perform one step in a command sequence. Valid only if CmdSequencer is in MANUAL run mode.
-        pub fn CS_STEP(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10006004;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10006004)]
+        pub fn CS_STEP(&self) -> fprime_core::CmdResponse {}
         /// Set the run mode to AUTO.
-        pub fn CS_AUTO(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10006005;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10006005)]
+        pub fn CS_AUTO(&self) -> fprime_core::CmdResponse {}
         /// Set the run mode to MANUAL.
-        pub fn CS_MANUAL(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10006006;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10006006)]
+        pub fn CS_MANUAL(&self) -> fprime_core::CmdResponse {}
         /// Wait for sequences that are running to finish. Allow user to run multiple seq files in SEQ_NO_BLOCK mode then wait for them to finish before allowing more seq run request.
-        pub fn CS_JOIN_WAIT(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10006007;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10006007)]
+        pub fn CS_JOIN_WAIT(&self) -> fprime_core::CmdResponse {}
         /// The number of Load commands executed
-        pub fn CS_LoadCommands(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10006000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10006000)]
+        pub fn CS_LoadCommands(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of Cancel commands executed
-        pub fn CS_CancelCommands(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10006001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10006001)]
+        pub fn CS_CancelCommands(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of errors that have occurred
-        pub fn CS_Errors(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10006002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10006002)]
+        pub fn CS_Errors(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of commands executed across all sequences.
-        pub fn CS_CommandsExecuted(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10006003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10006003)]
+        pub fn CS_CommandsExecuted(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// The number of sequences completed.
-        pub fn CS_SequencesCompleted(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10006004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10006004)]
+        pub fn CS_SequencesCompleted(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefDpDemo {}
     impl RefDpDemo {
@@ -3979,181 +2000,63 @@ mod Impl {
         /// Select color
         ///
         ///  * `color`
+        #[fprime_command(opcode = 0xA10)]
         pub fn SelectColor(
             &self,
             color: crate::Defs::Ref::DpDemo::ColorEnum,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0xA10;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            color.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Command for generating a DP
         ///
         ///  * `reqType`
         ///  * `priority`
         ///  * `proc`
+        #[fprime_command(opcode = 0xA11)]
         pub fn Dp(
             &self,
             reqType: crate::Defs::Ref::DpDemo::DpReqType,
             priority: u32,
             proc: crate::Defs::Fw::DpCfg::ProcType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0xA11;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            reqType.serialize_to(__encoded, &mut __offset);
-            priority.serialize_to(__encoded, &mut __offset);
-            proc.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
     }
     pub struct RefPingRcvr {}
     impl RefPingRcvr {
         pub const DEFAULT: Self = Self {};
         /// Command to disable ping response
-        pub fn PR_StopPings(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10004000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10004000)]
+        pub fn PR_StopPings(&self) -> fprime_core::CmdResponse {}
         /// Number of pings received
-        pub fn PR_NumPings(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10004000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10004000)]
+        pub fn PR_NumPings(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefRateGroup1Comp {}
     impl RefRateGroup1Comp {
         pub const DEFAULT: Self = Self {};
         /// Max execution time rate group
-        pub fn RgMaxTime(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10001000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10001000)]
+        pub fn RgMaxTime(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Cycle slips for rate group
-        pub fn RgCycleSlips(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10001001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10001001)]
+        pub fn RgCycleSlips(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefRateGroup2Comp {}
     impl RefRateGroup2Comp {
         pub const DEFAULT: Self = Self {};
         /// Max execution time rate group
-        pub fn RgMaxTime(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10002000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10002000)]
+        pub fn RgMaxTime(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Cycle slips for rate group
-        pub fn RgCycleSlips(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10002001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10002001)]
+        pub fn RgCycleSlips(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefRateGroup3Comp {}
     impl RefRateGroup3Comp {
         pub const DEFAULT: Self = Self {};
         /// Max execution time rate group
-        pub fn RgMaxTime(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10003000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10003000)]
+        pub fn RgMaxTime(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Cycle slips for rate group
-        pub fn RgCycleSlips(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10003001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10003001)]
+        pub fn RgCycleSlips(&self) -> (u32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefRecvBuffComp {}
     impl RefRecvBuffComp {
@@ -4161,193 +2064,64 @@ mod Impl {
         /// A test parameter
         ///
         ///  * `val`
-        pub fn PARAMETER1_PRM_SET(&self, val: u32) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10022000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10022000)]
+        pub fn PARAMETER1_PRM_SET(&self, val: u32) -> fprime_core::CmdResponse {}
         /// A test parameter
-        pub fn PARAMETER1_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10022001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10022001)]
+        pub fn PARAMETER1_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// A test parameter
         ///
         ///  * `val`
-        pub fn PARAMETER2_PRM_SET(&self, val: i16) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10022002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10022002)]
+        pub fn PARAMETER2_PRM_SET(&self, val: i16) -> fprime_core::CmdResponse {}
         /// A test parameter
-        pub fn PARAMETER2_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10022003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10022003)]
+        pub fn PARAMETER2_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// Packet Statistics
+        #[fprime_telemetry(id = 0x10022000)]
         pub fn PktState(
             &self,
-        ) -> (crate::Defs::Ref::PacketStat, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::PacketStat as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10022000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::PacketStat as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::PacketStat, super::Defs::Fw::TimeValue) {}
         /// Value of Sensor1
-        pub fn Sensor1(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10022001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10022001)]
+        pub fn Sensor1(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Value of Sensor3
-        pub fn Sensor2(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10022002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10022002)]
+        pub fn Sensor2(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Readback of Parameter1
-        pub fn Parameter1(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10022003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10022003)]
+        pub fn Parameter1(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Readback of Parameter2
-        pub fn Parameter2(&self) -> (i16, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <i16 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10022004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <i16 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10022004)]
+        pub fn Parameter2(&self) -> (i16, super::Defs::Fw::TimeValue) {}
+        /// A test parameter
+        #[fprime_parameter(id = 0x10022000)]
+        pub fn parameter1(&self) -> u32 {}
+        /// A test parameter
+        #[fprime_parameter(id = 0x10022001)]
+        pub fn parameter2(&self) -> i16 {}
     }
     pub struct RefSendBuffComp {}
     impl RefSendBuffComp {
         pub const DEFAULT: Self = Self {};
         /// Command to start sending packets
-        pub fn SB_START_PKTS(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10010000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10010000)]
+        pub fn SB_START_PKTS(&self) -> fprime_core::CmdResponse {}
         /// Send a bad packet
-        pub fn SB_INJECT_PKT_ERROR(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10010001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10010001)]
+        pub fn SB_INJECT_PKT_ERROR(&self) -> fprime_core::CmdResponse {}
         /// Generate a FATAL EVR
         ///
         ///  * `arg1` - First FATAL Argument
         ///  * `arg2` - Second FATAL Argument
         ///  * `arg3` - Third FATAL Argument
+        #[fprime_command(opcode = 0x10010002)]
         pub fn SB_GEN_FATAL(
             &self,
             arg1: u32,
             arg2: u32,
             arg3: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10010002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            arg1.serialize_to(__encoded, &mut __offset);
-            arg2.serialize_to(__encoded, &mut __offset);
-            arg3.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Generate an ASSERT
         ///
         ///  * `arg1` - First ASSERT Argument
@@ -4356,6 +2130,7 @@ mod Impl {
         ///  * `arg4` - Fourth ASSERT Argument
         ///  * `arg5` - Fifth ASSERT Argument
         ///  * `arg6` - Sixth ASSERT Argument
+        #[fprime_command(opcode = 0x10010003)]
         pub fn SB_GEN_ASSERT(
             &self,
             arg1: u32,
@@ -4364,161 +2139,46 @@ mod Impl {
             arg4: u32,
             arg5: u32,
             arg6: u32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10010003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            arg1.serialize_to(__encoded, &mut __offset);
-            arg2.serialize_to(__encoded, &mut __offset);
-            arg3.serialize_to(__encoded, &mut __offset);
-            arg4.serialize_to(__encoded, &mut __offset);
-            arg5.serialize_to(__encoded, &mut __offset);
-            arg6.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// A test parameter
         ///
         ///  * `val`
-        pub fn PARAMETER3_PRM_SET(&self, val: u8) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1001000A;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1001000A)]
+        pub fn PARAMETER3_PRM_SET(&self, val: u8) -> fprime_core::CmdResponse {}
         /// A test parameter
-        pub fn PARAMETER3_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1001000B;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1001000B)]
+        pub fn PARAMETER3_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// A test parameter
         ///
         ///  * `val`
-        pub fn PARAMETER4_PRM_SET(&self, val: f32) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1001000C;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1001000C)]
+        pub fn PARAMETER4_PRM_SET(&self, val: f32) -> fprime_core::CmdResponse {}
         /// A test parameter
-        pub fn PARAMETER4_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1001000D;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1001000D)]
+        pub fn PARAMETER4_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// Number of packets sent
-        pub fn PacketsSent(&self) -> (u64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10010000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10010000)]
+        pub fn PacketsSent(&self) -> (u64, super::Defs::Fw::TimeValue) {}
         /// Number of errors injected
-        pub fn NumErrorsInjected(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10010001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10010001)]
+        pub fn NumErrorsInjected(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Readback of Parameter3
-        pub fn Parameter3(&self) -> (u8, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u8 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10010002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u8 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10010002)]
+        pub fn Parameter3(&self) -> (u8, super::Defs::Fw::TimeValue) {}
         /// Readback of Parameter4
-        pub fn Parameter4(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10010003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10010003)]
+        pub fn Parameter4(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Readback of Parameter4
+        #[fprime_telemetry(id = 0x10010004)]
         pub fn SendState(
             &self,
-        ) -> (crate::Defs::Ref::SendBuff::ActiveState, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::SendBuff::ActiveState as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10010004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::SendBuff::ActiveState as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::SendBuff::ActiveState, super::Defs::Fw::TimeValue) {}
+        /// A test parameter
+        #[fprime_parameter(id = 0x10010000)]
+        pub fn parameter3(&self) -> u8 {}
+        /// A test parameter
+        #[fprime_parameter(id = 0x10010001)]
+        pub fn parameter4(&self) -> f32 {}
     }
     pub struct RefSystemResources {}
     impl RefSystemResources {
@@ -4526,337 +2186,74 @@ mod Impl {
         /// A command to enable or disable system resource telemetry
         ///
         ///  * `enable` - whether or not system resource telemetry is enabled
+        #[fprime_command(opcode = 0x10023000)]
         pub fn ENABLE(
             &self,
             enable: crate::Defs::Svc::SystemResourceEnabled,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10023000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            enable.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Total system memory in KB
-        pub fn MEMORY_TOTAL(&self) -> (u64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023000)]
+        pub fn MEMORY_TOTAL(&self) -> (u64, super::Defs::Fw::TimeValue) {}
         /// System memory used in KB
-        pub fn MEMORY_USED(&self) -> (u64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023001)]
+        pub fn MEMORY_USED(&self) -> (u64, super::Defs::Fw::TimeValue) {}
         /// System non-volatile available in KB
-        pub fn NON_VOLATILE_TOTAL(&self) -> (u64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023002)]
+        pub fn NON_VOLATILE_TOTAL(&self) -> (u64, super::Defs::Fw::TimeValue) {}
         /// System non-volatile available in KB
-        pub fn NON_VOLATILE_FREE(&self) -> (u64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023003)]
+        pub fn NON_VOLATILE_FREE(&self) -> (u64, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023004)]
+        pub fn CPU(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_00(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023005, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023005)]
+        pub fn CPU_00(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_01(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023006, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023006)]
+        pub fn CPU_01(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_02(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023007, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023007)]
+        pub fn CPU_02(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_03(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023008, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023008)]
+        pub fn CPU_03(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_04(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023009, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023009)]
+        pub fn CPU_04(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_05(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1002300A, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1002300A)]
+        pub fn CPU_05(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_06(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1002300B, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1002300B)]
+        pub fn CPU_06(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_07(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1002300C, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1002300C)]
+        pub fn CPU_07(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_08(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1002300D, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1002300D)]
+        pub fn CPU_08(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_09(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1002300E, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1002300E)]
+        pub fn CPU_09(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_10(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1002300F, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1002300F)]
+        pub fn CPU_10(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_11(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023010, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023010)]
+        pub fn CPU_11(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_12(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023011, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023011)]
+        pub fn CPU_12(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_13(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023012, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023012)]
+        pub fn CPU_13(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_14(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023013, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023013)]
+        pub fn CPU_14(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// System's CPU Percentage
-        pub fn CPU_15(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10023014, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10023014)]
+        pub fn CPU_15(&self) -> (f32, super::Defs::Fw::TimeValue) {}
     }
     pub struct RefTypeDemo {}
     impl RefTypeDemo {
@@ -4864,719 +2261,249 @@ mod Impl {
         /// Single choice command
         ///
         ///  * `choice` - A single choice
+        #[fprime_command(opcode = 0x10005000)]
         pub fn CHOICE(
             &self,
             choice: crate::Defs::Ref::Choice,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            choice.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Single enumeration parameter
         ///
         ///  * `val`
+        #[fprime_command(opcode = 0x10005001)]
         pub fn CHOICE_PRM_PRM_SET(
             &self,
             val: crate::Defs::Ref::Choice,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Single enumeration parameter
-        pub fn CHOICE_PRM_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10005002)]
+        pub fn CHOICE_PRM_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// Multiple choice command via Array
         ///
         ///  * `choices` - A set of choices
+        #[fprime_command(opcode = 0x10005003)]
         pub fn CHOICES(
             &self,
             choices: crate::Defs::Ref::ManyChoices,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            choices.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple choice command via Array with a preceding and following argument
         ///
         ///  * `repeat` - Number of times to repeat the choices
         ///  * `choices` - A set of choices
         ///  * `repeat_max` - Limit to the number of repetitions
+        #[fprime_command(opcode = 0x10005004)]
         pub fn CHOICES_WITH_FRIENDS(
             &self,
             repeat: u8,
             choices: crate::Defs::Ref::ManyChoices,
             repeat_max: u8,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005004;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            repeat.serialize_to(__encoded, &mut __offset);
-            choices.serialize_to(__encoded, &mut __offset);
-            repeat_max.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple enumeration parameter via Array
         ///
         ///  * `val`
+        #[fprime_command(opcode = 0x10005005)]
         pub fn CHOICES_PRM_PRM_SET(
             &self,
             val: crate::Defs::Ref::ManyChoices,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005005;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple enumeration parameter via Array
-        pub fn CHOICES_PRM_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005006;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10005006)]
+        pub fn CHOICES_PRM_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// Too many choice command via Array
         ///
         ///  * `choices` - Way to many choices to make
+        #[fprime_command(opcode = 0x10005007)]
         pub fn EXTRA_CHOICES(
             &self,
             choices: crate::Defs::Ref::TooManyChoices,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005007;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            choices.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Too many choices command via Array with a preceding and following argument
         ///
         ///  * `repeat` - Number of times to repeat the choices
         ///  * `choices` - Way to many choices to make
         ///  * `repeat_max` - Limit to the number of repetitions
+        #[fprime_command(opcode = 0x10005008)]
         pub fn EXTRA_CHOICES_WITH_FRIENDS(
             &self,
             repeat: u8,
             choices: crate::Defs::Ref::TooManyChoices,
             repeat_max: u8,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005008;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            repeat.serialize_to(__encoded, &mut __offset);
-            choices.serialize_to(__encoded, &mut __offset);
-            repeat_max.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Too many enumeration parameter via Array
         ///
         ///  * `val`
+        #[fprime_command(opcode = 0x10005009)]
         pub fn EXTRA_CHOICES_PRM_PRM_SET(
             &self,
             val: crate::Defs::Ref::ManyChoices,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005009;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Too many enumeration parameter via Array
-        pub fn EXTRA_CHOICES_PRM_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000500A;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1000500A)]
+        pub fn EXTRA_CHOICES_PRM_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// Multiple choice command via Structure
         ///
         ///  * `choices` - A pair of choices
+        #[fprime_command(opcode = 0x1000500B)]
         pub fn CHOICE_PAIR(
             &self,
             choices: crate::Defs::Ref::ChoicePair,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000500B;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            choices.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple choices command via Structure with a preceding and following argument
         ///
         ///  * `repeat` - Number of times to repeat the choices
         ///  * `choices` - A pair of choices
         ///  * `repeat_max` - Limit to the number of repetitions
+        #[fprime_command(opcode = 0x1000500C)]
         pub fn CHOICE_PAIR_WITH_FRIENDS(
             &self,
             repeat: u8,
             choices: crate::Defs::Ref::ChoicePair,
             repeat_max: u8,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000500C;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            repeat.serialize_to(__encoded, &mut __offset);
-            choices.serialize_to(__encoded, &mut __offset);
-            repeat_max.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple enumeration parameter via Structure
         ///
         ///  * `val`
+        #[fprime_command(opcode = 0x1000500D)]
         pub fn CHOICE_PAIR_PRM_PRM_SET(
             &self,
             val: crate::Defs::Ref::ChoicePair,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000500D;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple enumeration parameter via Structure
-        pub fn CHOICE_PAIR_PRM_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000500E;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1000500E)]
+        pub fn CHOICE_PAIR_PRM_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// Multiple choice command via Complex Structure
         ///
         ///  * `choices` - A phenomenal amount of choice
+        #[fprime_command(opcode = 0x1000500F)]
         pub fn GLUTTON_OF_CHOICE(
             &self,
             choices: crate::Defs::Ref::ChoiceSlurry,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000500F;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            choices.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple choices command via Complex Structure with a preceding and following argument
         ///
         ///  * `repeat` - Number of times to repeat the choices
         ///  * `choices` - A phenomenal amount of choice
         ///  * `repeat_max` - Limit to the number of repetitions
+        #[fprime_command(opcode = 0x10005010)]
         pub fn GLUTTON_OF_CHOICE_WITH_FRIENDS(
             &self,
             repeat: u8,
             choices: crate::Defs::Ref::ChoiceSlurry,
             repeat_max: u8,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005010;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            repeat.serialize_to(__encoded, &mut __offset);
-            choices.serialize_to(__encoded, &mut __offset);
-            repeat_max.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple enumeration parameter via Complex Structure
         ///
         ///  * `val`
+        #[fprime_command(opcode = 0x10005011)]
         pub fn GLUTTON_OF_CHOICE_PRM_PRM_SET(
             &self,
             val: crate::Defs::Ref::ChoiceSlurry,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005011;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Multiple enumeration parameter via Complex Structure
-        pub fn GLUTTON_OF_CHOICE_PRM_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005012;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10005012)]
+        pub fn GLUTTON_OF_CHOICE_PRM_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// Dump the typed parameters
-        pub fn DUMP_TYPED_PARAMETERS(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005013;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10005013)]
+        pub fn DUMP_TYPED_PARAMETERS(&self) -> fprime_core::CmdResponse {}
         /// Dump the float values
-        pub fn DUMP_FLOATS(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005014;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10005014)]
+        pub fn DUMP_FLOATS(&self) -> fprime_core::CmdResponse {}
         /// Send scalars
         ///
         ///  * `scalar_input`
+        #[fprime_command(opcode = 0x10005015)]
         pub fn SEND_SCALARS(
             &self,
             scalar_input: crate::Defs::Ref::ScalarStruct,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10005015;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            scalar_input.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Single choice channel
+        #[fprime_telemetry(id = 0x10005000)]
         pub fn ChoiceCh(
             &self,
-        ) -> (crate::Defs::Ref::Choice, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::Choice as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005000, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::Choice as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::Choice, super::Defs::Fw::TimeValue) {}
         /// Multiple choice channel via Array
+        #[fprime_telemetry(id = 0x10005001)]
         pub fn ChoicesCh(
             &self,
-        ) -> (crate::Defs::Ref::ManyChoices, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::ManyChoices as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005001, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::ManyChoices as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::ManyChoices, super::Defs::Fw::TimeValue) {}
         /// Too many choice channel via Array
+        #[fprime_telemetry(id = 0x10005002)]
         pub fn ExtraChoicesCh(
             &self,
-        ) -> (crate::Defs::Ref::TooManyChoices, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::TooManyChoices as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005002, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::TooManyChoices as Serializable>::deserialize(
-                    value_buf,
-                ),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::TooManyChoices, super::Defs::Fw::TimeValue) {}
         /// Multiple choice channel via Structure
+        #[fprime_telemetry(id = 0x10005003)]
         pub fn ChoicePairCh(
             &self,
-        ) -> (crate::Defs::Ref::ChoicePair, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::ChoicePair as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005003, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::ChoicePair as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::ChoicePair, super::Defs::Fw::TimeValue) {}
         /// Multiple choice channel via Complex Structure
+        #[fprime_telemetry(id = 0x10005004)]
         pub fn ChoiceSlurryCh(
             &self,
-        ) -> (crate::Defs::Ref::ChoiceSlurry, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::ChoiceSlurry as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005004, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::ChoiceSlurry as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::ChoiceSlurry, super::Defs::Fw::TimeValue) {}
         /// Float output channel 1
-        pub fn Float1Ch(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005005, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10005005)]
+        pub fn Float1Ch(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Float output channel 2
-        pub fn Float2Ch(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005006, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10005006)]
+        pub fn Float2Ch(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Float output channel 3
-        pub fn Float3Ch(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005007, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10005007)]
+        pub fn Float3Ch(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Float set output channel
+        #[fprime_telemetry(id = 0x10005008)]
         pub fn FloatSet(
             &self,
-        ) -> (crate::Defs::Ref::FloatSet, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::FloatSet as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005008, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::FloatSet as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::FloatSet, super::Defs::Fw::TimeValue) {}
         /// Scalar struct channel
+        #[fprime_telemetry(id = 0x10005009)]
         pub fn ScalarStructCh(
             &self,
-        ) -> (crate::Defs::Ref::ScalarStruct, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <crate::Defs::Ref::ScalarStruct as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005009, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <crate::Defs::Ref::ScalarStruct as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        ) -> (crate::Defs::Ref::ScalarStruct, super::Defs::Fw::TimeValue) {}
         /// Scalar U8 channel
-        pub fn ScalarU8Ch(&self) -> (u8, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u8 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000500A, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u8 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000500A)]
+        pub fn ScalarU8Ch(&self) -> (u8, super::Defs::Fw::TimeValue) {}
         /// Scalar U16 channel
-        pub fn ScalarU16Ch(&self) -> (u16, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u16 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000500B, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u16 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000500B)]
+        pub fn ScalarU16Ch(&self) -> (u16, super::Defs::Fw::TimeValue) {}
         /// Scalar U32 channel
-        pub fn ScalarU32Ch(&self) -> (u32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000500C, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000500C)]
+        pub fn ScalarU32Ch(&self) -> (u32, super::Defs::Fw::TimeValue) {}
         /// Scalar U64 channel
-        pub fn ScalarU64Ch(&self) -> (u64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <u64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000500D, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <u64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000500D)]
+        pub fn ScalarU64Ch(&self) -> (u64, super::Defs::Fw::TimeValue) {}
         /// Scalar I8 channel
-        pub fn ScalarI8Ch(&self) -> (i8, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <i8 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000500E, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <i8 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000500E)]
+        pub fn ScalarI8Ch(&self) -> (i8, super::Defs::Fw::TimeValue) {}
         /// Scalar I16 channel
-        pub fn ScalarI16Ch(&self) -> (i16, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <i16 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x1000500F, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <i16 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x1000500F)]
+        pub fn ScalarI16Ch(&self) -> (i16, super::Defs::Fw::TimeValue) {}
         /// Scalar I32 channel
-        pub fn ScalarI32Ch(&self) -> (i32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <i32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005010, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <i32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10005010)]
+        pub fn ScalarI32Ch(&self) -> (i32, super::Defs::Fw::TimeValue) {}
         /// Scalar I64 channel
-        pub fn ScalarI64Ch(&self) -> (i64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <i64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005011, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <i64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10005011)]
+        pub fn ScalarI64Ch(&self) -> (i64, super::Defs::Fw::TimeValue) {}
         /// Scalar F32 channel
-        pub fn ScalarF32Ch(&self) -> (f32, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f32 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005012, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f32 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10005012)]
+        pub fn ScalarF32Ch(&self) -> (f32, super::Defs::Fw::TimeValue) {}
         /// Scalar F64 channel
-        pub fn ScalarF64Ch(&self) -> (f64, super::Defs::Fw::TimeValue) {
-            let mut time_buf: [u8; super::Defs::Fw::TimeValue::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            let mut value_buf: [u8; <f64 as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)] core::mem::MaybeUninit::uninit().assume_init()
-            };
-            unsafe { sys::telemetry(0x10005013, &mut time_buf, &mut value_buf) }
-                .unwrap();
-            (
-                <f64 as Serializable>::deserialize(value_buf),
-                super::Defs::Fw::TimeValue::deserialize(time_buf),
-            )
-        }
+        #[fprime_telemetry(id = 0x10005013)]
+        pub fn ScalarF64Ch(&self) -> (f64, super::Defs::Fw::TimeValue) {}
+        /// Single enumeration parameter
+        #[fprime_parameter(id = 0x10005000)]
+        pub fn CHOICE_PRM(&self) -> crate::Defs::Ref::Choice {}
+        /// Multiple enumeration parameter via Array
+        #[fprime_parameter(id = 0x10005001)]
+        pub fn CHOICES_PRM(&self) -> crate::Defs::Ref::ManyChoices {}
+        /// Too many enumeration parameter via Array
+        #[fprime_parameter(id = 0x10005002)]
+        pub fn EXTRA_CHOICES_PRM(&self) -> crate::Defs::Ref::ManyChoices {}
+        /// Multiple enumeration parameter via Structure
+        #[fprime_parameter(id = 0x10005003)]
+        pub fn CHOICE_PAIR_PRM(&self) -> crate::Defs::Ref::ChoicePair {}
+        /// Multiple enumeration parameter via Complex Structure
+        #[fprime_parameter(id = 0x10005004)]
+        pub fn GLUTTON_OF_CHOICE_PRM(&self) -> crate::Defs::Ref::ChoiceSlurry {}
     }
     pub struct RefWasmSeq {}
     impl RefWasmSeq {
@@ -5591,199 +2518,76 @@ mod Impl {
         ///
         ///  * `fileName` - The name of the sequence file
         ///  * `block` - Return command status when complete or not
+        #[fprime_command(opcode = 0x10007000)]
         pub fn RUN(
             &self,
-            fileName: &str,
+            fileName: String<240>,
             block: crate::Defs::Svc::BlockState,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007000;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(fileName)
-                .serialize_to(__encoded, &mut __offset);
-            block.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Wait for the interpreter to finish and return it's result as a CmdResponse
-        pub fn WAIT(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007001;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10007001)]
+        pub fn WAIT(&self) -> fprime_core::CmdResponse {}
         /// Loads and validates a WebAssembly module into the store.
         /// This command loads the module with a empty name meaning only a single module may be loaded.
         /// To allow multiple modules, use the `LOAD_NAME` command instead.
         ///
         ///  * `fileName` - The name of the sequence file
-        pub fn LOAD(&self, fileName: &str) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007002;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(fileName)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10007002)]
+        pub fn LOAD(&self, fileName: String<240>) -> fprime_core::CmdResponse {}
         /// Load and validate a WebAssembly module into the store. This module is given a name so that
         /// it's exports can be referenced by other modules.
         ///
         ///  * `fileName` - The name of the sequence file
         ///  * `name` - WebAssembly module name, must not conflict with previously loaded modules
+        #[fprime_command(opcode = 0x10007003)]
         pub fn LOAD_NAME(
             &self,
-            fileName: &str,
-            name: &str,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007003;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<240> as StrTruncate<240>>::truncate(fileName)
-                .serialize_to(__encoded, &mut __offset);
-            <String<16> as StrTruncate<16>>::truncate(name)
-                .serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+            fileName: String<240>,
+            name: String<16>,
+        ) -> fprime_core::CmdResponse {}
         /// Invoke a main function from a loaded module
         ///
         ///  * `module` - Name of the module to invoke a function from
         ///  * `block`
+        #[fprime_command(opcode = 0x10007004)]
         pub fn INVOKE(
             &self,
-            module: &str,
+            module: String<16>,
             block: crate::Defs::Svc::BlockState,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007004;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            <String<16> as StrTruncate<16>>::truncate(module)
-                .serialize_to(__encoded, &mut __offset);
-            block.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Cancels a running or validated sequence. After running CANCEL, the sequencer should return to IDLE
         /// This completely clears the store.
         /// Cancelling during LOADING will trigger a fail response in the reader and
         /// return to IDLE mode.
-        pub fn CANCEL(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007005;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10007005)]
+        pub fn CANCEL(&self) -> fprime_core::CmdResponse {}
         /// Pauses the execution of the sequencer, just before it is about to dispatch the next directive,
         /// until unpaused by the CONTINUE command, or stepped by the STEP command. This command is only valid
         /// substates of the RUNNING state that are not RUNNING.PAUSED.
-        pub fn PAUSE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007006;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10007006)]
+        pub fn PAUSE(&self) -> fprime_core::CmdResponse {}
         /// Dump a stack trace in events
-        pub fn TRACE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007007;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
-        pub fn CONTINUE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007008;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x10007007)]
+        pub fn TRACE(&self) -> fprime_core::CmdResponse {}
+        #[fprime_command(opcode = 0x10007008)]
+        pub fn CONTINUE(&self) -> fprime_core::CmdResponse {}
         /// the number of seconds to wait before giving up
         /// on a directive or command. if <= 0 or greater than U32 max, never time out.
         /// accuracy of this timeout is determined by the rate group driving this
         /// component. it will be rounded up
         ///
         ///  * `val`
+        #[fprime_command(opcode = 0x10007009)]
         pub fn STATEMENT_TIMEOUT_SECS_PRM_SET(
             &self,
             val: f32,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x10007009;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// the number of seconds to wait before giving up
         /// on a directive or command. if <= 0 or greater than U32 max, never time out.
         /// accuracy of this timeout is determined by the rate group driving this
         /// component. it will be rounded up
-        pub fn STATEMENT_TIMEOUT_SECS_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000700A;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1000700A)]
+        pub fn STATEMENT_TIMEOUT_SECS_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
         /// Number of Wasm instructions to execute per interpreter cycle.
         /// Larger numbers will effect the responsiveness of the interpreter to
         /// `PAUSE` commands. The interpreter will always pause before commands.
@@ -5792,40 +2596,33 @@ mod Impl {
         /// need to feed itself through a queue to fuel more cycles.
         ///
         ///  * `val`
+        #[fprime_command(opcode = 0x1000700B)]
         pub fn INSTRUCTION_FUEL_PRM_SET(
             &self,
             val: crate::Defs::FwSizeType,
-        ) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000700B;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            val.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        ) -> fprime_core::CmdResponse {}
         /// Number of Wasm instructions to execute per interpreter cycle.
         /// Larger numbers will effect the responsiveness of the interpreter to
         /// `PAUSE` commands. The interpreter will always pause before commands.
         ///
         /// Larger numbers make the interpreter faster because the engine doesn't
         /// need to feed itself through a queue to fuel more cycles.
-        pub fn INSTRUCTION_FUEL_PRM_SAVE(&self) -> super::Defs::Fw::CmdResponse {
-            let __encoded = unsafe {
-                let ptr = (&raw mut __SCRATCH) as *mut u8;
-                let len = __SCRATCH_SIZE;
-                core::slice::from_raw_parts_mut(ptr, len)
-            };
-            let mut __offset: usize = 0;
-            let __opcode: super::Defs::FwOpcodeType = 0x1000700C;
-            __opcode.serialize_to(__encoded, &mut __offset);
-            let res = unsafe { sys::command(&__encoded[0..__offset]) };
-            unsafe { core::mem::transmute(res as u8) }
-        }
+        #[fprime_command(opcode = 0x1000700C)]
+        pub fn INSTRUCTION_FUEL_PRM_SAVE(&self) -> fprime_core::CmdResponse {}
+        /// the number of seconds to wait before giving up
+        /// on a directive or command. if <= 0 or greater than U32 max, never time out.
+        /// accuracy of this timeout is determined by the rate group driving this
+        /// component. it will be rounded up
+        #[fprime_parameter(id = 0x10007000)]
+        pub fn STATEMENT_TIMEOUT_SECS(&self) -> f32 {}
+        /// Number of Wasm instructions to execute per interpreter cycle.
+        /// Larger numbers will effect the responsiveness of the interpreter to
+        /// `PAUSE` commands. The interpreter will always pause before commands.
+        ///
+        /// Larger numbers make the interpreter faster because the engine doesn't
+        /// need to feed itself through a queue to fuel more cycles.
+        #[fprime_parameter(id = 0x10007001)]
+        pub fn INSTRUCTION_FUEL(&self) -> crate::Defs::FwSizeType {}
     }
     pub struct Ref {
         pub SG1: RefSg1,

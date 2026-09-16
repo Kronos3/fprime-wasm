@@ -14,18 +14,8 @@ pub fn parameter(prm: &fprime_dictionary::Parameter) -> (Qualifier, TokenStream)
     let id = hex_literal(prm.id);
 
     let def = quote! {
-        pub fn #name(&self) -> #ty {
-            let mut value_buf: [u8; <#ty as Serializable>::SIZE] = unsafe {
-                #[allow(invalid_value)]
-                core::mem::MaybeUninit::uninit().assume_init()
-            };
-
-            unsafe {
-                parameter(#id, &mut value_buf)
-            };
-
-            <#ty as Serializable>::deserialize(&value_buf)
-        }
+        #[fprime_parameter(id = #id)]
+        pub fn #name(&self) -> #ty {}
     };
 
     (q, annotate(def, &prm.annotation))

@@ -8,16 +8,6 @@ use fprime_core::Serializable;
 pub use inner::Defs::*;
 pub use inner::*;
 
-impl Fw::CmdResponse {
-    #[allow(dead_code)]
-    pub fn check(&self) {
-        match self {
-            Defs::Fw::CmdResponse::OK => {}
-            _ => fprime_core::panic(fprime_core::PanicCode::CmdFailed),
-        }
-    }
-}
-
 impl Fw::TimeValue {
     #[allow(dead_code)]
     pub fn now() -> Defs::Fw::TimeValue {

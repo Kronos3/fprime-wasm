@@ -18,6 +18,40 @@ pub fn set_fail_mode(mode: FailMode) {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(i32)]
+pub enum CmdResponse {
+    /// Command successfully executed
+    Ok = 0,
+
+    /// Invalid opcode dispatched
+    InvalidOpcode = 1,
+
+    /// Command failed validation
+    ValidationError = 2,
+
+    /// Command failed to deserialize
+    FormatError = 3,
+
+    /// Command had execution error
+    ExecutionError = 4,
+
+    /// Component busy
+    Busy = 5,
+
+    /// Command tracking was cleared before the command completed
+    Cleared = 6,
+}
+
+impl CmdResponse {
+    pub fn check(&self) {
+        match self {
+            CmdResponse::Ok => {}
+            _ => panic(PanicCode::CmdFailed),
+        }
+    }
+}
+
 /// Dispatch a command given a Fw::ComBuffer
 /// This command should be run synchronously and return the response
 /// once the command has finished.
@@ -37,11 +71,12 @@ pub fn set_fail_mode(mode: FailMode) {
 /// * `com_buffer`: Fw::ComBuffer encoded F Prime command
 ///
 /// returns: i32 (Fw::CmdResponse)
-pub unsafe fn command(com_buffer: &[u8]) -> i32 {
-    let status = unsafe { abi::cmd(com_buffer.as_ptr() as u32, com_buffer.len() as u32) };
-    if status != 0 && unsafe { CMD_MODE_CHECKED == FailMode::Checked } {
-        panic(PanicCode::CmdFailed)
-    } else {
-        status
+pub unsafe fn command(com_buffer: &[u8]) -> CmdResponse {
+    let status_raw = unsafe { abi::cmd(com_buffer.as_ptr() as u32, com_buffer.len() as u32) };
+    let status: CmdResponse = unsafe { core::mem::transmute(status_raw) };
+    if unsafe { CMD_MODE_CHECKED == FailMode::Checked } {
+        status.check();
     }
+
+    status
 }

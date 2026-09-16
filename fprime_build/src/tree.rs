@@ -186,6 +186,9 @@ impl CodeTree {
                 #[allow(unused_imports)]
                 use fprime_core::*;
 
+                #[allow(unused_imports)]
+                use super::Defs::FwOpcodeType;
+
                 #global_impls
                 #defs
             }

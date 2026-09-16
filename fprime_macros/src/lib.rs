@@ -1,164 +1,72 @@
 use proc_macro::TokenStream;
-use proc_macro2::{Ident, Literal, Span};
 use quote::quote;
-use syn::{Data, DeriveInput, ItemFn, parse_macro_input};
+use syn::{DeriveInput, ItemFn, parse_macro_input};
 
-/// Returns the repr integer type as a string (e.g. "u8", "i32") if present.
-fn enum_repr_type_name(attrs: &[syn::Attribute]) -> Option<Ident> {
-    let mut repr: Option<Ident> = None;
+mod command;
+mod parameter;
+mod serializable;
+mod signature;
+mod telemetry;
 
-    for attr in attrs {
-        if !attr.path().is_ident("repr") {
-            continue;
-        }
-
-        let _ = attr.parse_nested_meta(|meta| {
-            if let Some(ident) = meta.path.get_ident() {
-                repr = Some(ident.clone());
-            }
-            Ok(())
-        });
-
-        // Stop after first repr attribute
-        if repr.is_some() {
-            break;
-        }
-    }
-
-    repr
+/// Render a macro result, reporting failures where the macro was invoked.
+fn expand(result: syn::Result<proc_macro2::TokenStream>) -> TokenStream {
+    result.unwrap_or_else(syn::Error::into_compile_error).into()
 }
 
 #[proc_macro_derive(Serializable)]
 pub fn derive_serializable(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
-    let name = &input.ident;
-    let generics = &input.generics;
+    expand(serializable::derive_serializable(input))
+}
 
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+/// Implement a dictionary command accessor from its signature.
+///
+/// The formal parameters and the `Fw::CmdResponse` return type are read off the
+/// stub's signature, so the attribute only carries the opcode:
+///
+/// ```ignore
+/// #[fprime_command(opcode = 0x1000001)]
+/// pub fn CMD_NO_OP_STRING(&self, arg1: String<40>) -> super::Defs::Fw::CmdResponse {}
+/// ```
+///
+/// A `String<N>` parameter is the wire type, not the calling convention: the
+/// caller passes a `&str` that is truncated to `N` bytes on the way out.
+///
+/// The expansion encodes the command into the enclosing module's `__SCRATCH`
+/// buffer, so it requires `__SCRATCH`, `__SCRATCH_SIZE` and the dictionary's
+/// `FwOpcodeType` to be in scope alongside `fprime_core`'s prelude.
+#[proc_macro_attribute]
+pub fn fprime_command(attr: TokenStream, item: TokenStream) -> TokenStream {
+    expand(command::command(attr.into(), item.into()))
+}
 
-    match input.data {
-        Data::Struct(s) => {
-            let size = s.fields.iter().map(|field| {
-                let ty = &field.ty;
-                quote! { <#ty as Serializable>::SIZE }
-            });
+/// Implement a dictionary telemetry channel accessor from its signature.
+///
+/// The channel value type and the time type are read off the stub's `(value,
+/// time)` return type, so the attribute only carries the channel id:
+///
+/// ```ignore
+/// #[fprime_telemetry(id = 0x1000000)]
+/// pub fn CommandsDispatched(&self) -> (u32, super::Defs::Fw::TimeValue) {}
+/// ```
+#[proc_macro_attribute]
+pub fn fprime_telemetry(attr: TokenStream, item: TokenStream) -> TokenStream {
+    expand(telemetry::telemetry(attr.into(), item.into()))
+}
 
-            let serialize_to = s
-                .fields
-                .iter()
-                .enumerate()
-                .map(|(i, field)| match &field.ident {
-                    None => {
-                        let name = Literal::usize_unsuffixed(i);
-                        quote! { self.#name.serialize_to(to, offset); }
-                    }
-                    Some(name) => quote! { self.#name.serialize_to(to, offset); },
-                });
-
-            let deserialize_from = s.fields.iter().enumerate().map(|(i, field)| {
-                let ty = &field.ty;
-                let name = match &field.ident {
-                    None => &Ident::new(
-                        &format!("_{}", Literal::usize_unsuffixed(i)),
-                        Span::call_site(),
-                    ),
-                    Some(name) => name,
-                };
-
-                quote! { let #name: #ty = Serializable::deserialize_from(from, offset); }
-            });
-
-            let field_names: Vec<Ident> = s
-                .fields
-                .iter()
-                .enumerate()
-                .map(|(i, field)| match &field.ident {
-                    None => Ident::new(
-                        &format!("_{}", Literal::usize_unsuffixed(i)),
-                        Span::call_site(),
-                    ),
-                    Some(name) => name.clone(),
-                })
-                .collect();
-
-            quote! {
-                impl #impl_generics Serializable for #name #ty_generics #where_clause {
-                    const SIZE: usize = 0 #(+ #size)*;
-
-                    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-                        #(#serialize_to)*
-                    }
-
-                    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-                        #(#deserialize_from)*
-                        Self {
-                            #(#field_names,)*
-                        }
-                    }
-                }
-            }
-            .into()
-        }
-        Data::Enum(e) => {
-            let repr = match enum_repr_type_name(&input.attrs) {
-                None => {
-                    return syn::Error::new_spanned(
-                        input.ident,
-                        "Serializable can only be derived on enums with explicit repr() attributes",
-                    )
-                    .to_compile_error()
-                    .into();
-                }
-                Some(repr) => repr,
-            };
-
-            let mut match_branches = vec![];
-            for variant in &e.variants {
-                match &variant.discriminant {
-                    None => {
-                        return syn::Error::new_spanned(
-                            &variant.ident,
-                            "Serializable can only be derived on enums with explicit values on all variants",
-                        )
-                        .to_compile_error()
-                        .into();
-                    }
-                    Some((_, value)) => {
-                        let name = &variant.ident;
-                        match_branches.push(quote! {
-                            #value => Self::#name,
-                        })
-                    }
-                }
-            }
-
-            quote! {
-                impl #impl_generics Serializable for #name #ty_generics #where_clause {
-                    const SIZE: usize = #repr::SIZE;
-
-                    fn serialize_to(&self, to: &mut [u8], offset: &mut usize) {
-                        (*self as #repr).serialize_to(to, offset);
-                    }
-
-                    fn deserialize_from(from: &[u8], offset: &mut usize) -> Self {
-                        let raw: #repr = Serializable::deserialize_from(from, offset);
-                        match raw {
-                            #(#match_branches)*
-                            _ => fprime_core::panic(fprime_core::PanicCode::InvalidEnum),
-                        }
-                    }
-                }
-            }
-            .into()
-        }
-        Data::Union(_) => syn::Error::new_spanned(
-            input.ident,
-            "Serializable can only be derived for structs and enums",
-        )
-        .to_compile_error()
-        .into(),
-    }
+/// Implement a dictionary parameter accessor from its signature.
+///
+/// The parameter type is read off the stub's return type, so the attribute only
+/// carries the parameter id:
+///
+/// ```ignore
+/// #[fprime_parameter(id = 0x2000000)]
+/// pub fn parameter1(&self) -> u32 {}
+/// ```
+#[proc_macro_attribute]
+pub fn fprime_parameter(attr: TokenStream, item: TokenStream) -> TokenStream {
+    expand(parameter::parameter(attr.into(), item.into()))
 }
 
 #[proc_macro_attribute]
@@ -183,4 +91,9 @@ pub fn fprime_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     TokenStream::from(expanded)
+}
+
+#[cfg(test)]
+mod test {
+    mod test;
 }
