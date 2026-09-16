@@ -9,6 +9,10 @@ use fprime_core::*;
 pub fn main() {
     set_fail_mode(FailMode::Permissive);
 
+    let time = now();
+
+    if time < now() {}
+
     CdhCore.cmdDisp.CMD_NO_OP();
     CdhCore.cmdDisp.CMD_NO_OP_STRING("STRINGS");
     CdhCore.events.SET_EVENT_FILTER(ACTIVITY_HI, DISABLED);

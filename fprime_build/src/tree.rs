@@ -178,7 +178,9 @@ impl CodeTree {
             })
             .collect();
 
-        let global_impls = util::global_memory(dict);
+        let impl_defs = vec![util::global_memory(dict)];
+        let global_defs = vec![util::time_now(), util::time_cmp()];
+
         let defs = self.struct_nesting_impl(vec![]);
 
         quote! {
@@ -189,11 +191,12 @@ impl CodeTree {
                 #[allow(unused_imports)]
                 use super::Defs::FwOpcodeType;
 
-                #global_impls
+                #(#impl_defs)*
                 #defs
             }
 
             #(#consts)*
+            #(#global_defs)*
         }
     }
 }

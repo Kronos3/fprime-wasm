@@ -5,27 +5,24 @@ use crate::{EventSeverity, abi, message, messagef};
 pub enum PanicCode {
     /// Code reserved for Rust global panic handler (abort)
     RustPanic = 0,
-
     /// A host function returned an invalid response
     InvalidStatus = 1,
-
     /// A command failed
     CmdFailed = 2,
-
     /// Telemetry value is invalid
     TlmInvalid = 3,
-
     /// Parameter value is not initialized
     PrmUninit = 4,
-
     /// Parameter value is not initialized
     PrmInvalid = 5,
-
     /// A serialized enum held a value with no corresponding variant
     InvalidEnum = 6,
-
     /// A serialized value did not fit its destination buffer
     Truncated = 7,
+    /// Attempted to compare times with different bases
+    TimeBaseIncomparable = 8,
+    /// Attempted to compare times with different contexts
+    TimeContextIncomparable = 9,
 }
 
 /// Exit the runtime due to a system/response failure

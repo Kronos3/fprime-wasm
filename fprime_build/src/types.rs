@@ -88,7 +88,7 @@ fn struct_type_definition(ty: &StructType) -> (Qualifier, TokenStream) {
     });
 
     let struct_def = quote! {
-        #[derive(Clone, Debug, Serializable)]
+        #[derive(Clone, Debug, PartialEq, Serializable)]
         pub struct #name {
             #(#members)*
         }

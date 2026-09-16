@@ -86,6 +86,41 @@ pub(crate) fn global_memory(dictionary: &Dictionary) -> TokenStream {
     }
 }
 
+pub(crate) fn time_now() -> TokenStream {
+    quote! {
+        pub fn now() -> crate::Defs::Fw::TimeValue {
+            use fprime_core::Serializable;
+            let mut buf: [u8; crate::Defs::Fw::TimeValue::SIZE] = [0; crate::Defs::Fw::TimeValue::SIZE];
+            unsafe {
+                fprime_core::time::time_read(&mut buf);
+            }
+
+            crate::Defs::Fw::TimeValue::deserialize(&buf)
+        }
+    }
+}
+
+pub(crate) fn time_cmp() -> TokenStream {
+    quote! {
+        impl PartialOrd for crate::Defs::Fw::TimeValue {
+            fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+                if self.timeBase != other.timeBase {
+                    fprime_core::panic(fprime_core::PanicCode::TimeBaseIncomparable);
+                } else if self.timeContext != other.timeContext {
+                    fprime_core::panic(fprime_core::PanicCode::TimeContextIncomparable);
+                }
+
+                match self.seconds.partial_cmp(&other.seconds) {
+                    Some(core::cmp::Ordering::Equal) => {}
+                    ord => return ord,
+                }
+
+                self.useconds.partial_cmp(&other.useconds)
+            }
+        }
+    }
+}
+
 pub(crate) fn split_identifier(qi: &str) -> (Qualifier, Ident) {
     let (qualifier, name) = split_qualified_name(qi);
 
