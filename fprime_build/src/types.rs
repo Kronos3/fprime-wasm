@@ -2,7 +2,8 @@ use crate::tree::Qualifier;
 use crate::util::{annotate, split_identifier, str_to_ident};
 use fprime_dictionary::naming::definition_path;
 use fprime_dictionary::{
-    AliasType, ArrayType, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition, TypeName,
+    AliasType, ArrayType, Dictionary, EnumType, FloatKind, IntegerKind, StructType, TypeDefinition,
+    TypeName,
 };
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
@@ -29,6 +30,13 @@ pub(crate) fn type_name(tn: &TypeName) -> TokenStream {
             quote! { String<#size_u> }
         }
         TypeName::QualifiedIdentifier { name } => definition_path(name),
+    }
+}
+
+pub(crate) fn type_name_is_string(type_name: &TypeName, dictionary: &Dictionary) -> bool {
+    match dictionary.underlying_type(type_name) {
+        TypeName::String { .. } => true,
+        _ => false,
     }
 }
 

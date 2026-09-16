@@ -6,11 +6,13 @@ use std::path::Path;
 use std::{env, fs};
 
 mod commands;
+mod constants;
 mod parameters;
 mod telemetry;
 mod tree;
 mod types;
 mod util;
+mod values;
 
 /// Serialize a token stream into a string
 fn render_tokens(ts: TokenStream) -> String {
@@ -35,6 +37,11 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     // Generate all namespace nested definitions
     for (_, ty) in &dict.type_definitions {
         let (qualifier, tokens) = types::type_definition(ty);
+        definitions.push(Definition { qualifier, tokens });
+    }
+
+    for c in &dict.constants {
+        let (qualifier, tokens) = constants::constant(c, &dict);
         definitions.push(Definition { qualifier, tokens });
     }
 

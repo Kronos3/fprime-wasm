@@ -48,6 +48,17 @@ pub enum TypeName {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum Value {
+    Integer(i64),
+    Float(f64),
+    Bool(bool),
+    String(String),
+    Array(Vec<Value>),
+    Struct(HashMap<String, Value>),
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EnumConstant {
     pub name: String,
@@ -86,7 +97,7 @@ pub struct ArrayType {
     pub qualified_name: String,
     pub size: u32,
     pub element_type: TypeName,
-    pub default: Vec<serde_json::Value>,
+    pub default: Vec<Value>,
 
     pub annotation: Option<String>,
 }
@@ -139,7 +150,7 @@ pub struct StructType {
     pub qualified_name: String,
     #[serde(deserialize_with = "deserialize_struct_members")]
     pub members: Vec<StructMember>,
-    pub default: Option<serde_json::Value>,
+    pub default: Option<Value>,
 
     pub annotation: Option<String>,
 }
@@ -203,7 +214,7 @@ pub struct Constant {
     pub qualified_name: String,
     #[serde(rename = "type")]
     pub type_name: TypeName,
-    pub value: serde_json::Value,
+    pub value: Value,
 
     pub annotation: Option<String>,
 }
@@ -260,7 +271,7 @@ pub struct Parameter {
     #[serde(rename = "type")]
     pub type_name: TypeName,
     pub id: u64,
-    pub default: Option<serde_json::Value>,
+    pub default: Option<Value>,
 
     pub annotation: Option<String>,
 }
@@ -286,6 +297,18 @@ pub struct Dictionary {
     pub commands: Vec<Command>,
     pub parameters: Vec<Parameter>,
     pub telemetry_channels: Vec<TelemetryChannel>,
+}
+
+impl Dictionary {
+    pub fn underlying_type<'a>(&'a self, type_name: &'a TypeName) -> &'a TypeName {
+        match type_name {
+            TypeName::QualifiedIdentifier { name } => match self.type_definitions.get(name) {
+                Some(TypeDefinition::Alias(alias)) => &alias.underlying_type,
+                _ => type_name,
+            },
+            _ => type_name,
+        }
+    }
 }
 
 pub fn parse(json_file: &Path) -> Dictionary {
