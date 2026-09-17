@@ -1,0 +1,200 @@
+[package]
+name = "bench"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+fprime_core = { path = "../../fprime_core" }
+
+[build-dependencies]
+fprime_build = { path = "../../fprime_build" }
+
+[lib]
+test = false
+bench = false
+
+[[bin]]
+name = "baseline"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_no_args"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_ints"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_floats"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_bool"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_enum"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_enum_wide"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_alias"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_mixed_scalars"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_string_tiny"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_string_small"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_string_large"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_string_truncated"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_array_scalar"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_array_bool"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_array_float"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_array_enum"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_array_2d"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_array_repeat"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_struct_enums"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_struct_scalars"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_struct_with_friends"
+test = false
+bench = false
+
+[[bin]]
+name = "cmd_struct_nested"
+test = false
+bench = false
+
+[[bin]]
+name = "fallback_scalar"
+test = false
+bench = false
+
+[[bin]]
+name = "fallback_string"
+test = false
+bench = false
+
+[[bin]]
+name = "fallback_struct"
+test = false
+bench = false
+
+[[bin]]
+name = "fallback_nested_string"
+test = false
+bench = false
+
+[[bin]]
+name = "fallback_struct_string"
+test = false
+bench = false
+
+[[bin]]
+name = "tlm_scalar"
+test = false
+bench = false
+
+[[bin]]
+name = "tlm_scalar_x8"
+test = false
+bench = false
+
+[[bin]]
+name = "tlm_string"
+test = false
+bench = false
+
+[[bin]]
+name = "tlm_struct"
+test = false
+bench = false
+
+[[bin]]
+name = "prm_scalar"
+test = false
+bench = false
+
+[[bin]]
+name = "dedup_same_cmd"
+test = false
+bench = false
+
+[[bin]]
+name = "dedup_distinct_cmd"
+test = false
+bench = false
+
+[[bin]]
+name = "mixed_small"
+test = false
+bench = false
+
+[[bin]]
+name = "mixed_max"
+test = false
+bench = false

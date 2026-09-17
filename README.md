@@ -39,17 +39,12 @@ Each sequence is its own bin, so each one builds to its own `.wasm`:
    #![no_main]
 
    use example::*;
-   use fprime_core::*;
 
    #[fprime_main]
    pub fn main() {
        CdhCore.cmdDisp.CMD_NO_OP();
    }
    ```
-
-   The `use example::*;` glob has to sit at the crate root: the sequencing DSL
-   rewrites bare enumerated constants into `crate::Defs::...` paths, and that
-   glob is what makes `Defs` resolve.
 
 2. Declare it in `example/Cargo.toml` so Cargo does not try to build a test
    harness for a `#![no_main]` bin:

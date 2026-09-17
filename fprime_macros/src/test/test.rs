@@ -1,4 +1,4 @@
-use crate::infer_path::test_support::{render_block, rewrite_block};
+use crate::infer_path::test_support::{const_encode_block, render_block, rewrite_block};
 use crate::{command, parameter, telemetry};
 use pretty_assertions::assert_eq;
 use proc_macro2::TokenStream;
@@ -560,4 +560,252 @@ fn passes_through_unknown_names() {
     // Non enum parameters are never rewritten
     let string_argument = "Ref.wasmSeq.LOAD(\"helloworld\");";
     assert_eq!(rewrite(string_argument), expect(string_argument));
+}
+
+fn const_encode(body: &str) -> String {
+    const_encode_block(body).expect("failed to rewrite body")
+}
+
+/// The `const` buffer a const-encoded call is expected to expand to.
+fn encoded(command: &str, args: &str) -> String {
+    let parse = |source: String| {
+        syn::parse_str::<TokenStream>(&source).expect("expectation should parse")
+    };
+
+    let path = command.replace('.', "::");
+    let size = parse(format!("crate::Konst::{path}__size"));
+    let encode = parse(format!("crate::Konst::{path}__encode"));
+    let args = parse(args.to_string());
+
+    // The call the user wrote, kept so an editor can still resolve the receiver
+    // and the command name. See `keeps_the_written_call_for_navigation`.
+    let original = parse(command.to_string());
+
+    quote! {
+        {
+            const __FPRIME_LEN: usize = #size(#args);
+            const __FPRIME_CMD: [u8; __FPRIME_LEN] = #encode::<__FPRIME_LEN>(#args);
+
+            if false {
+                #original(#args);
+            }
+
+            unsafe { fprime_core::command(&__FPRIME_CMD) }
+        }
+    }
+    .to_string()
+}
+
+#[test]
+fn const_encodes_a_call_with_no_arguments() {
+    assert_eq!(
+        const_encode("CdhCore.cmdDisp.CMD_NO_OP();"),
+        format!("{} ;", encoded("CdhCore.cmdDisp.CMD_NO_OP", ""))
+    )
+}
+
+/// The enumerated constants are qualified by the first pass, and it is that
+/// qualification which makes them recognisable as constants by the second.
+#[test]
+fn const_encodes_literals_and_enumerated_constants() {
+    assert_eq!(
+        const_encode("Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);"),
+        format!(
+            "{} ;",
+            encoded(
+                "Ref.dpDemo.Dp",
+                "crate::Defs::Ref::DpDemo::DpReqType::IMMEDIATE,
+                 0,
+                 crate::Defs::Fw::DpCfg::ProcType::PROC_TYPE_NONE"
+            )
+        )
+    )
+}
+
+#[test]
+fn const_encodes_a_string_literal() {
+    assert_eq!(
+        const_encode(r#"CdhCore.cmdDisp.CMD_NO_OP_STRING("STRINGS");"#),
+        format!(
+            "{} ;",
+            encoded("CdhCore.cmdDisp.CMD_NO_OP_STRING", r#""STRINGS""#)
+        )
+    )
+}
+
+/// `-1` is a unary negation of a literal, not a literal, but it is still a
+/// compile-time constant.
+#[test]
+fn const_encodes_a_negative_literal() {
+    assert_eq!(
+        const_encode("CdhCore.cmdDisp.CMD_TEST_CMD_1(-1, -2.5, 3);"),
+        format!(
+            "{} ;",
+            encoded("CdhCore.cmdDisp.CMD_TEST_CMD_1", "-1, -2.5, 3")
+        )
+    )
+}
+
+/// The load-bearing negative case. A bare identifier is a path expression just
+/// like a qualified enumerated constant is, so accepting "any path" would move a
+/// local into a `const` initialiser and break a program that compiles today.
+#[test]
+fn leaves_a_runtime_argument_on_the_accessor() {
+    let body = r#"CdhCore.cmdDisp.CMD_NO_OP_STRING(name);"#;
+    assert_eq!(const_encode(body), expect(body));
+
+    let body = "Ref.dpDemo.SelectColor(chosen);";
+    assert_eq!(const_encode(body), expect(body));
+}
+
+/// A local of the right enum type reaches the argument already qualified-looking
+/// only if the user wrote the path themselves; a bare name stays on the accessor.
+#[test]
+fn leaves_a_computed_argument_on_the_accessor() {
+    let body = "Ref.dpDemo.Dp(IMMEDIATE, count + 1, PROC_TYPE_NONE);";
+    assert_eq!(
+        const_encode(body),
+        expect(
+            "Ref.dpDemo.Dp(
+                 crate::Defs::Ref::DpDemo::DpReqType::IMMEDIATE,
+                 count + 1,
+                 crate::Defs::Fw::DpCfg::ProcType::PROC_TYPE_NONE
+             );"
+        )
+    )
+}
+
+/// Arity is the accessor's to complain about, against the user's own argument
+/// list, so a wrong-arity call is not rewritten.
+#[test]
+fn leaves_a_wrong_arity_call_on_the_accessor() {
+    let body = "CdhCore.cmdDisp.CMD_NO_OP(1);";
+    assert_eq!(const_encode(body), expect(body));
+}
+
+/// Something that is not a command at all is untouched by the second pass.
+#[test]
+fn leaves_a_non_command_alone() {
+    let body = "Ref.notAThing.Dp(1, 2, 3);";
+    assert_eq!(const_encode(body), expect(body));
+}
+
+/// A struct argument is const-encodable too: the generated encoder descends the
+/// members itself, so nothing needs a `const` trait method (which is not stable
+/// anyway -- E0379).
+#[test]
+fn const_encodes_a_struct_argument() {
+    let arg = "crate::Defs::Ref::ChoicePair {
+         firstChoice: crate::Defs::Ref::Choice::RED,
+         secondChoice: crate::Defs::Ref::Choice::BLUE
+     }";
+
+    assert_eq!(
+        const_encode(
+            "Ref.typeDemo.CHOICE_PAIR(ChoicePair { firstChoice: RED, secondChoice: BLUE });"
+        ),
+        format!("{} ;", encoded("Ref.typeDemo.CHOICE_PAIR", arg))
+    )
+}
+
+#[test]
+fn const_encodes_an_array_argument() {
+    let arg = "[crate::Defs::Ref::Choice::ONE, crate::Defs::Ref::Choice::TWO]";
+
+    assert_eq!(
+        const_encode("Ref.typeDemo.CHOICES([ONE, TWO]);"),
+        format!("{} ;", encoded("Ref.typeDemo.CHOICES", arg))
+    )
+}
+
+/// Nested arrays, a nested struct and a member array in one argument.
+#[test]
+fn const_encodes_a_deeply_nested_struct_argument() {
+    let body = "Ref.typeDemo.GLUTTON_OF_CHOICE(ChoiceSlurry {
+             tooManyChoices: [[BLUE, RED], [TWO, TWO]],
+             choiceAsMemberArray: [2, 3],
+             choicePair: ChoicePair { firstChoice: RED, secondChoice: BLUE },
+             separateChoice: ONE,
+         });";
+
+    assert!(
+        const_encode(body).contains("GLUTTON_OF_CHOICE__encode"),
+        "expected the nested struct to be const-encoded, got: {}",
+        const_encode(body)
+    )
+}
+
+/// `[x; N]` is qualified like an array literal, so it is accepted when the
+/// repeat count matches the dictionary's array size.
+#[test]
+fn const_encodes_a_repeated_array_argument() {
+    let arg = "[crate::Defs::Ref::Choice::ONE ; 2]";
+
+    assert_eq!(
+        const_encode("Ref.typeDemo.CHOICES([ONE; 2]);"),
+        format!("{} ;", encoded("Ref.typeDemo.CHOICES", arg))
+    )
+}
+
+/// An array literal of the wrong length would not compile as the argument, so it
+/// is left for the accessor to reject rather than turned into a `const`.
+#[test]
+fn leaves_a_wrong_length_array_on_the_accessor() {
+    let body = "Ref.typeDemo.CHOICES([ONE, TWO, ONE]);";
+    assert!(
+        !const_encode(body).contains("__encode"),
+        "expected fallback, got: {}",
+        const_encode(body)
+    )
+}
+
+/// A struct literal missing a member, or completing itself from elsewhere, is
+/// not something we can evaluate.
+#[test]
+fn leaves_a_partial_struct_literal_on_the_accessor() {
+    let body = "Ref.typeDemo.CHOICE_PAIR(ChoicePair { firstChoice: RED, ..other });";
+    assert!(
+        !const_encode(body).contains("__encode"),
+        "expected fallback, got: {}",
+        const_encode(body)
+    )
+}
+
+/// A runtime value anywhere inside an aggregate keeps the whole call on the
+/// accessor.
+#[test]
+fn leaves_a_struct_with_a_runtime_member_on_the_accessor() {
+    let body = "Ref.typeDemo.CHOICE_PAIR(ChoicePair { firstChoice: RED, secondChoice: chosen });";
+    assert!(
+        !const_encode(body).contains("__encode"),
+        "expected fallback, got: {}",
+        const_encode(body)
+    )
+}
+
+/// The regression guard for the span damage const encoding used to cause.
+///
+/// Rewriting a call into a `Konst` path deletes the receiver and the command name
+/// from the expansion, and an editor with no token to map back offers no
+/// definition at all: `tools/goto_probe.py` went from 12/12 to 7/12, losing
+/// exactly `dpDemo`, `Dp`, `CMD_NO_OP`, `CMD_NO_OP_STRING` and
+/// `GLUTTON_OF_CHOICE`. Keeping the written call in an unreachable branch restores
+/// it and costs nothing, which `bench` measures.
+#[test]
+fn keeps_the_written_call_for_navigation() {
+    let expansion = const_encode("Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);");
+
+    assert!(
+        expansion.contains("if false"),
+        "the written call should survive in an unreachable branch: {expansion}"
+    );
+
+    // The receiver chain and the command name have to be present as themselves;
+    // a `Konst` path does not give an editor anything to resolve `dpDemo` to.
+    for token in ["Ref", "dpDemo", "Dp"] {
+        assert!(
+            expansion.contains(&format!("{token} ")) || expansion.contains(&format!("{token}.")),
+            "`{token}` should appear in the expansion: {expansion}"
+        );
+    }
 }

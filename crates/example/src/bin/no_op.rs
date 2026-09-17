@@ -2,7 +2,6 @@
 #![no_main]
 
 use example::*;
-use fprime_core::*;
 
 #[fprime_main]
 pub fn main() {

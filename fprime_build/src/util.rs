@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 pub(crate) use fprime_dictionary::naming::str_to_ident;
 
-fn type_name_size(dictionary: &Dictionary, ty: &TypeName) -> usize {
+pub(crate) fn type_name_size(dictionary: &Dictionary, ty: &TypeName) -> usize {
     match ty {
         TypeName::Integer { name } => match name {
             IntegerKind::U8 | IntegerKind::I8 => 1,

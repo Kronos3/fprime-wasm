@@ -1,9 +1,10 @@
 use serde::Deserialize;
 use serde::de::Error;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::path::Path;
 
+pub mod konst;
 pub mod naming;
 
 /// Environment variable that `fprime_build::generate` the dictionary.
@@ -55,7 +56,7 @@ pub enum Value {
     Bool(bool),
     String(String),
     Array(Vec<Value>),
-    Struct(HashMap<String, Value>),
+    Struct(BTreeMap<String, Value>),
 }
 
 #[derive(Debug, Deserialize)]
@@ -188,12 +189,12 @@ impl TypeDefinition {
 
 fn deserialize_type_definitions<'de, D>(
     deserializer: D,
-) -> Result<HashMap<String, TypeDefinition>, D::Error>
+) -> Result<BTreeMap<String, TypeDefinition>, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
     let initial: Vec<TypeDefinition> = Vec::deserialize(deserializer)?;
-    let mut out = HashMap::with_capacity(initial.len());
+    let mut out = BTreeMap::new();
 
     for definition in initial {
         let qualified_name = definition.qualified_name().to_string();
@@ -292,7 +293,7 @@ pub struct TelemetryChannel {
 pub struct Dictionary {
     pub metadata: Metadata,
     #[serde(deserialize_with = "deserialize_type_definitions")]
-    pub type_definitions: HashMap<String, TypeDefinition>,
+    pub type_definitions: BTreeMap<String, TypeDefinition>,
     pub constants: Vec<Constant>,
     pub commands: Vec<Command>,
     pub parameters: Vec<Parameter>,
@@ -313,10 +314,18 @@ impl Dictionary {
 
 /// Load a dictionary
 pub fn try_parse(json_file: &Path) -> Result<Dictionary, String> {
-    let contents = fs::read_to_string(json_file).map_err(|err| format!("{}: {}", json_file.display(), err))?;
+    let contents =
+        fs::read_to_string(json_file).map_err(|err| format!("{}: {}", json_file.display(), err))?;
 
-    serde_json::from_str(&contents)
-        .map_err(|err| format!("{}:{}:{} {}", json_file.display(), err.line(), err.column(), err))
+    serde_json::from_str(&contents).map_err(|err| {
+        format!(
+            "{}:{}:{} {}",
+            json_file.display(),
+            err.line(),
+            err.column(),
+            err
+        )
+    })
 }
 
 pub fn parse(json_file: &Path) -> Dictionary {

@@ -5,3 +5,4 @@
 
 include!(concat!(env!("OUT_DIR"), "/dictionary.rs"));
 pub use Defs::*;
+pub use fprime_core::*;

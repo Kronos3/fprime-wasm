@@ -1,9 +1,6 @@
 [workspace]
 resolver = "3"
-members = [
-    "example",
-    "fprime_*"
-]
+members = ["crates/*", "fprime_*"]
 
 [profile.release]
 lto = true

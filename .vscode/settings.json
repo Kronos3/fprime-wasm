@@ -6,7 +6,6 @@
         "core::convert::Into",
         "core::any::Any"
     ],
-    "rust-analyzer.completion.addSemicolonToUnit": false,
     "rust-analyzer.completion.callable.snippets": "fill_arguments",
     "rust-analyzer.completion.autoself.enable": false,
     "rust-analyzer.completion.postfix.enable": false,

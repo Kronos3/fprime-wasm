@@ -44,3 +44,14 @@ pub fn definition_path_with_name(qualified_name: &str, name: Ident) -> TokenStre
 
     quote! { crate::Defs::#(#modules::)*#name }
 }
+
+/// The Rust path of a generated const encoder, e.g. `CdhCore.cmdDisp.CMD_NO_OP`
+/// with [`crate::konst::ENCODE_SUFFIX`] becomes
+/// `crate::Konst::CdhCore::cmdDisp::CMD_NO_OP__encode`.
+pub fn konst_path(qualified_name: &str, suffix: &str) -> TokenStream {
+    let (qualifier, name) = split_qualified_name(qualified_name);
+    let modules = qualifier.into_iter().map(str_to_ident);
+    let name = str_to_ident(&format!("{}{}", name, suffix));
+
+    quote! { crate::Konst::#(#modules::)*#name }
+}

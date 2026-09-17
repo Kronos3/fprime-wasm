@@ -21,3 +21,7 @@ target
 #.idea/
 
 .notes
+
+# Scratch wasm inspected by hand; the real build output lives under target/
+/*/*.wasm
+/*/*.wat

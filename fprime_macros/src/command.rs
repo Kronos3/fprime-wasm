@@ -66,7 +66,11 @@ pub(crate) fn command(attr: TokenStream, item: TokenStream) -> syn::Result<Token
         }
     };
 
-    let inline = has_str_arg.then(|| quote! { #[inline(always)] });
+    let inline = has_str_arg.then(|| {
+        quote_spanned! { stub.block.span() =>
+            #[inline(always)]
+        }
+    });
 
     Ok(quote! {
         #(#attrs)*

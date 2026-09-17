@@ -5,10 +5,10 @@ edition = "2024"
 publish = false
 
 [dependencies]
-fprime_core = { path = "../fprime_core" }
+fprime_core = { path = "../../fprime_core" }
 
 [build-dependencies]
-fprime_build = { path = "../fprime_build" }
+fprime_build = { path = "../../fprime_build" }
 
 [lib]
 test = false

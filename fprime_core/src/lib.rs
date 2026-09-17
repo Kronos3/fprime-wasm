@@ -2,6 +2,7 @@
 
 mod abi;
 mod cmd;
+mod konst;
 mod log;
 mod panic;
 mod prm;
@@ -12,6 +13,7 @@ pub mod time;
 mod tlm;
 
 pub use cmd::*;
+pub use konst::*;
 pub use log::*;
 pub use panic::*;
 pub use prm::*;

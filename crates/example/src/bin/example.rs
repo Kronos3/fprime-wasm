@@ -2,7 +2,6 @@
 #![no_main]
 
 use example::*;
-use fprime_core::*;
 
 #[fprime_main]
 pub fn main() {
@@ -27,6 +26,16 @@ pub fn main() {
     Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);
     Ref.dpDemo.SelectColor(BLUE);
     Ref.dpDemo.Dp(IMMEDIATE, 2, PROC_TYPE_TWO);
+
+    Ref.typeDemo.GLUTTON_OF_CHOICE(ChoiceSlurry {
+        tooManyChoices: [[BLUE, RED], [TWO, TWO]],
+        choiceAsMemberArray: [2, 3],
+        choicePair: ChoicePair {
+            firstChoice: RED,
+            secondChoice: BLUE,
+        },
+        separateChoice: ONE,
+    });
 
     Ref.dpDemo.Dp(IMMEDIATE, 0, PROC_TYPE_NONE);
     Ref.wasmSeq.LOAD("helloworld");

@@ -7,6 +7,7 @@ use std::{env, fs};
 
 mod commands;
 mod constants;
+mod konst;
 mod parameters;
 mod telemetry;
 mod tree;
@@ -55,10 +56,15 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
 
     // Generate all impl nested definitions
     let mut impls = vec![];
+    let mut konsts = vec![];
 
     for cmd in &dict.commands {
         let (qualifier, tokens) = commands::command(cmd);
         impls.push(Definition { qualifier, tokens });
+
+        if let Some((qualifier, tokens)) = konst::command(&dict, cmd) {
+            konsts.push(Definition { qualifier, tokens });
+        }
     }
 
     for tlm in &dict.telemetry_channels {
@@ -74,6 +80,7 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
     // Collect all the code into a hierarchy
     let definitions: CodeTree = definitions.into();
     let impls: CodeTree = impls.into();
+    let konsts: CodeTree = konsts.into();
 
     // Linearize the definition trees into a token stream nested in modules
     // Linearize the impl trees into a token stream of nested structs
@@ -81,6 +88,7 @@ pub(crate) fn generate_to_file<W: ?Sized + Write>(
         .module_nesting()
         .into_iter()
         .chain(impls.struct_nesting(dict))
+        .chain(konsts.module_nesting_named("Konst"))
         .collect();
 
     // Render the token stream into formatted Rust code and write it to a file

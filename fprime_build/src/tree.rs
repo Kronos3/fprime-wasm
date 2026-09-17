@@ -82,10 +82,15 @@ impl CodeTree {
     }
 
     pub fn module_nesting(self) -> TokenStream {
+        self.module_nesting_named("Defs")
+    }
+
+    pub fn module_nesting_named(self, root: &str) -> TokenStream {
         let inner = self.module_nesting_impl();
+        let root = str_to_ident(root);
 
         quote! {
-            pub mod Defs {
+            pub mod #root {
                 #inner
             }
         }

@@ -14,8 +14,9 @@
 //!     .Dp(crate::Defs::Ref::DpDemo::DpReqType::IMMEDIATE, 0, crate::Defs::Fw::DpCfg::ProcType::PROC_TYPE_NONE);
 //! ```
 
+use fprime_dictionary::konst::{ENCODE_SUFFIX, SIZE_SUFFIX};
 use fprime_dictionary::naming::{
-    definition_path, definition_path_with_name, split_qualified_name, str_to_ident,
+    definition_path, definition_path_with_name, konst_path, split_qualified_name, str_to_ident,
 };
 use fprime_dictionary::{Command, Dictionary, TypeDefinition, TypeName};
 use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream, TokenTree};
@@ -23,7 +24,7 @@ use quote::{ToTokens, quote};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
-use syn::{Expr, ExprPath, ExprStruct, Member, Path as SynPath};
+use syn::{Expr, ExprPath, ExprStruct, Lit, Member, Path as SynPath, UnOp};
 
 /// Aliases followed before concluding the dictionary is cyclic.
 const MAX_ALIAS_HOPS: usize = 32;
@@ -55,7 +56,9 @@ pub(crate) fn rewrite(attr: TokenStream, item: TokenStream) -> syn::Result<Token
 
     let resolver = resolver(Path::new(&dictionary)).map_err(|err| syn::Error::new(span, err))?;
 
-    Ok(resolver.qualify_calls(item))
+    let qualified = resolver.qualify_calls(item);
+
+    Ok(resolver.const_encode_calls(qualified))
 }
 
 fn signature_span(item: &TokenStream) -> Span {
@@ -237,6 +240,192 @@ impl Resolver {
         qualified
     }
 
+    /// Replace every command call whose arguments are all compile-time constants
+    /// with a reference to its encoded `Fw::ComBuffer`.
+    fn const_encode_calls(&self, tokens: TokenStream) -> TokenStream {
+        let trees: Vec<TokenTree> = tokens.into_iter().collect();
+        let mut encoded = TokenStream::new();
+        let mut index = 0;
+
+        while index < trees.len() {
+            let begins_a_chain = match index.checked_sub(1).map(|previous| &trees[previous]) {
+                Some(TokenTree::Punct(punct)) => !matches!(punct.as_char(), '.' | ':'),
+                _ => true,
+            };
+
+            if begins_a_chain
+                && let Some(call) = self.command_call(&trees, index)
+                && let Some(TokenTree::Group(args)) = trees.get(call.args)
+                && let Some(buffer) = self.const_encoded_call(
+                    call.command,
+                    args,
+                    trees[index..=call.args].iter().cloned().collect(),
+                )
+            {
+                encoded.extend(buffer);
+                index = call.args + 1;
+                continue;
+            }
+
+            match &trees[index] {
+                TokenTree::Group(group) => {
+                    let mut descended =
+                        Group::new(group.delimiter(), self.const_encode_calls(group.stream()));
+                    descended.set_span(group.span());
+                    encoded.extend([TokenTree::Group(descended)]);
+                }
+                tree => encoded.extend([tree.clone()]),
+            }
+
+            index += 1;
+        }
+
+        encoded
+    }
+
+    /// The const-encoded form of `command` applied to `args`, or `None` if this
+    /// call has to keep the runtime `__SCRATCH` path.
+    fn const_encoded_call(
+        &self,
+        command: &Command,
+        args: &Group,
+        original: TokenStream,
+    ) -> Option<TokenStream> {
+        if !self.dictionary.const_encodable(command) {
+            return None;
+        }
+
+        let parsed = arguments(args.stream());
+
+        // A call with the wrong arity is left alone, so that the accessor is what
+        // reports it against the user's own argument list.
+        if parsed.len() != command.formal_params.len() {
+            return None;
+        }
+
+        for (param, argument) in command.formal_params.iter().zip(&parsed) {
+            let expr = syn::parse2::<Expr>(argument.tokens.clone()).ok()?;
+
+            if !self.is_const_argument(&expr, &param.type_name) {
+                return None;
+            }
+        }
+
+        let size = konst_path(&command.name, SIZE_SUFFIX);
+        let encode = konst_path(&command.name, ENCODE_SUFFIX);
+        let args = args.stream();
+
+        Some(quote! {
+            {
+                const __FPRIME_LEN: usize = #size(#args);
+                const __FPRIME_CMD: [u8; __FPRIME_LEN] = #encode::<__FPRIME_LEN>(#args);
+
+                if false {
+                    #original;
+                }
+
+                unsafe { fprime_core::command(&__FPRIME_CMD) }
+            }
+        })
+    }
+
+    /// Whether `expr` may appear in the `const` initialiser of a const-encoded
+    /// call.
+    fn is_const_argument(&self, expr: &Expr, expected: &TypeName) -> bool {
+        self.is_const_argument_at(expr, expected, 0)
+    }
+
+    fn is_const_argument_at(&self, expr: &Expr, expected: &TypeName, depth: usize) -> bool {
+        if depth > MAX_DEPTH {
+            return false;
+        }
+
+        match self.dictionary.resolved_type(expected) {
+            Some(TypeName::String { .. }) => {
+                matches!(expr, Expr::Lit(lit) if matches!(lit.lit, Lit::Str(_)))
+            }
+            Some(TypeName::Bool) => {
+                matches!(expr, Expr::Lit(lit) if matches!(lit.lit, Lit::Bool(_)))
+            }
+            Some(TypeName::Integer { .. } | TypeName::Float { .. }) => is_numeric_literal(expr),
+            Some(TypeName::QualifiedIdentifier { name }) => {
+                match self.dictionary.type_definitions.get(name) {
+                    Some(TypeDefinition::Enum(_)) => is_qualified_definition(expr),
+                    Some(TypeDefinition::Array(ty)) => {
+                        self.is_const_elements(expr, &ty.element_type, ty.size, depth)
+                    }
+                    Some(TypeDefinition::Struct(ty)) => {
+                        let Expr::Struct(literal) = expr else {
+                            return false;
+                        };
+
+                        // A struct literal that borrows the rest of its fields
+                        // from somewhere is not something we can evaluate.
+                        if literal.rest.is_some() || !is_qualified_path(&literal.path) {
+                            return false;
+                        }
+
+                        // Every member has to be given, and given a constant.
+                        ty.members.len() == literal.fields.len()
+                            && ty.members.iter().all(|member| {
+                                let field = literal.fields.iter().find(|field| {
+                                    matches!(&field.member, Member::Named(name)
+                                        if unraw(name) == member.name)
+                                });
+
+                                let Some(field) = field else {
+                                    return false;
+                                };
+
+                                match member.size {
+                                    None => self.is_const_argument_at(
+                                        &field.expr,
+                                        &member.type_name,
+                                        depth + 1,
+                                    ),
+                                    Some(size) => self.is_const_elements(
+                                        &field.expr,
+                                        &member.type_name,
+                                        size,
+                                        depth,
+                                    ),
+                                }
+                            })
+                    }
+                    _ => false,
+                }
+            }
+            _ => false,
+        }
+    }
+
+    /// An array of exactly `size` constants of type `element`, written either
+    /// element by element or as a repeat.
+    fn is_const_elements(&self, expr: &Expr, element: &TypeName, size: u32, depth: usize) -> bool {
+        match expr {
+            Expr::Array(array) => {
+                array.elems.len() == size as usize
+                    && array
+                        .elems
+                        .iter()
+                        .all(|elem| self.is_const_argument_at(elem, element, depth + 1))
+            }
+            Expr::Repeat(repeat) => {
+                // The length has to be a plain literal for us to know it matches.
+                let Expr::Lit(lit) = repeat.len.as_ref() else {
+                    return false;
+                };
+                let Lit::Int(len) = &lit.lit else {
+                    return false;
+                };
+
+                len.base10_parse::<u32>().is_ok_and(|len| len == size)
+                    && self.is_const_argument_at(&repeat.expr, element, depth + 1)
+            }
+            _ => false,
+        }
+    }
+
     /// Qualify `expr` against the type the dictionary expects there. An
     /// expression the dictionary has nothing to say about is left untouched.
     fn qualify(&self, expr: &mut Expr, expected: &TypeName, depth: usize) {
@@ -324,6 +513,36 @@ struct Argument {
 }
 
 /// Split an argument list on its commas, keeping them.
+/// A numeric literal, or a negated one: `-1` parses as a unary negation.
+fn is_numeric_literal(expr: &Expr) -> bool {
+    match expr {
+        Expr::Lit(lit) => matches!(lit.lit, Lit::Int(_) | Lit::Float(_)),
+        Expr::Unary(unary) => matches!(unary.op, UnOp::Neg(_)) && is_numeric_literal(&unary.expr),
+        _ => false,
+    }
+}
+
+/// A path this pass qualified against the dictionary, which is rooted at
+/// `crate`. A bare `SOME_NAME` is not one: it could be a local, and a user path
+/// we did not write cannot be assumed to name a `const`.
+fn is_qualified_definition(expr: &Expr) -> bool {
+    let Expr::Path(path) = expr else {
+        return false;
+    };
+
+    path.qself.is_none() && is_qualified_path(&path.path)
+}
+
+/// A path rooted at `crate`, which is the shape this pass writes when it
+/// qualifies a name against the dictionary.
+fn is_qualified_path(path: &SynPath) -> bool {
+    path.segments.len() > 1
+        && path
+            .segments
+            .first()
+            .is_some_and(|segment| segment.ident == "crate")
+}
+
 fn arguments(tokens: TokenStream) -> Vec<Argument> {
     let mut arguments = Vec::new();
     let mut current = TokenStream::new();
@@ -477,6 +696,16 @@ pub(crate) mod test_support {
             .map_err(|err| syn::Error::new(Span::call_site(), err))?;
 
         Ok(resolver.qualify_calls(syn::parse_str(body)?).to_string())
+    }
+
+    /// Both passes, in the order `rewrite` runs them: qualify, then const-encode.
+    pub(crate) fn const_encode_block(body: &str) -> syn::Result<String> {
+        let resolver = resolver(Path::new(DICTIONARY))
+            .map_err(|err| syn::Error::new(Span::call_site(), err))?;
+
+        let qualified = resolver.qualify_calls(syn::parse_str(body)?);
+
+        Ok(resolver.const_encode_calls(qualified).to_string())
     }
 
     /// Render a body without rewriting it, so expectations can be written as
